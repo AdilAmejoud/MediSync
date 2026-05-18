@@ -1,0 +1,220 @@
+services:
+  # ── PostgreSQL ─────────────────────────────────────────────────────
+  postgres:
+    image: postgres:15
+    container_name: medisync-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: medisync
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d medisync"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - medisync-net
+
+  # ── Redis (Caching Layer) ──────────────────────────────────────────
+  redis:
+    image: redis:7
+    container_name: medisync-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    networks:
+      - medisync-net
+
+  # ── RabbitMQ (Message Queue Broker) ───────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: medisync-rabbitmq
+    restart: unless-stopped
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - medisync-net
+
+  # ── API Gateway (Single Entry Point) ──────────────────────────────
+  gateway:
+    build:
+      context: ./
+      dockerfile: ./backend/src/services/gateway/Dockerfile
+      network: host
+    container_name: medisync-gateway
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "http.get('http://localhost:3000/health',(r)=>{process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    env_file:
+      - .env
+    environment:
+      - PORT=3000
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - DOCTOR_SERVICE_URL=http://doctor-service:3002
+      - BOOKING_SERVICE_URL=http://booking-service:3003
+      - MAIN_BACKEND_URL=http://main-backend:3004
+    ports:
+      - '3000:3000'
+    depends_on:
+      - auth-service
+      - doctor-service
+      - booking-service
+    networks:
+      - medisync-net
+
+  # ── Auth Service ───────────────────────────────────────────────────
+  auth-service:
+    build:
+      context: ./
+      dockerfile: ./backend/src/services/auth-service/Dockerfile
+      network: host
+    container_name: medisync-auth-service
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - AUTH_SERVICE_PORT=3001
+      - DATABASE_URL=postgresql://user:password@postgres:5432/medisync?schema=public
+      - RABBITMQ_URL=amqp://rabbitmq
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    networks:
+      - medisync-net
+
+  # ── Doctor Service ─────────────────────────────────────────────────
+  doctor-service:
+    build:
+      context: ./
+      dockerfile: ./backend/src/services/doctor-service/Dockerfile
+      network: host
+    container_name: medisync-doctor-service
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DOCTOR_SERVICE_PORT=3002
+      - DATABASE_URL=postgresql://user:password@postgres:5432/medisync?schema=public
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - medisync-net
+
+  # ── Booking Service ────────────────────────────────────────────────
+  booking-service:
+    build:
+      context: ./
+      dockerfile: ./backend/src/services/booking-service/Dockerfile
+      network: host
+    container_name: medisync-booking-service
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - BOOKING_SERVICE_PORT=3003
+      - DATABASE_URL=postgresql://user:password@postgres:5432/medisync?schema=public
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - medisync-net
+
+  # ── Notification Service (Background Consumer) ────────────────────
+  notification-service:
+    build:
+      context: ./
+      dockerfile: ./backend/src/services/notification-service/Dockerfile
+      network: host
+    container_name: medisync-notification-service
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq
+      - RESEND_API_KEY=${RESEND_API_KEY}
+    depends_on:
+      - rabbitmq
+    networks:
+      - medisync-net
+
+  # ── Main Backend Server ────────────────────────────────────────────
+  main-backend:
+    build:
+      context: ./
+      dockerfile: ./backend/Dockerfile
+    container_name: medisync-main-backend
+    restart: unless-stopped
+    ports:
+      - "3004:3004"
+    command: sh -c "cd /app && npx prisma migrate deploy --schema=./database/schema.prisma && cd /app/backend && node seed.js && node server.js"
+    env_file:
+      - .env
+    environment:
+      - PORT=3004
+      - DATABASE_URL=postgresql://user:password@postgres:5432/medisync?schema=public
+      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_key_here}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@medisync.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin_password_here}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - medisync-net
+
+  # ── Prisma Studio (Database GUI) ───────────────────────────────────
+  prisma-studio:
+    image: medisync-main-backend:latest
+    container_name: medisync-prisma-studio
+    working_dir: /app
+    entrypoint: npx prisma studio --port 5555 --browser none
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/medisync?schema=public
+    ports:
+      - '5555:5555'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - medisync-net
+
+  # ── Frontend (Angular / Nginx) ─────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      network: host
+    container_name: medisync-frontend
+    restart: unless-stopped
+    ports:
+      - '4200:80'
+    depends_on:
+      gateway:
+        condition: service_healthy
+    networks:
+      - medisync-net
+
+networks:
+  medisync-net:
+    driver: bridge
+
+volumes:
+  pg_data:
