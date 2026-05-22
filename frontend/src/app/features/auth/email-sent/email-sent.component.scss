@@ -1,0 +1,20 @@
+@use '../forgot-password/forgot-password.component.scss';
+@use 'variables' as *;
+
+.success-icon-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 9999px;
+  background: $success-bg;
+  color: $success;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+
+  mat-icon {
+    font-size: 32px;
+    height: 32px;
+    width: 32px;
+  }
+}

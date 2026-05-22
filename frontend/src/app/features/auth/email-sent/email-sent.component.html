@@ -1,0 +1,60 @@
+<div class="forgot-wrapper">
+  
+  <div class="top-nav">
+    <a [routerLink]="['/auth/login']" class="home-btn">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Back to Login</span>
+    </a>
+  </div>
+
+  <div class="split-layout">
+    
+    <!-- Left panel: Illustration -->
+    <div class="left-panel">
+      <div class="glow-accent-1"></div>
+      <div class="glow-accent-2"></div>
+      
+      <div class="illustration-container">
+        <img 
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5r60FKDFBr_9HqlOdQ-0e-7PMP_iJu02VwQhHNO40R6Q2skYqa_WXX4h81EhjHa_grkhrr77g9GXKqZtg4JGyeYJe_XoS705EECWWbihzoLXrEWUxKkj2-MqawXjGjRsP1fZTrZA77bOYY0ISqutfcgSBnDZRSnL0mDz2czxdqpOtpzM2gd3PXbOnjofBZK2HRmAe8ItMbZ4juwByWPtkNddoJ-9QtsfXHSn2fGaDGthvLEKzExNL8iBYt31TtrYC8JCQei_RVPyv"
+          alt="Email Sent Illustration"
+          class="illustration-img"
+        />
+      </div>
+    </div>
+
+    <!-- Right panel: Content -->
+    <div class="right-panel">
+      
+      <div class="logo-wrapper">
+        <div class="logo-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="logo-icon">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <span class="logo-title">Medi<span class="logo-accent">Sync</span></span>
+      </div>
+
+      <div class="form-container">
+        <div class="header-text">
+          <div class="success-icon-circle">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+          <h2>Check Your Email</h2>
+          <p>We've sent recovery instructions to your email address. Please follow the instructions to reset your password.</p>
+        </div>
+
+        <button [routerLink]="['/auth/login']" class="submit-btn btn-primary">
+          Back to Login
+        </button>
+      </div>
+
+      <footer class="forgot-footer">
+        <p>© 2026 MediSync. All rights reserved.</p>
+      </footer>
+
+    </div>
+
+  </div>
+
+</div>

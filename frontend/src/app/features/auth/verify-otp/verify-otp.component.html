@@ -1,0 +1,73 @@
+<div class="forgot-wrapper">
+  
+  <div class="top-nav">
+    <a [routerLink]="['/auth/login']" class="home-btn">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Back to Login</span>
+    </a>
+  </div>
+
+  <div class="split-layout">
+    
+    <!-- Left panel: Illustration -->
+    <div class="left-panel">
+      <div class="glow-accent-1"></div>
+      <div class="glow-accent-2"></div>
+      
+      <div class="illustration-container">
+        <img 
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoj3qletrLc_sKDIiqGxXZ0DVBEkLv-5wUmS1qWkPCjL6KgiiF-wV6PZ0eJ6OiFCQL44B366dU3vDE9jgE35fYHO7QFQVTHGnmatUx2HB9_Wt9BJsKKuZD-p1bVwOLgR-fqaQEhRCl6z9YM48OCKSEYS7m2sDfF2_QfPm5uNc9zleCtxVEyV7wEELOmVWhRxLj8kJ-PW41VpwuzoEPF_JcRwBL3S6tnLf8gh_AYy0sDnvPK3xNdWkjFJk0IpcX1GV4CrNtGy1wYAi9"
+          alt="OTP Verification Illustration"
+          class="illustration-img"
+        />
+      </div>
+    </div>
+
+    <!-- Right panel: Form -->
+    <div class="right-panel">
+      
+      <div class="logo-wrapper">
+        <div class="logo-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="logo-icon">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <span class="logo-title">Medi<span class="logo-accent">Sync</span></span>
+      </div>
+
+      <div class="form-container">
+        <div class="header-text">
+          <h2>Two-Step Verification</h2>
+          <p>Please enter the 6-digit OTP code sent to your email</p>
+        </div>
+
+        @if (errorStatus()) {
+          <div class="alert alert-error">
+            {{ errorStatus() }}
+          </div>
+        }
+
+        <form (ngSubmit)="handleSubmit()" class="forgot-form">
+          <div class="form-group">
+            <label class="form-label">Verification Code *</label>
+            <div class="input-wrapper">
+              <mat-icon class="input-icon">lock</mat-icon>
+              <input type="text" name="code" [(ngModel)]="code" placeholder="123456" class="form-input" required />
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn btn-primary">
+            Verify Code
+          </button>
+        </form>
+      </div>
+
+      <footer class="forgot-footer">
+        <p>© 2026 MediSync. All rights reserved.</p>
+      </footer>
+
+    </div>
+
+  </div>
+
+</div>

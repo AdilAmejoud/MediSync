@@ -1,0 +1,122 @@
+<div class="register-wrapper">
+  
+  <div class="top-nav">
+    <a [routerLink]="['/']" class="home-btn">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Home</span>
+    </a>
+  </div>
+
+  <div class="split-layout">
+    
+    <!-- Left panel: Illustration -->
+    <div class="left-panel">
+      <div class="glow-accent-1"></div>
+      <div class="glow-accent-2"></div>
+      
+      <div class="illustration-container">
+        <img 
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_wB9Z6busyuycvmW2xe5u1TnaxsDqkTe1a15nakyv0SHtB27A5gphMoqPxLhSF-0ObSmHrutk21ourNozOsnHe1t232BnvJxWv1wvlORBwNhZEiBGYI2_kjSX7f7dZkSQUVK8zKm3_h7FLaLbBZ4b0RTb6PXwfBWGOon_OKYRfnWFlPxdn3zxr2MyvwXghUQfq39QcVTrpO5HDZrYE7lRbj424yyXYdTFw_CixBtg9vqFcxSMdeWXIkqQ41uV18HmbY-ZuNypZ3BW"
+          alt="Register Illustration"
+          class="illustration-img"
+        />
+      </div>
+    </div>
+
+    <!-- Right panel: Form -->
+    <div class="right-panel">
+      
+      <div class="logo-wrapper">
+        <div class="logo-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="logo-icon">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <span class="logo-title">Medi<span class="logo-accent">Sync</span></span>
+      </div>
+
+      <div class="form-container">
+        <div class="header-text">
+          <h2>Create Account</h2>
+          <p>Please enter your information to create an account</p>
+        </div>
+
+        @if (errorStatus()) {
+          <div class="alert alert-error">
+            {{ errorStatus() }}
+          </div>
+        }
+        @if (successStatus()) {
+          <div class="alert alert-success">
+            {{ successStatus() }}
+          </div>
+        }
+
+        <form (ngSubmit)="handleSubmit()" class="register-form">
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <div class="input-wrapper">
+              <mat-icon class="input-icon">person</mat-icon>
+              <input type="text" name="name" [(ngModel)]="name" placeholder="John Doe" class="form-input" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <div class="input-wrapper">
+              <mat-icon class="input-icon">mail</mat-icon>
+              <input type="email" name="email" [(ngModel)]="email" placeholder="name@example.com" class="form-input" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <div class="input-wrapper">
+              <mat-icon class="input-icon">lock</mat-icon>
+              <input type="password" name="password" [(ngModel)]="password" placeholder="••••••••" class="form-input" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <div class="input-wrapper">
+              <mat-icon class="input-icon">phone</mat-icon>
+              <input type="text" name="phone" [(ngModel)]="phone" placeholder="0600000000" class="form-input" />
+            </div>
+          </div>
+
+          <div class="form-options-row">
+            <div class="form-group flex-1">
+              <label class="form-label">Gender</label>
+              <select name="gender" [(ngModel)]="gender" class="form-select">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+
+            <div class="form-group flex-1">
+              <label class="form-label">Date of Birth</label>
+              <ms-date-picker [(value)]="dob" placeholder="Select date"></ms-date-picker>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn btn-primary" [disabled]="isLoading()">
+            {{ isLoading() ? 'Creating Account...' : 'Sign Up' }}
+          </button>
+        </form>
+
+        <div class="login-link">
+          Already have an account? 
+          <a [routerLink]="['/auth/login']" class="login-redirect">Sign In</a>
+        </div>
+      </div>
+
+      <footer class="register-footer">
+        <p>© 2026 MediSync. All rights reserved.</p>
+      </footer>
+
+    </div>
+
+  </div>
+
+</div>
