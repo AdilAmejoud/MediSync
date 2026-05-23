@@ -1,0 +1,410 @@
+<div class="landing-wrapper">
+  
+  <!-- Header & Navigation -->
+  <header class="landing-header">
+    <div class="header-container">
+      <div class="logo-area" [routerLink]="['/']" id="header-logo">
+        <div class="logo-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="logo-icon"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <span class="logo-title">Medi<span class="logo-accent">Sync</span></span>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#stats">Patient Portal</a>
+        <a href="#how-it-works">For Clinics</a>
+        <a href="#pricing">Pricing Plans</a>
+      </nav>
+
+      <div class="header-actions">
+        @if (isAuthenticated) {
+          <button (click)="goToDashboard()" class="btn-ghost nav-auth-btn" id="nav-dashboard-btn">
+            <ng-icon name="heroChartBar" size="16"></ng-icon>
+            Dashboard
+          </button>
+          <button (click)="signOutFromLanding()" class="btn-primary nav-auth-btn" id="nav-signout-btn">
+            <ng-icon name="heroArrowRightOnRectangle" size="14"></ng-icon>
+            Sign Out
+          </button>
+        } @else {
+          <button [routerLink]="['/auth/login']" class="login-link-btn" id="nav-login-btn">Log In</button>
+          <button [routerLink]="['/auth/register']" class="get-started-btn btn-primary" id="nav-commencer-btn">Get Started</button>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-glow"></div>
+    <div class="hero-container">
+      <div class="hero-left">
+        <div class="hero-pill" id="hero-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="heart-icon"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          <span>All-in-one clinical platform</span>
+        </div>
+
+        <h1 class="hero-title" id="hero-title">
+          Manage your health.
+          <span class="highlight mt-2 block font-bold">Simply.</span>
+        </h1>
+
+        <p class="hero-desc">
+          Take control of your healthcare journey with our intuitive patient portal. Schedule consultations, track prescriptions, and securely access your digital medical files anytime, anywhere.
+        </p>
+
+        <div class="hero-buttons">
+          <button [routerLink]="['/auth/register']" class="cta-demo btn-primary" id="hero-cta-demo">
+            Get Started Now
+          </button>
+          <a href="#how-it-works" class="cta-how btn-ghost" id="hero-cta-how">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="play-icon"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            <span>See How It Works</span>
+          </a>
+        </div>
+
+        <div class="perks-list">
+          <div class="perk-item">
+            <div class="check-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="check-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+            </div>
+            <span>Easy online booking & instant confirmations</span>
+          </div>
+          <div class="perk-item">
+            <div class="check-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="check-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+            </div>
+            <span>Secure 24/7 access to your medical history & records</span>
+          </div>
+          <div class="perk-item">
+            <div class="check-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="check-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+            </div>
+            <span>Real-time notifications and telehealth integrations</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Tablet Preview -->
+      <div class="hero-right">
+        <div class="tablet-scene">
+          <div class="bg-glow"></div>
+
+          <!-- Tablet Frame (white iPad-style) -->
+          <div class="mock-device-frame">
+            <!-- Tablet Camera / Notch -->
+            <div class="tablet-camera">
+              <div class="camera-lens"></div>
+            </div>
+
+            <div class="mock-device-screen">
+              <!-- Mock App Header -->
+              <div class="mock-screen-header">
+                <div class="mock-logo">
+                  <span class="symbol">M</span>
+                  <span class="text">MediSync</span>
+                </div>
+                <div class="mock-user">
+                  <span class="avatar">JD</span>
+                  <span class="name">John Doe</span>
+                </div>
+              </div>
+
+              <!-- Next Appointment -->
+              <div class="mock-appt-banner">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="appt-icon"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+                <div class="appt-text">
+                  <p class="doctor">Dr. Mick Thompson — General Cardiology</p>
+                  <p class="time">Mon, June 02 · 14:30</p>
+                </div>
+              </div>
+
+              <!-- Stat Cards -->
+              <div class="mock-stats-grid">
+                <div class="mock-stat-card">
+                  <span class="label">Appointments</span>
+                  <div class="val-row">
+                    <span class="value">24</span>
+                    <span class="trend-up">+95%</span>
+                  </div>
+                </div>
+                <div class="mock-stat-card">
+                  <span class="label">Teleconsultations</span>
+                  <div class="val-row">
+                    <span class="value">36</span>
+                    <span class="trend-down">-15%</span>
+                  </div>
+                </div>
+                <div class="mock-stat-card">
+                  <span class="label">Next Visit</span>
+                  <div class="val-row">
+                    <span class="value">Jun 02</span>
+                    <span class="trend-up">In 11d</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Vitals Strip -->
+              <div class="mock-vitals-strip">
+                <span class="vitals-title">Vital Signs</span>
+                <div class="vitals-grid">
+                  <div class="vital-item">
+                    <span class="label">Weight</span>
+                    <span class="val">100 Kg</span>
+                    <span class="badge-status stable">Stable</span>
+                  </div>
+                  <div class="vital-item">
+                    <span class="label">Pulse</span>
+                    <span class="val">97%</span>
+                    <span class="badge-status regular">Regular</span>
+                  </div>
+                  <div class="vital-item">
+                    <span class="label">SPO2</span>
+                    <span class="val">98%</span>
+                    <span class="badge-status healthy">Healthy</span>
+                  </div>
+                  <div class="vital-item">
+                    <span class="label">Temp</span>
+                    <span class="val">36.8°C</span>
+                    <span class="badge-status normal">Normal</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- My Doctors -->
+              <div class="mock-doctors-section">
+                <div class="header-row">
+                  <span>My Doctors</span>
+                  <span class="specialist-link">Find a Specialist</span>
+                </div>
+                <div class="doctor-row-card">
+                  <div class="doc-info">
+                    <span class="avatar-sj">SJ</span>
+                    <div class="doc-text">
+                      <p class="name">Dr. Sarah Johnson</p>
+                      <p class="specialty">Orthopedist</p>
+                    </div>
+                  </div>
+                  <button class="book-btn">Book Appointment</button>
+                </div>
+              </div>
+
+              <!-- Date strip -->
+              <div class="mock-date-strip">
+                <div class="date-item"><span>Lun</span><span>22</span></div>
+                <div class="date-item"><span>Mar</span><span>23</span></div>
+                <div class="date-item"><span>Mer</span><span>24</span></div>
+                <div class="date-item"><span>Jeu</span><span>25</span></div>
+                <div class="date-item active"><span>Ven</span><span>26</span></div>
+                <div class="date-item"><span>Sam</span><span>27</span></div>
+                <div class="date-item"><span>Dim</span><span>28</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Floating Notification -->
+          <div class="floating-notif-pill">
+            <div class="bell-ring">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="bell-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+            </div>
+            <div class="notif-text">
+              <p class="title">Nouveau RDV</p>
+              <p class="desc">Dr. Amrani — 14:30</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Horizontal Stats section -->
+  <section id="stats" class="stats-bar-section">
+    <div class="stats-container">
+      <div class="stat-col">
+        <span class="number">99.8%</span>
+        <span class="label">HDS Backup & Compliance</span>
+      </div>
+      <div class="stat-col">
+        <span class="number">+45%</span>
+        <span class="label">Proven administrative efficiency</span>
+      </div>
+      <div class="stat-col">
+        <span class="number">-30%</span>
+        <span class="label">No-show rate reduction</span>
+      </div>
+      <div class="stat-col">
+        <span class="number">15 min</span>
+        <span class="label">Saved per consultation</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <section id="features" class="features-section">
+    <div class="features-container">
+      <div class="features-header">
+        <h2>Everything You Need</h2>
+        <p>A comprehensive suite of modular tools designed specifically for seamless practitioner workflow.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="icon-box blue">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feature-icon"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+          </div>
+          <h3>Smart Scheduling</h3>
+          <p>Intelligent calendar, automated appointment reminders, and dynamic waiting lists.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box green">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feature-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Shared Medical Records</h3>
+          <p>Centralized digital clinical files including structured medical histories and exams.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box purple">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feature-icon"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a5 5 0 0 0 5 5h2a5 5 0 0 0 5-5v-4"/><circle cx="20" cy="10" r="2"/></svg>
+          </div>
+          <h3>Consultation Space</h3>
+          <p>Optimized interface promoting practitioner focus, with rapid clinical report entry.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box amber">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feature-icon"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+          </div>
+          <h3>Billing & Invoicing</h3>
+          <p>Integration of third-party payment systems, daily insurance allowances, and cash flow tracking.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box emerald">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feature-icon"><path d="M20 13c0 5-3.5 7.5-7.66 9.7a1 1 0 0 1-.68 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 .76-.97l8.24-2a1 1 0 0 1 .5 0l8.24 2A1 1 0 0 1 20 6Z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <h3>HDS Security & Backups</h3>
+          <p>Certified healthcare data hosts and end-to-end encryption ensuring absolute legal compliance.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box rose">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feature-icon"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          </div>
+          <h3>Analytical Dashboards</h3>
+          <p>Track clinic metrics, patient throughput, and overall performance in real time using key indicators.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="how-section">
+    <div class="how-container">
+      <div class="how-header">
+        <h2>Ready in Three Simple Steps</h2>
+        <p>Just a few days are enough to restructure your clinic's administrative management.</p>
+      </div>
+
+      <div class="how-steps">
+        <div class="step-line"></div>
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <h3>Configuration</h3>
+          <p>We configure your workspace according to your medical specialties and current scheduling organization.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <h3>Training</h3>
+          <p>Dedicated onboarding support and training sessions for an immediate, autonomous daily utilize.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <h3>Deployment</h3>
+          <p>Your clinic gains immediate responsiveness and efficiency from day one on MediSync.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Transform Banner Pricing -->
+  <section id="pricing" class="pricing-banner-section">
+    <div class="banner-container">
+      <div class="banner-card">
+        <h2>Ready to Transform Your Clinic?</h2>
+        <p>Join thousands of healthcare professionals who trust us daily for their complex facility management.</p>
+        
+        <div class="banner-actions">
+          <button [routerLink]="['/auth/register']" class="register-btn">Register</button>
+          <button [routerLink]="['/auth/login']" class="advisor-btn">Contact an Advisor</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <div class="footer-container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <div class="logo-area mb-4">
+            <div class="logo-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="logo-icon text-white"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <span class="logo-title text-white">MediSync</span>
+          </div>
+          <p class="about-desc">
+            State-of-the-art software solutions for modern, contemporary medical clinics.
+          </p>
+          <div class="social-icons">
+            <a href="https://linkedin.com" target="_blank" class="social-btn social-btn--linkedin">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="social-btn__icon">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+              <span class="social-btn__label">LinkedIn</span>
+            </a>
+            <a href="https://github.com" target="_blank" class="social-btn social-btn--github">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="social-btn__icon">
+                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+              </svg>
+              <span class="social-btn__label">GitHub</span>
+            </a>
+          </div>
+
+        </div>
+
+        <div class="footer-links-grid">
+          <div>
+            <h3>Product</h3>
+            <ul>
+              <li><a href="#features">Features</a></li>
+              <li><a href="#pricing">Pricing Plans</a></li>
+              <li><a href="#features">HDS Security & GDPR</a></li>
+              <li><a href="#features">Clinical Integrations</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Company</h3>
+            <ul>
+              <li><a href="#">About Us</a></li>
+              <li><a href="#">News / Blog</a></li>
+              <li><a href="#">Careers</a></li>
+              <li><a href="#">Partnerships</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Legal</h3>
+            <ul>
+              <li><button [routerLink]="['/auth/forgot-password']">Privacy Policy</button></li>
+              <li><button [routerLink]="['/auth/verify-otp']">Terms of Use</button></li>
+              <li><a href="#">Legal Notice</a></li>
+              <li><button [routerLink]="['/auth/login']">Contact</button></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 MediSync. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+</div>
