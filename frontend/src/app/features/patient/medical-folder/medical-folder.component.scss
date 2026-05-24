@@ -1,0 +1,631 @@
+@use '../../../../styles/variables' as *;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PAGE SHELL
+══════════════════════════════════════════════════════════════════════════ */
+.mf-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: $surface;
+  min-height: 100%;
+}
+
+.mf-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 80px 20px;
+  color: $text-muted;
+  p { font-size: 13px; margin: 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PROFILE HEADER (Image 2 — full-width card, avatar + name + badge)
+══════════════════════════════════════════════════════════════════════════ */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: $white;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  padding: 20px 24px;
+  margin-bottom: 12px;
+  box-shadow: $shadow-card;
+}
+
+.ph-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #0D9488;          /* teal — matching image 2 */
+  color: #fff;
+  font-family: $font-display;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.ph-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+
+  .ph-name {
+    font-family: $font-display;
+    font-size: 18px;
+    font-weight: 700;
+    color: $text-primary;
+    margin: 0;
+  }
+
+  .ph-meta {
+    font-size: 12.5px;
+    color: $text-muted;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ph-dot { color: $border; }
+
+  .ph-blood {
+    font-weight: 600;
+    color: $text-secondary;
+  }
+
+  .ph-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: $success;
+    margin-top: 2px;
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: $success;
+      animation: pulse-dot 2s infinite;
+    }
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TAB BAR (Image 2 — pill-style active, ghost inactive)
+══════════════════════════════════════════════════════════════════════════ */
+.tab-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: $white;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  padding: 5px 6px;
+  margin-bottom: 16px;
+  box-shadow: $shadow-card;
+}
+
+.tab-btn {
+  flex: 1;
+  height: 36px;
+  border: none;
+  border-radius: $radius-md;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  color: $text-muted;
+  background: transparent;
+  letter-spacing: 0.01em;
+
+  &:hover:not(.tab-btn--active) {
+    background: $surface;
+    color: $text-secondary;
+  }
+
+  &--active {
+    background: $primary;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(79,70,229,0.25);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TAB CONTENT WRAPPER
+══════════════════════════════════════════════════════════════════════════ */
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SECTION CARD (reusable panel — Allergies, Pathologies, Vitals, Upload)
+══════════════════════════════════════════════════════════════════════════ */
+.section-card {
+  background: $white;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  padding: 20px 24px;
+  box-shadow: $shadow-card;
+  text-align: left;
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: $text-primary;
+    margin-bottom: 14px;
+
+    ng-icon { color: $primary; flex-shrink: 0; }
+  }
+
+  &__empty {
+    font-size: 13px;
+    color: $text-muted;
+    margin: 0;
+    font-style: italic;
+  }
+}
+
+/* ── Chips ─────────────────────────────────────────────────────────────── */
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: $radius-full;
+
+  &--danger  { background: #FEE2E2; color: #DC2626; }
+  &--warning { background: #FEF3C7; color: #D97706; }
+  &--info    { background: #DBEAFE; color: #2563EB; }
+  &--neutral { background: $surface; color: $text-muted; }
+}
+
+/* ── Vital Signs Row (image 2 — flat grey boxes in a row) ──────────────── */
+.vitals-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+
+  @media (min-width: 600px)  { grid-template-columns: repeat(4, 1fr); }
+  @media (min-width: 900px)  { grid-template-columns: repeat(7, 1fr); }
+}
+
+.vital-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 12px;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: $radius-md;
+
+  &__label {
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $text-muted;
+  }
+
+  &__value {
+    font-size: 15px;
+    font-weight: 700;
+    color: $text-primary;
+    font-family: $font-display;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   UPLOAD ZONE (kept in Overview — matching image 1 style)
+══════════════════════════════════════════════════════════════════════════ */
+.upload-zone {
+  border: 2px dashed rgba(79,70,229,0.22);
+  border-radius: $radius-lg;
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #FAFBFF;
+  text-align: center;
+
+  &:hover {
+    border-color: $primary;
+    background: $primary-light;
+  }
+
+  &--active {
+    border-color: $primary;
+    background: $primary-light;
+    transform: scale(1.005);
+  }
+
+  &--uploading {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.8;
+  }
+
+  &__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: $primary-light;
+    color: $primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+    transition: transform 0.2s;
+
+    .upload-zone:hover & { transform: translateY(-2px); }
+  }
+
+  &__text {
+    font-size: 13.5px;
+    color: $text-secondary;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  &__link {
+    color: $primary;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  &__formats {
+    font-size: 11.5px;
+    color: $text-muted;
+    margin: 0;
+  }
+
+  &__spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(79,70,229,0.2);
+    border-top-color: $primary;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+}
+
+.upload-error {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: $danger;
+  margin: 8px 0 0;
+  ng-icon { flex-shrink: 0; }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CONSULTATION TIMELINE (Consultations tab)
+══════════════════════════════════════════════════════════════════════════ */
+.consultation-timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.ct-item {
+  display: flex;
+  gap: 14px;
+  padding-bottom: 22px;
+  &:last-child { padding-bottom: 0; }
+
+  .ct-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 16px;
+    padding-top: 3px;
+
+    .ct-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: $primary;
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+      flex-shrink: 0;
+    }
+
+    .ct-line {
+      flex: 1;
+      width: 2px;
+      background: linear-gradient(to bottom, rgba(79,70,229,0.25), transparent);
+      margin-top: 5px;
+      min-height: 16px;
+    }
+  }
+
+  .ct-body {
+    flex: 1;
+    text-align: left;
+
+    .ct-header-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .ct-date {
+      font-size: 11px;
+      font-weight: 600;
+      color: $text-muted;
+    }
+
+    .ct-badge {
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: $radius-full;
+      background: $primary-light;
+      color: $primary;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .ct-doctor {
+      font-size: 13px;
+      font-weight: 700;
+      color: $text-primary;
+      margin: 0 0 3px;
+    }
+
+    .ct-notes {
+      font-size: 12px;
+      color: $text-secondary;
+      margin: 0 0 6px;
+      line-height: 1.5;
+    }
+
+    .btn-view-notes {
+      background: none;
+      border: none;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: $primary;
+      cursor: pointer;
+      padding: 0;
+      &:hover { opacity: 0.7; }
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DOCUMENTS TAB — Filter bar as its own section
+══════════════════════════════════════════════════════════════════════════ */
+.docs-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: $white;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  padding: 12px 20px;
+  box-shadow: $shadow-card;
+
+  &__count {
+    font-size: 13px;
+    font-weight: 600;
+    color: $text-secondary;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: $text-muted;
+  }
+}
+
+.sort-select {
+  border: 1px solid $border;
+  border-radius: $radius-sm;
+  padding: 5px 30px 5px 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: $text-primary;
+  background: $white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236B7280' width='16' height='16'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 6px center;
+  background-size: 16px;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+  &:focus { border-color: $primary; }
+}
+
+.docs-section {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* ── Document list rows ─────────────────────────────────────────────────── */
+.docs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.doc-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid $border;
+  transition: background 0.12s ease;
+
+  &:last-child { border-bottom: none; }
+  &:hover      { background: $surface; }
+
+  &__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    &--pdf   { background: #FEE2E2; color: #DC2626; }
+    &--image { background: #D1FAE5; color: #059669; }
+    &--dicom { background: #DBEAFE; color: #2563EB; }
+  }
+
+  &__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow: hidden;
+    text-align: left;
+  }
+
+  &__name {
+    font-size: 13px;
+    font-weight: 700;
+    color: $text-primary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: $text-muted;
+    flex-wrap: wrap;
+  }
+
+  &__by {
+    font-size: 11.5px;
+    color: $text-secondary;
+    font-weight: 500;
+    flex-shrink: 0;
+    white-space: nowrap;
+    @media (max-width: 600px) { display: none; }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+}
+
+.doc-badge {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+
+  &--pdf   { background: #FEE2E2; color: #DC2626; }
+  &--image { background: #D1FAE5; color: #059669; }
+  &--dicom { background: #DBEAFE; color: #2563EB; }
+}
+
+.doc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: $radius-sm;
+  border: 1px solid $border;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  padding: 6px 8px;
+
+  &--view {
+    background: $white;
+    color: $text-secondary;
+    &:hover { background: $primary-light; color: $primary; border-color: rgba(79,70,229,0.3); }
+  }
+
+  &--dl {
+    background: $primary;
+    color: #fff;
+    border-color: $primary;
+    padding: 6px 14px;
+    &:hover { background: $primary-dark; }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════════════════════════════════════ */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 64px 24px;
+  text-align: center;
+  color: $text-muted;
+
+  ng-icon { opacity: 0.35; }
+
+  h5 {
+    font-size: 15px;
+    font-weight: 700;
+    color: $text-primary;
+    margin: 0;
+  }
+
+  p {
+    font-size: 12.5px;
+    color: $text-muted;
+    margin: 0;
+    max-width: 260px;
+  }
+}
+
+/* Spinner */
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid rgba(79,70,229,0.15);
+  border-top-color: $primary;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}

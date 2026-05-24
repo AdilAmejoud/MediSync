@@ -1,0 +1,247 @@
+@use '../../../../styles/variables' as *;
+
+.notifications-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  text-align: left;
+}
+
+/* Filter Bar */
+.filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 768px) {
+  .filter-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.filter-tab {
+  padding: 8px 16px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: $radius-md;
+  border: 1px solid var(--border-color, $border);
+  background: $white;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.2s);
+  font-family: inherit;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-tab:hover {
+  background: var(--bg-surface, #F4F6FB);
+  color: var(--text-primary);
+}
+
+.filter-tab--active {
+  background: #4F46E5;
+  border-color: #4F46E5;
+  color: $white;
+}
+
+.filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+// Utility flex layout classes matching HTML
+.flex { display: flex; }
+.justify-between { justify-content: space-between; }
+.items-center { align-items: center; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.mb-6 { margin-bottom: 24px; }
+.mt-2 { margin-top: 8px; }
+.py-12 { padding-top: 48px; padding-bottom: 48px; }
+.w-16 { width: 64px; }
+.w-24 { width: 96px; }
+.w-28 { width: 112px; }
+.w-36 { width: 144px; }
+.w-48 { width: 192px; }
+.font-bold { font-weight: 700; }
+.text-center { text-align: center; }
+.justify-center { justify-content: center; }
+
+// Purple primary button (like New Appointment)
+// We inherit styles from .btn-primary but define local green success behavior
+.btn-primary {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &.turned-green {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25) !important;
+    color: $white !important;
+    border-color: transparent !important;
+  }
+}
+
+// Red clear-all button
+.btn-gradient-danger {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  color: $white;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: $radius-md;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  
+  &:hover:not(:disabled) {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+  }
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+
+// Table Wrapper & Table Layout (matches ms-data-table)
+.data-table-wrapper {
+  position: relative;
+  overflow: hidden;
+  background: $white;
+  width: 100%;
+}
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+
+  th {
+    background: $surface;
+    color: $text-muted;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 14px 16px;
+    border-bottom: 1px solid $border;
+    user-select: none;
+  }
+
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid $border;
+    color: $text-secondary;
+    vertical-align: middle;
+    transition: all 0.2s ease;
+  }
+
+  .table-row {
+    transition: background 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba($primary, 0.01);
+    }
+    
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  // Highlight unread notifications rows beautifully
+  .unread-row {
+    background-color: rgba($primary, 0.02) !important;
+    border-left: 3px solid $primary;
+    
+    td {
+      font-weight: 600;
+      color: $text-primary;
+    }
+    
+    &:hover {
+      background-color: rgba($primary, 0.04) !important;
+    }
+  }
+}
+
+// Actions Buttons cell and hovered visual cues
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: $radius-sm;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    
+    &.icon-btn-view {
+      color: $text-muted;
+      
+      &:hover {
+        background: #ECFDF5;
+        color: #10B981;
+      }
+    }
+    
+    &.icon-btn-delete {
+      color: $text-muted;
+      
+      &:hover {
+        background: #FEF2F2;
+        color: $danger;
+      }
+    }
+  }
+}
+
+// Empty state details
+.empty-cell {
+  padding: 48px !important;
+  text-align: center;
+  border-bottom: none !important;
+}
+
+.flex-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: $text-muted;
+  gap: 4px;
+}

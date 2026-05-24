@@ -1,0 +1,276 @@
+@if (loading()) {
+  <div class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading dashboard data...</p>
+  </div>
+} @else if (error()) {
+  <div class="error-container">
+    <p>{{ error() }}</p>
+  </div>
+} @else {
+<div class="dashboard-container">
+
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  <!-- NEXT APPOINTMENT BANNER — Full-width, at the very top               -->
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  @if (nextAppointment) {
+    <div class="next-appt-banner">
+      <div class="banner-left">
+        <div class="banner-icon-circle">
+          <ng-icon name="heroCalendar" size="22"></ng-icon>
+        </div>
+        <div class="banner-text">
+          <span class="banner-badge">NEXT APPOINTMENT</span>
+          <h4 class="doctor-details">{{ nextAppointment.doctorName }} — <span class="doctor-specialty">{{ nextAppointment.specialty }}</span></h4>
+          <p class="doctor-time">{{ nextAppointment.date | date: 'EEE, MMMM dd, yyyy · HH:mm' }}</p>
+        </div>
+      </div>
+      <div class="banner-actions">
+        <button (click)="viewDetails(nextAppointment); $event.stopPropagation()" class="btn-view-details">View Details</button>
+        <button routerLink="/patient/appointments" class="btn-cancel-appt">Cancel</button>
+      </div>
+    </div>
+  }
+
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  <!-- ROW 1: Stat Cards                                                   -->
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  <div class="stats-grid">
+    <ms-stat-card label="Completed Appointments" [value]="stats?.completedAppointments ?? 0" trend="" [trendUp]="true" icon="heroCalendar" iconColor="blue" [sparkline]="[]"></ms-stat-card>
+    <ms-stat-card label="Active Prescriptions" [value]="activePrescriptions" trend="Active" [trendUp]="true" icon="heroClipboardDocument" iconColor="green" [sparkline]="[]"></ms-stat-card>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  <!-- HEADER ROW — Welcome + QR Scan button                               -->
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  <div class="header-row">
+    <div>
+      <h2 class="page-title">Welcome back, {{ patientName }}</h2>
+      <p class="page-subtitle">Patient ID: {{ patientId }}</p>
+    </div>
+    <button class="qr-scan-btn" (click)="openScanner()">
+      <ng-icon name="heroQrCode" size="18"></ng-icon>
+      Scan QR to Check In
+    </button>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  <!-- VITALS SNAPSHOT — Live sync from Medical Folder                     -->
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  <div class="vitals-section">
+    <div class="section-header-row">
+      <h3 class="section-title">My Vitals</h3>
+      <a routerLink="/patient/medical-folder" class="specialist-link">View Full Folder →</a>
+    </div>
+    <div class="vitals-strip">
+      @for (v of vitalsLabels; track v.key) {
+        <div class="card vital-card">
+          <span class="vital-label">{{ v.label }}</span>
+          <span class="vital-value">{{ getVitalDisplay(v.key) }}</span>
+          <span class="vital-badge" [class]="getVitalBadgeClass(v.key)">{{ getVitalStatus(v.key) }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  <!-- TWO COLUMNS: My Doctors & Online Documents                          -->
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  <div class="content-grid">
+
+    <!-- LEFT: My Doctors (65%) -->
+    <div class="card my-doctors-card">
+      <div class="section-header-row">
+        <h3 class="section-title">My Doctors</h3>
+        <a href="#" class="specialist-link">Find a Specialist</a>
+      </div>
+
+      <div class="doctors-list">
+        @for (doc of myDoctors; track doc.name) {
+          <div class="doctor-row">
+            <div class="doc-profile">
+              <div class="avatar-circle" [style.background-color]="doc.color">{{ doc.initials }}</div>
+              <div class="doc-meta">
+                <h4 class="doc-name">{{ doc.name }}</h4>
+                <a href="#" class="specialty-link">{{ doc.specialty }}</a>
+              </div>
+            </div>
+
+            <div class="doc-info-right">
+              <span class="consultation-count">{{ doc.consultations }} Consultations</span>
+              @if (doc.apptBadge) {
+                <span class="appt-status-badge">{{ doc.apptBadge }}</span>
+              } @else {
+                <button class="btn-book">Book Appointment</button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- RIGHT: Online Documents (35%) — Live snapshot from Medical Folder -->
+    <div class="card online-docs-card">
+      <div class="section-header-row">
+        <h3 class="section-title">Online Documents</h3>
+        <a routerLink="/patient/medical-folder" class="specialist-link">View All →</a>
+      </div>
+
+      <div class="docs-list">
+        @for (doc of documents; track doc.id) {
+          <div class="document-row">
+            <div class="doc-info">
+              <div class="doc-icon" [class]="getDocIconClass(doc)">
+                @if (isPdf(doc)) {
+                  <ng-icon name="heroDocumentText" size="16"></ng-icon>
+                } @else {
+                  <ng-icon name="heroPhoto" size="16"></ng-icon>
+                }
+              </div>
+              <div class="doc-meta">
+                <span class="doc-name">{{ doc.filename }}</span>
+                <span class="doc-date">{{ doc.createdAt | date: 'dd MMM yyyy' }} · {{ formatFileSize(doc.fileSize) }}</span>
+              </div>
+            </div>
+            <button (click)="viewDashboardDocument(doc)" class="btn-download" title="View Document">
+              <ng-icon name="heroEye" size="16"></ng-icon>
+            </button>
+          </div>
+        }
+        @if (documents.length === 0) {
+          <div class="docs-empty">
+            <ng-icon name="heroDocumentDuplicate" size="28"></ng-icon>
+            <p>No documents uploaded yet</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  <!-- RECENT ACTIVITY TIMELINE                                            -->
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  <div class="card activity-timeline-card">
+    <div class="section-header-row"><h3 class="section-title">Recent Activity</h3></div>
+
+    <div class="timeline-wrapper">
+      @for (act of recentActivities; track act.action; let last = $last) {
+        <div class="timeline-item">
+          <div class="timeline-left">
+            <span class="timeline-dot" [style.background-color]="act.color"></span>
+            @if (!last) {
+              <span class="timeline-line"></span>
+            }
+          </div>
+          <div class="timeline-content">
+            <h4 class="activity-action">{{ act.action }}</h4>
+            <p class="activity-desc">{{ act.desc }}</p>
+          </div>
+          <div class="timeline-date">{{ act.date }}</div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  <!-- QR Scanner Modal                                                    -->
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  @if (showQRScanner()) {
+    <div class="modal-overlay-scan" (click)="closeScanner()">
+      <div class="modal-scan" (click)="$event.stopPropagation()">
+        <div class="modal-scan__header">
+          <h3>Check-in by QR Code</h3>
+          <button class="modal-scan__close" (click)="closeScanner()">&times;</button>
+        </div>
+        <div class="modal-scan__body">
+          @if (qrScanning()) {
+            <div id="qr-reader" class="qr-reader-container"></div>
+            <p class="qr-scan-hint">Point your camera at the clinic QR code</p>
+          }
+          @if (qrSuccessMessage()) {
+            <div class="qr-result qr-result--success">
+              <ng-icon name="heroCheckCircle" size="32"></ng-icon>
+              <p>{{ qrSuccessMessage() }}</p>
+              <button class="sd__btn sd__btn--qr" (click)="closeScanner()">Done</button>
+            </div>
+          }
+          @if (qrErrorMessage() && !qrScanning()) {
+            <div class="qr-result qr-result--error">
+              <ng-icon name="heroExclamationCircle" size="32"></ng-icon>
+              <p>{{ qrErrorMessage() }}</p>
+              <button class="sd__btn sd__btn--qr" (click)="openScanner()">Try Again</button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Details Modal -->
+  <ms-modal [visible]="showDetailsModal" title="Appointment Details" (close)="showDetailsModal = false">
+    @if (selectedApptDetails; as details) {
+      <div class="booking-form details-form">
+        <div class="form-group mb-4">
+          <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Doctor Details</label>
+          <div class="form-readonly-value font-medium">
+            {{ details.doctorName }} — <span class="text-slate-500">{{ details.doctorSpecialty }}</span>
+          </div>
+        </div>
+
+        <div class="form-row flex gap-4 mb-4">
+          <div class="form-group flex-1">
+            <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Appointment Type</label>
+            <div class="form-readonly-value">{{ details.type }}</div>
+          </div>
+          <div class="form-group flex-1">
+            <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Consultation Mode</label>
+            <div class="form-readonly-value">{{ details.mode }}</div>
+          </div>
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Appointment Date & Time</label>
+          <div class="form-readonly-value font-medium text-indigo">
+            {{ details.date | date: 'EEEE, MMMM dd, yyyy - hh:mm a' }}
+          </div>
+        </div>
+
+        <div class="form-row flex gap-4 mb-4">
+          <div class="form-group flex-1">
+            <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Consultation Fees</label>
+            <div class="form-readonly-value font-semibold text-slate-800">{{ details.fee }} MAD</div>
+          </div>
+          <div class="form-group flex-1">
+            <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Appointment Status</label>
+            <div class="form-readonly-value flex items-center">
+              <span class="status-badge badge-{{ details.status | lowercase }}">{{ details.status }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Notes / Symptoms</label>
+          <div class="form-readonly-value textarea-style">
+            {{ details.notes || 'No specific notes or symptoms provided for this consultation.' }}
+          </div>
+        </div>
+
+        <div class="form-actions flex justify-end gap-2 mt-6 pt-4 border-t border-slate-100">
+          <button type="button" (click)="showDetailsModal = false" class="btn-secondary">Close</button>
+        </div>
+      </div>
+    }
+
+    @if (showDocViewer && docViewerData) {
+      <ms-document-viewer
+        [pdfData]="docViewerData"
+        [title]="docViewerTitle"
+        [showDownload]="true"
+        (close)="closeDocViewer()"
+        (download)="downloadDashboardDocument(getDocForViewer())"
+      ></ms-document-viewer>
+    }
+  </ms-modal>
+
+</div>
+}

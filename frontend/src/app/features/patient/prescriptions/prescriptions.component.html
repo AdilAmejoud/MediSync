@@ -1,0 +1,19 @@
+<div class="prescriptions-container">
+  <div class="header-row">
+    <div>
+      <h2 class="page-title">My Prescriptions</h2>
+      <p class="page-subtitle">Track your electronic prescriptions and drug dosages.</p>
+    </div>
+  </div>
+  <ms-data-table [columns]="columns" [rows]="prescriptions" (actionClick)="onActionClick($event)"></ms-data-table>
+</div>
+
+@if (showPrescriptionViewer && prescriptionViewerData) {
+  <ms-document-viewer
+    [pdfData]="prescriptionViewerData"
+    [title]="prescriptionViewerTitle"
+    [showDownload]="true"
+    (close)="closePrescriptionViewer()"
+    (download)="downloadViewedPrescription()"
+  ></ms-document-viewer>
+}

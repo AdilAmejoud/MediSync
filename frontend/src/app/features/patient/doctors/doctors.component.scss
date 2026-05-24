@@ -1,0 +1,580 @@
+@use '../../admin/doctors/doctors.component.scss' as admin;
+@use '../../../../styles/variables' as *;
+
+/* Filter Bar */
+.filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 576px) {
+  .filter-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.filter-tab {
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: $radius-md;
+  border: 1px solid var(--border-color, $border);
+  background: $white;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.2s);
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.filter-tab:hover {
+  background: var(--bg-surface, #F4F6FB);
+  color: var(--text-primary);
+}
+
+.filter-tab--active {
+  background: #4F46E5;
+  border-color: #4F46E5;
+  color: $white;
+}
+
+.filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+
+.filter-search {
+  position: relative;
+  width: 100%;
+}
+
+@media (min-width: 576px) {
+  .filter-search {
+    width: 260px;
+    max-width: 260px;
+  }
+}
+
+.filter-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.filter-search-input {
+  width: 100%;
+  font-size: 12px;
+  padding: 8px 12px 8px 36px;
+  background: var(--bg-surface, #F4F6FB);
+  border: 1px solid var(--border-color, $border);
+  border-radius: $radius-md;
+  transition: all var(--transition-fast, 0.2s);
+  outline: none;
+  font-family: inherit;
+  color: var(--text-primary);
+}
+
+.filter-search-input:focus {
+  background: $white;
+  border-color: #4F46E5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+// Cards Grid Wrapper
+.doctors-grid-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 16px;
+  justify-items: center;
+}
+
+// Doctor Card Styling
+.doctor-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: $radius-xl;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  width: 100%;
+  max-width: 320px;
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.05);
+    border-color: rgba($primary, 0.12);
+  }
+
+  .card-avatar-wrapper {
+    margin-bottom: 20px;
+    display: inline-block;
+  }
+
+  .doctor-card-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .doctor-card-speciality {
+    font-size: 13px;
+    font-weight: 600;
+    color: $primary;
+    margin-top: 6px;
+    display: inline-block;
+  }
+
+  .doctor-card-info {
+    width: 100%;
+    margin: 20px 0 28px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    padding: 0;
+
+    .consultations-count {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .referral-type {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-top: auto;
+
+    button {
+      height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      padding: 0 8px;
+      line-height: 1;
+      box-sizing: border-box;
+    }
+
+    .btn-primary-sm {
+      flex: 1.5;
+      background: #4F46E5;
+      color: $white;
+      border: none;
+      border-radius: $radius-full;
+      font-size: 13.5px;
+      font-weight: 700;
+      box-shadow: 0 2px 6px rgba(79, 70, 229, 0.15);
+
+      &:hover {
+        background: #4338CA;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+      }
+    }
+
+    .btn-secondary-sm {
+      flex: 1;
+      background: #F4F6FB;
+      color: #4F46E5;
+      border: none;
+      border-radius: $radius-full;
+      font-size: 13.5px;
+      font-weight: 700;
+
+      &:hover {
+        background: #E0E7FF;
+        color: #4338CA;
+      }
+    }
+  }
+}
+
+// Skeleton loading placeholders
+.skeleton-card {
+  opacity: 0.65;
+  pointer-events: none;
+  border-radius: $radius-xl !important;
+  padding: 32px 24px !important;
+  
+  .skeleton-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+  }
+
+  .skeleton-text {
+    border-radius: 4px;
+  }
+}
+
+// Modal styles
+.doctor-profile-modal-content {
+  padding: 0;
+  margin: -16px; // negate parent modal padding for full-bleed headers
+  display: flex;
+  flex-direction: column;
+}
+
+// CV/Resume Header Layout
+.profile-resume-header {
+  position: relative;
+  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+  padding: 32px 24px;
+  overflow: hidden;
+}
+
+.profile-resume-header-bg {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.profile-resume-header-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  z-index: 2;
+  text-align: left;
+}
+
+.profile-resume-avatar {
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: block;
+}
+
+.profile-resume-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-resume-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: $white;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.profile-resume-degree {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+.profile-resume-specialty-badge {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: rgba(255, 255, 255, 0.15);
+  color: $white;
+  padding: 4px 10px;
+  border-radius: $radius-full;
+  margin-top: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+// CV/Resume Body & Sidebar structure
+.profile-resume-body {
+  display: flex;
+  flex-direction: column;
+  background: #FCFDFE;
+  
+  @media (min-width: 640px) {
+    flex-direction: row;
+  }
+}
+
+.profile-resume-sidebar {
+  width: 100%;
+  padding: 24px;
+  border-bottom: 1px solid var(--border-color, #E2E8F0);
+  background: #F8FAFC;
+  box-sizing: border-box;
+
+  @media (min-width: 640px) {
+    width: 38%;
+    border-bottom: none;
+    border-right: 1px solid var(--border-color, #E2E8F0);
+  }
+}
+
+.profile-resume-main {
+  width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+  
+  @media (min-width: 640px) {
+    width: 62%;
+  }
+}
+
+.resume-info-section {
+  margin-bottom: 24px;
+  text-align: left;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.resume-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #4F46E5;
+  letter-spacing: 1px;
+  margin: 0 0 12px 0;
+  border-bottom: 1px dashed rgba(79, 70, 229, 0.2);
+  padding-bottom: 4px;
+}
+
+.resume-info-item {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.info-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748B;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: #1E293B;
+
+  &.fee-value {
+    font-size: 15px;
+  }
+}
+
+.resume-about-text {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #334155;
+  margin: 0;
+}
+
+// Practice Statistics Layout
+.resume-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.resume-stat-box {
+  background: $white;
+  border: 1px solid var(--border-color, #E2E8F0);
+  border-radius: $radius-lg;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+
+  .stat-num {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .stat-desc {
+    font-size: 10px;
+    font-weight: 600;
+    color: #64748B;
+    margin-top: 4px;
+  }
+}
+
+// Resume Footer Actions
+.profile-resume-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: #F8FAFC;
+  border-top: 1px solid var(--border-color, #E2E8F0);
+  box-sizing: border-box;
+
+  button {
+    height: 38px;
+    padding: 0 16px;
+    font-size: 12.5px;
+    font-weight: 700;
+    border-radius: $radius-full;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .btn-outline-resume {
+    background: $white;
+    color: #4F46E5;
+    border: 1px solid var(--border-color, #E2E8F0);
+
+    &:hover {
+      background: #F1F5F9;
+      border-color: #CBD5E1;
+    }
+  }
+
+  .btn-primary-resume {
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    color: $white;
+    border: none;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);
+
+    &:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+    }
+  }
+}
+
+// Booking Form Styles
+.add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+
+  .form-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .form-input, .form-select {
+    border: 1px solid var(--border-color);
+    border-radius: $radius-md;
+    padding: 10px 12px;
+    font-size: 13px;
+    outline: none;
+    background: var(--bg-card);
+    height: 40px;
+    color: var(--text-primary);
+
+    &:focus {
+      border-color: #4F46E5;
+    }
+    
+    &:disabled {
+      background: var(--bg-surface);
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.time-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.slot-btn {
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: $radius-md;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  text-align: center;
+
+  &.slot-available {
+    background: var(--bg-card);
+    color: var(--text-primary);
+
+    &:hover {
+      background: var(--bg-surface);
+      border-color: rgba(79, 70, 229, 0.3);
+    }
+  }
+
+  &.slot-selected {
+    background: #4F46E5;
+    color: $white;
+    border-color: transparent;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.15);
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+}

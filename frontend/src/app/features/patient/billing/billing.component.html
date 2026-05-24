@@ -1,0 +1,182 @@
+<div class="billing-page">
+
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Payments & Invoices</h2>
+      <p class="page-subtitle">Inspect your billing transactions and invoice sheets.</p>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-card-accent stat-card-accent--emerald"></div>
+      <div class="stat-card-body">
+        <div class="stat-card-content">
+          <span class="stat-card-label">TOTAL COMPLETED APPOINTMENTS</span>
+          <p class="stat-card-value stat-card-value--emerald">{{ completedAppointmentsCount }}</p>
+        </div>
+        <div class="stat-card-icon stat-card-icon--emerald">
+          <ng-icon name="heroCheckCircle" size="22"></ng-icon>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-accent stat-card-accent--amber"></div>
+      <div class="stat-card-body">
+        <div class="stat-card-content">
+          <span class="stat-card-label">PENDING APPOINTMENTS</span>
+          <p class="stat-card-value stat-card-value--amber">{{ pendingAppointmentsCount }}</p>
+        </div>
+        <div class="stat-card-icon stat-card-icon--amber">
+          <ng-icon name="heroClock" size="22"></ng-icon>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-accent stat-card-accent--rose"></div>
+      <div class="stat-card-body">
+        <div class="stat-card-content">
+          <span class="stat-card-label">OVERDUE APPOINTMENTS</span>
+          <p class="stat-card-value stat-card-value--rose">{{ overdueAppointmentsCount }}</p>
+        </div>
+        <div class="stat-card-icon stat-card-icon--rose">
+          <ng-icon name="heroExclamationTriangle" size="22"></ng-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-tabs">
+      @for (tab of statusTabs; track tab) {
+        <button
+          class="filter-tab"
+          [class.filter-tab--active]="activeStatusTab === tab"
+          (click)="setStatusTab(tab)"
+        >
+          {{ tab === 'All' ? 'All Statuses' : tab }}
+        </button>
+      }
+    </div>
+    <div class="filter-controls">
+      <div class="filter-search">
+        <ng-icon name="heroMagnifyingGlass" size="16" class="filter-search-icon"></ng-icon>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Search by Doctor, Bill #, service..."
+          class="filter-search-input"
+        />
+      </div>
+      <div class="filter-group">
+        <ms-date-picker [(value)]="dateFilter" placeholder="Select date"></ms-date-picker>
+        @if (dateFilter) {
+          <button (click)="dateFilter = ''" class="filter-clear-btn">Clear</button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Invoices Table -->
+  <div class="table-card">
+    <div class="table-scroll">
+      <table class="billing-table">
+        <thead>
+          <tr>
+            <th>Invoice #</th>
+            <th>Doctor</th>
+            <th>Service</th>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (inv of filteredInvoices; track inv.id; let idx = $index) {
+            <tr class="table-row">
+              <td class="table-cell-id">{{ inv.id }}</td>
+              <td class="table-cell-doctor">{{ inv.doctorName || 'N/A' }}</td>
+              <td class="table-cell-service">{{ inv.service }}</td>
+              <td class="table-cell-date">{{ inv.date }}</td>
+              <td class="table-cell-amount">{{ inv.amountMAD }} MAD</td>
+              <td>
+                <span
+                  class="status-pill"
+                  [ngClass]="getStatusClass(inv.status)"
+                >
+                  {{ inv.status }}
+                </span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button
+                    (click)="handleViewInvoice(inv)"
+                    class="action-btn action-btn--view"
+                    title="View Invoice"
+                  >
+                    <ng-icon name="heroEye" size="16"></ng-icon>
+                  </button>
+                  <button
+                    (click)="downloadInvoice(inv)"
+                    class="action-btn action-btn--download"
+                    title="Download PDF"
+                  >
+                    <ng-icon name="heroArrowDownTray" size="16"></ng-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (filteredInvoices.length === 0) {
+            <tr>
+              <td colspan="7" class="empty-state">No invoices found.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Invoice View Modal -->
+  @if (showInvoiceModal && selectedInvoice) {
+    <div class="invoice-modal-overlay" (click)="closeInvoiceModal()">
+      <div class="invoice-modal-container" (click)="$event.stopPropagation()">
+        <div class="invoice-modal-header">
+          <div>
+            <h3 class="invoice-modal-title">Invoice #{{ selectedInvoice.id }}</h3>
+            <p class="invoice-modal-subtitle">{{ selectedInvoice.doctorName }} · {{ selectedInvoice.date }}</p>
+          </div>
+          <button (click)="closeInvoiceModal()" class="invoice-modal-close">
+            <ng-icon name="heroXMark" size="20"></ng-icon>
+          </button>
+        </div>
+        <div class="invoice-modal-body">
+          @if (invoicePdfData) {
+            <pdf-viewer
+              [src]="invoicePdfData"
+              [zoom]="0.9"
+              [render-text]="true"
+              [show-all]="true"
+              class="invoice-pdf-viewer"
+            ></pdf-viewer>
+          } @else {
+            <div class="invoice-loading">
+              <p>Generating invoice PDF...</p>
+            </div>
+          }
+        </div>
+        <div class="invoice-modal-footer">
+          <button (click)="closeInvoiceModal()" class="btn-outline">Close</button>
+          <button (click)="downloadInvoice(selectedInvoice)" class="btn-gradient">
+            <ng-icon name="heroArrowDownTray" size="16"></ng-icon>
+            Download PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

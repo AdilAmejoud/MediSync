@@ -1,0 +1,245 @@
+<div class="doctors-container">
+  <div class="page-header mb-6">
+    <div>
+      <h2 class="page-title">My Doctors</h2>
+      <p class="page-subtitle">Inspect specialists that manage your clinical history.</p>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-tabs">
+      <button
+        class="filter-tab"
+        [class.filter-tab--active]="activeTab === 'All'"
+        (click)="setTab('All')"
+      >
+        All
+      </button>
+      <button
+        class="filter-tab"
+        [class.filter-tab--active]="activeTab === 'My Doctors'"
+        (click)="setTab('My Doctors')"
+      >
+        My Doctors
+      </button>
+    </div>
+    <div class="filter-controls">
+      <div class="filter-search">
+        <ng-icon name="heroMagnifyingGlass" size="16" class="filter-search-icon"></ng-icon>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="filterDoctors()"
+          placeholder="Search treating doctors..."
+          class="filter-search-input"
+        />
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="doctors-grid-wrapper">
+      @for (placeholder of [1, 2, 3]; track $index) {
+        <div class="doctor-card card skeleton-card">
+          <div class="skeleton-circle mx-auto"></div>
+          <div class="skeleton-text short mx-auto mt-4" style="height: 16px; width: 60%;"></div>
+          <div class="skeleton-text medium mx-auto mt-2" style="height: 12px; width: 40%;"></div>
+          <div class="skeleton-text long mx-auto mt-6" style="height: 14px; width: 70%;"></div>
+          <div class="skeleton-text short mx-auto mt-2" style="height: 10px; width: 50%;"></div>
+          <div class="card-actions flex gap-3 mt-6 border-t pt-4">
+            <div class="skeleton-text" style="height: 32px; width: 100%; border-radius: 9999px;"></div>
+            <div class="skeleton-text" style="height: 32px; width: 100%; border-radius: 9999px;"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="doctors-grid-wrapper">
+      @for (doc of filteredDoctors; track doc.id || $index) {
+        <div class="doctor-card card">
+          <div class="card-avatar-wrapper">
+            <ms-avatar 
+              [name]="doc.name" 
+              [src]="doc.image" 
+              [size]="80"
+            ></ms-avatar>
+          </div>
+          
+          <h3 class="doctor-card-name">{{ doc.name }}</h3>
+          <span class="doctor-card-speciality">{{ doc.speciality }}</span>
+          
+          <div class="doctor-card-info">
+            <span class="consultations-count font-semibold text-slate-700 block mb-1">
+              {{ doc.consultsCount }} Consultations completed
+            </span>
+            <span class="referral-type text-slate-400 block text-xs tracking-wider font-bold">
+              {{ doc.referralType }}
+            </span>
+          </div>
+
+          <div class="card-actions">
+            <button (click)="bookAppointment(doc); $event.stopPropagation()" class="btn-primary-sm">
+              Book Appointment
+            </button>
+            <button (click)="viewProfile(doc); $event.stopPropagation()" class="btn-secondary-sm">
+              View Profile
+            </button>
+          </div>
+        </div>
+      } @empty {
+        <div class="empty-state-card card py-12 text-center text-slate-400 w-full col-span-full">
+          <div class="flex-empty-state">
+            <ng-icon name="heroFolderOpen" size="32" class="text-slate-300"></ng-icon>
+            <p class="font-semibold text-slate-500 mt-2">No doctors found</p>
+            <p class="text-xs text-slate-400">Try modifying your search criteria.</p>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Doctor Profile Details Glassmorphic Modal -->
+  <ms-modal [visible]="showProfileModal" title="Doctor Profile Details" (close)="showProfileModal = false">
+    @if (selectedDoctor) {
+      <div class="doctor-profile-modal-content">
+        <!-- Resume Header Card -->
+        <div class="profile-resume-header">
+          <div class="profile-resume-header-bg"></div>
+          <div class="profile-resume-header-content">
+            <ms-avatar [name]="selectedDoctor.name" [src]="selectedDoctor.image" [size]="80" class="profile-resume-avatar"></ms-avatar>
+            <div class="profile-resume-title-block">
+              <h3 class="profile-resume-name">{{ selectedDoctor.name }}</h3>
+              <p class="profile-resume-degree">{{ selectedDoctor.degree }}</p>
+              <span class="profile-resume-specialty-badge">{{ selectedDoctor.speciality }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resume Content Layout -->
+        <div class="profile-resume-body">
+          <!-- Left Column: Credentials & Info -->
+          <div class="profile-resume-sidebar">
+            <div class="resume-info-section">
+              <h4 class="resume-section-title">Credentials</h4>
+              
+              <div class="resume-info-item">
+                <span class="info-label">Specialty</span>
+                <span class="info-value font-bold text-slate-800">{{ selectedDoctor.speciality }}</span>
+              </div>
+              
+              <div class="resume-info-item">
+                <span class="info-label">Experience</span>
+                <span class="info-value font-bold text-slate-800">{{ selectedDoctor.experience }}</span>
+              </div>
+              
+              <div class="resume-info-item">
+                <span class="info-label">Consultation Fee</span>
+                <span class="info-value fee-value font-bold text-indigo-600">{{ selectedDoctor.fees }} MAD</span>
+              </div>
+            </div>
+
+            <div class="resume-info-section">
+              <h4 class="resume-section-title">Contact & Location</h4>
+              
+              <div class="resume-info-item">
+                <span class="info-label">Clinic Address</span>
+                <span class="info-value address-value font-semibold text-slate-700">{{ selectedDoctor.address }}</span>
+              </div>
+
+              <div class="resume-info-item">
+                <span class="info-label">Phone</span>
+                <span class="info-value font-semibold text-slate-700">{{ selectedDoctor.phone }}</span>
+              </div>
+
+              <div class="resume-info-item">
+                <span class="info-label">Email</span>
+                <span class="info-value email-value font-semibold text-slate-700">{{ selectedDoctor.email }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Biography & Stats -->
+          <div class="profile-resume-main">
+            <div class="resume-info-section">
+              <h4 class="resume-section-title">About the Doctor</h4>
+              <p class="resume-about-text text-slate-600">{{ selectedDoctor.about }}</p>
+            </div>
+
+            <div class="resume-info-section">
+              <h4 class="resume-section-title">Practice Statistics</h4>
+              <div class="resume-stats-grid">
+                <div class="resume-stat-box">
+                  <span class="stat-num text-indigo-600">{{ selectedDoctor.consultsCount }}</span>
+                  <span class="stat-desc">Completed Consultations</span>
+                </div>
+                <div class="resume-stat-box">
+                  <span class="stat-num text-emerald-600">Active</span>
+                  <span class="stat-desc">Referral Status</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-resume-actions">
+          <button type="button" (click)="showProfileModal = false" class="btn-outline-resume">
+            Close
+          </button>
+          <button type="button" (click)="bookAppointment(selectedDoctor); $event.stopPropagation()" class="btn-primary-resume flex items-center gap-2">
+            <ng-icon name="heroCalendarDays" size="16"></ng-icon>
+            <span>Book Appointment</span>
+          </button>
+        </div>
+      </div>
+    }
+  </ms-modal>
+
+  <!-- Centered Modal for Booking Appointment -->
+  <ms-modal [visible]="showBookingModal" title="Book New Appointment" (close)="showBookingModal = false">
+    <form (submit)="confirmBooking(); $event.preventDefault();" class="booking-form add-form">
+      <div class="form-group mb-4">
+        <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Select Doctor *</label>
+        <select name="selectedDoctorId" [(ngModel)]="selectedDoctorId" class="form-select w-full border border-slate-200 rounded px-3 py-2 text-sm" required disabled>
+          <option value="" disabled>-- Select Doctor --</option>
+          @for (doc of doctors; track doc.id) {
+            <option [value]="doc.id">{{ doc.name }} — {{ doc.speciality }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group mb-4">
+        <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Select Date *</label>
+        <ms-date-picker [(value)]="selectedDate" placeholder="Select date"></ms-date-picker>
+      </div>
+
+      <div class="form-group mb-4">
+        <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Select Time Slot *</label>
+        <div class="time-slots-grid">
+          @for (slot of timeSlots; track slot.time) {
+            <button
+              type="button"
+              (click)="selectedTime = slot.time"
+              [ngClass]="{
+                'slot-selected': selectedTime === slot.time,
+                'slot-available': selectedTime !== slot.time
+              }"
+              class="slot-btn"
+            >
+              {{ slot.time }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="form-actions flex justify-end gap-2 mt-6 pt-4 border-t border-slate-100">
+        <button type="button" (click)="showBookingModal = false" class="btn-secondary">
+          Cancel
+        </button>
+        <button type="submit" class="btn-primary">
+          Confirm Booking
+        </button>
+      </div>
+    </form>
+  </ms-modal>
+</div>

@@ -1,0 +1,411 @@
+<div class="appointments-container">
+  <!-- Header section -->
+  <div class="header-row flex justify-between items-center mb-6">
+    <div>
+      <h2 class="page-title">My Appointments</h2>
+      <p class="page-subtitle">View and manage your scheduled consultations.</p>
+    </div>
+    <button (click)="openNewAppointmentModal(); $event.stopPropagation()" class="btn-primary flex items-center gap-2">
+      <mat-icon>add</mat-icon>
+      <span>Book Appointment</span>
+    </button>
+  </div>
+
+  <!-- Hero Card: Next Appointment -->
+  @if (nextAppointment; as next) {
+    <div class="next-appointment-card mb-6 flex justify-between items-center">
+      <div class="flex items-center gap-4">
+        <div class="calendar-icon-box">
+          <mat-icon class="text-white">event</mat-icon>
+        </div>
+        <div>
+          <span class="next-label">NEXT APPOINTMENT</span>
+          <h3 class="next-doctor">{{ next.doctorName }} — <span class="next-specialty">{{ next.doctorSpecialty }}</span></h3>
+          <p class="next-time">{{ formatDateStr(next.slotDate) }} · {{ next.slotTime }}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <button (click)="viewDetails(next); $event.stopPropagation()" class="btn-hero-details">View Details</button>
+        <button (click)="cancelAppointment(next.id); $event.stopPropagation()" class="btn-hero-cancel">Cancel</button>
+      </div>
+    </div>
+  }
+
+  <!-- Search & Tab Filter Bar -->
+  <div class="search-filter-bar mb-6 flex justify-between items-center">
+    <!-- Filter tabs on the left -->
+    <div class="filter-tabs flex gap-2">
+      @for (tab of ['All', 'Upcoming', 'Pending', 'Completed', 'Cancelled']; track tab) {
+        <button 
+          (click)="currentFilter = tab" 
+          [class.active]="currentFilter === tab" 
+          class="tab-btn"
+        >
+          {{ tab }}
+        </button>
+      }
+    </div>
+    <!-- Search box on the right -->
+    <div class="search-box">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery" 
+        placeholder="Search by doctor or Id..." 
+        class="search-input"
+      />
+    </div>
+  </div>
+
+  <!-- Custom styled Table -->
+  <div class="table-card card">
+    <div class="table-scroll">
+      <table class="appointments-table">
+        <thead>
+          <tr>
+            <th>DOCTOR</th>
+            <th>DATE & TIME</th>
+            <th>TYPE</th>
+            <th>MODE</th>
+            <th>STATUS</th>
+            <th class="text-center">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (loading) {
+            @for (placeholder of [1, 2, 3, 4]; track $index) {
+              <tr class="skeleton-row-tr">
+                <td>
+                  <div class="flex items-center gap-3">
+                    <div class="skeleton-circle"></div>
+                    <div class="flex-column gap-1">
+                      <div class="skeleton-text medium"></div>
+                      <div class="skeleton-text short"></div>
+                    </div>
+                  </div>
+                </td>
+                <td><div class="skeleton-text medium"></div></td>
+                <td><div class="skeleton-text short"></div></td>
+                <td><div class="skeleton-text short"></div></td>
+                <td><div class="skeleton-text short"></div></td>
+                <td><div class="skeleton-text medium center-margin"></div></td>
+              </tr>
+            }
+          } @else {
+            @for (appt of getFilteredAppointments(); track appt.id) {
+              <tr class="table-row">
+                <!-- Column 1: DOCTOR -->
+                <td>
+                  <div class="doctor-profile-cell flex items-center gap-3">
+                    @if (appt.doctorAvatar) {
+                      <img [src]="appt.doctorAvatar" alt="Doctor" class="doc-avatar-img" />
+                    } @else {
+                      <div class="doc-initials-avatar" [style.background-color]="getAvatarColor(appt.doctorName)">
+                        {{ getInitials(appt.doctorName) }}
+                      </div>
+                    }
+                    <div class="doctor-info flex-column">
+                      <span class="doc-name">{{ appt.doctorName }}</span>
+                      <span class="doc-specialty">{{ appt.doctorSpecialty }}</span>
+                    </div>
+                  </div>
+                </td>
+                
+                <!-- Column 2: DATE & TIME -->
+                <td class="col-date">{{ formatDateStr(appt.slotDate) }} · {{ appt.slotTime }}</td>
+                
+                <!-- Column 3: TYPE -->
+                <td class="col-type">{{ appt.type }}</td>
+                
+                <!-- Column 4: MODE -->
+                <td class="col-mode">
+                  <div class="mode-container flex items-center gap-1.5">
+                    @if (appt.mode === 'Video Consult') {
+                      <mat-icon class="mode-icon text-indigo">videocam</mat-icon>
+                      <span class="mode-text">Video Consult</span>
+                    } @else if (appt.mode === 'In-Clinic') {
+                      <mat-icon class="mode-icon text-emerald">location_on</mat-icon>
+                      <span class="mode-text">In-Clinic</span>
+                    } @else {
+                      <span class="mode-text">{{ appt.mode }}</span>
+                    }
+                  </div>
+                </td>
+                
+                <!-- Column 5: STATUS -->
+                <td class="col-status">
+                  <span class="status-badge badge-{{ appt.status | lowercase }}">
+                    {{ appt.status }}
+                  </span>
+                </td>
+                
+                <!-- Column 6: ACTIONS -->
+                <td class="col-actions">
+                  <div class="flex items-center justify-center gap-3" (click)="$event.stopPropagation()">
+                    @if (appt.status === 'Upcoming' || appt.status === 'Pending') {
+                      <!-- Reschedule button -->
+                      <button (click)="openRescheduleModal(appt); $event.stopPropagation()" class="btn-action-outline btn-reschedule flex items-center gap-1.5" title="Reschedule Appointment">
+                        <mat-icon class="icon-reschedule">event</mat-icon>
+                        <span>Reschedule</span>
+                      </button>
+                      <!-- Cancel red X button -->
+                      <button (click)="cancelAppointment(appt.id); $event.stopPropagation()" class="btn-action-cancel" title="Cancel Appointment">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    } @else if (appt.status === 'Completed') {
+                      <!-- Details button -->
+                      <button (click)="viewDetails(appt); $event.stopPropagation()" class="btn-action-outline btn-details flex items-center gap-1.5" title="View details">
+                        <mat-icon class="icon-details">info</mat-icon>
+                        <span>Details</span>
+                      </button>
+                      <!-- View Invoice button -->
+                      <button (click)="viewInvoice(appt); $event.stopPropagation()" class="btn-action-outline btn-details flex items-center gap-1.5" title="View Invoice">
+                        <mat-icon>visibility</mat-icon>
+                        <span>Invoice</span>
+                      </button>
+                      <!-- Download green tray button -->
+                      <button (click)="downloadInvoice(appt); $event.stopPropagation()" class="btn-action-download" title="Download Invoice PDF">
+                        <mat-icon>file_download</mat-icon>
+                      </button>
+                    } @else if (appt.status === 'Cancelled') {
+                      <!-- Non-clickable label -->
+                      <span class="badge-cancelled-record">Cancelled Record</span>
+                    }
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="empty-cell text-center">
+                  <div class="empty-state py-8">
+                    <mat-icon class="empty-icon text-slate-300">folder_open</mat-icon>
+                    <h4 class="empty-title mt-2 font-bold text-slate-600">No records found</h4>
+                    <p class="empty-desc text-slate-400 text-sm">There are no appointments to display in this list.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Book Appointment Modal -->
+  <ms-modal [visible]="showAddModal" title="Book New Appointment" (close)="showAddModal = false">
+    <form (submit)="bookAppointment(); $event.preventDefault();" class="booking-form add-form">
+      <div class="form-group mb-4">
+        <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Select Doctor *</label>
+        <select name="selectedDoctorId" [(ngModel)]="selectedDoctorId" (ngModelChange)="loadBookedSlots()" class="form-select w-full border border-slate-200 rounded px-3 py-2 text-sm" required>
+          <option value="" disabled>-- Select Doctor --</option>
+          @for (doc of doctors; track doc.id) {
+            <option [value]="doc.id">{{ doc.name }} — {{ doc.specialty || doc.speciality }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-row flex gap-4 mb-4">
+        <div class="form-group flex-1">
+          <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Appointment Type *</label>
+          <select name="selectedType" [(ngModel)]="selectedType" class="form-select w-full border border-slate-200 rounded px-3 py-2 text-sm" required>
+            <option value="General Visit">General Visit</option>
+            <option value="Follow-up">Follow-up</option>
+            <option value="Routine Exam">Routine Exam</option>
+            <option value="Consultation">Consultation</option>
+            <option value="Post-Op Follow-up">Post-Op Follow-up</option>
+            <option value="Evaluation">Evaluation</option>
+            <option value="Vaccination">Vaccination</option>
+            <option value="Check-up">Check-up</option>
+          </select>
+        </div>
+
+        <div class="form-group flex-1">
+          <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Consultation Mode *</label>
+          <select name="selectedMode" [(ngModel)]="selectedMode" class="form-select w-full border border-slate-200 rounded px-3 py-2 text-sm" required>
+            <option value="In-Person">In-Clinic</option>
+            <option value="Video Consult">Video Consult</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group mb-4">
+        <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Select Date *</label>
+        <ms-date-picker [(value)]="selectedDate" (valueChange)="loadBookedSlots()" placeholder="Select date"></ms-date-picker>
+      </div>
+
+      <div class="form-group mb-4">
+        <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Select Time Slot *</label>
+        <div class="time-slots-grid">
+          @for (slot of timeSlots; track slot.time) {
+            <button
+              type="button"
+              [disabled]="slot.booked"
+              (click)="selectedTime = slot.time"
+              [ngClass]="{
+                'slot-selected': selectedTime === slot.time,
+                'slot-available': !slot.booked && selectedTime !== slot.time,
+                'slot-booked': slot.booked
+              }"
+              class="slot-btn"
+            >
+              {{ slot.time }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="form-actions flex justify-end gap-2 mt-6 pt-4 border-t border-slate-100">
+        <button type="button" (click)="showAddModal = false" class="btn-secondary">
+          Cancel
+        </button>
+        <button type="submit" class="btn-primary">
+          Confirm Booking
+        </button>
+      </div>
+    </form>
+  </ms-modal>
+
+  <!-- Reschedule Modal -->
+  <ms-modal [visible]="showRescheduleModal" title="Reschedule Appointment" (close)="showRescheduleModal = false">
+    @if (selectedApptToReschedule; as appt) {
+      <div class="mb-4 text-sm text-slate-600">
+        Rescheduling appointment with <strong class="text-slate-800">{{ appt.doctorName }}</strong>.
+      </div>
+      <form (submit)="confirmReschedule(); $event.preventDefault();" class="booking-form reschedule-form">
+        <div class="form-group mb-4">
+          <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Select New Date *</label>
+          <ms-date-picker [(value)]="rescheduleDate" placeholder="Select date"></ms-date-picker>
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Select New Time Slot *</label>
+          <div class="time-slots-grid">
+            @for (slot of timeSlots; track slot.time) {
+              <button
+                type="button"
+                [disabled]="slot.booked"
+                (click)="rescheduleTime = slot.time"
+                [ngClass]="{
+                  'slot-selected': rescheduleTime === slot.time,
+                  'slot-available': !slot.booked && rescheduleTime !== slot.time,
+                  'slot-booked': slot.booked
+                }"
+                class="slot-btn"
+              >
+                {{ slot.time }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="form-actions flex justify-end gap-2 mt-6 pt-4 border-t border-slate-100">
+          <button type="button" (click)="showRescheduleModal = false" class="btn-secondary">
+            Cancel
+          </button>
+          <button type="submit" class="btn-primary">
+            Confirm Reschedule
+          </button>
+        </div>
+      </form>
+    }
+  </ms-modal>
+
+  <!-- Details Modal -->
+  <ms-modal [visible]="showDetailsModal" title="Appointment Details" (close)="showDetailsModal = false">
+    @if (selectedApptDetails; as details) {
+      <div class="booking-form details-form">
+        <!-- Row 1: Doctor -->
+        <div class="form-group mb-4">
+          <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Doctor Details</label>
+          <div class="form-readonly-value font-medium">
+            {{ details.doctorName }} — <span class="text-slate-500">{{ details.doctorSpecialty }}</span>
+          </div>
+        </div>
+
+        <!-- Row 2: Type & Mode -->
+        <div class="form-row flex gap-4 mb-4">
+          <div class="form-group flex-1">
+            <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Appointment Type</label>
+            <div class="form-readonly-value">
+              {{ details.type }}
+            </div>
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Consultation Mode</label>
+            <div class="form-readonly-value">
+              {{ details.mode }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3: Date & Time -->
+        <div class="form-group mb-4">
+          <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Appointment Date & Time</label>
+          <div class="form-readonly-value font-medium text-indigo">
+            {{ formatDateStr(details.slotDate) }} · {{ details.slotTime }}
+          </div>
+        </div>
+
+        <!-- Row 4: Fees & Status -->
+        <div class="form-row flex gap-4 mb-4">
+          <div class="form-group flex-1">
+            <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Consultation Fees</label>
+            <div class="form-readonly-value font-semibold text-slate-800">
+              {{ details.fee }} MAD
+            </div>
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Appointment Status</label>
+            <div class="form-readonly-value flex items-center">
+              <span class="status-badge badge-{{ details.status | lowercase }}">{{ details.status }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 5: Notes -->
+        <div class="form-group mb-4">
+          <label class="form-label font-bold text-xs uppercase text-slate-500 block mb-1">Notes / Symptoms</label>
+          <div class="form-readonly-value textarea-style">
+            {{ details.notes || 'No specific notes or symptoms provided for this consultation.' }}
+          </div>
+        </div>
+
+        <!-- Action buttons matching booking modal styling -->
+        <div class="form-actions flex justify-end gap-2 mt-6 pt-4 border-t border-slate-100">
+          <button type="button" (click)="showDetailsModal = false" class="btn-secondary">
+            Close
+          </button>
+
+          @if (details.status === 'Completed') {
+            <button type="button" (click)="viewInvoice(details); showDetailsModal = false;" class="btn-primary">
+              View Invoice
+            </button>
+            <button type="button" (click)="downloadInvoice(details); showDetailsModal = false;" class="btn-secondary">
+              Download Invoice
+            </button>
+          } @else if (details.status === 'Upcoming' || details.status === 'Pending') {
+            <button type="button" (click)="openRescheduleModal(details); showDetailsModal = false;" class="btn-primary">
+              Reschedule
+            </button>
+          } @else if (details.status === 'Cancelled') {
+            <button type="button" (click)="openNewAppointmentModal(); showDetailsModal = false;" class="btn-primary">
+              Book Again
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </ms-modal>
+</div>
+
+@if (showInvoiceViewer && invoiceViewerData) {
+  <ms-document-viewer
+    [pdfData]="invoiceViewerData"
+    [title]="invoiceViewerTitle"
+    [showDownload]="true"
+    (close)="closeInvoiceViewer()"
+    (download)="downloadViewedInvoice()"
+  ></ms-document-viewer>
+}

@@ -1,0 +1,112 @@
+<div class="notifications-page">
+  
+  <div class="page-header mb-6">
+    <div>
+      <h1 class="page-title">Notifications</h1>
+      <p class="page-subtitle">Inspect alerts related to your medical care updates.</p>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-tabs">
+      @for (cat of categories; track cat) {
+        <button
+          class="filter-tab"
+          [class.filter-tab--active]="activeCategory === cat"
+          (click)="setCategory(cat)"
+        >
+          {{ cat }}
+        </button>
+      }
+    </div>
+    <div class="filter-controls">
+      <button 
+        (click)="markAllAsRead()" 
+        class="btn-primary flex items-center gap-2" 
+        [class.turned-green]="showGreenSuccess"
+        [disabled]="unreadCount === 0 && !showGreenSuccess"
+      >
+        <ng-icon [name]="showGreenSuccess ? 'heroCheck' : 'heroCheckCircle'" size="16"></ng-icon>
+        <span>{{ showGreenSuccess ? 'All marked read!' : 'Mark all read' }}</span>
+      </button>
+      <button 
+        (click)="clearAll()" 
+        class="btn-gradient-danger flex items-center gap-2" 
+        [disabled]="notifications.length === 0"
+      >
+        <ng-icon name="heroTrash" size="16"></ng-icon>
+        <span>Clear All</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="data-table-wrapper card">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="text-center w-16">No.</th>
+            <th class="w-48">Title</th>
+            <th>Message</th>
+            <th class="w-36">Time</th>
+            <th class="text-center w-28">Status</th>
+            <th class="text-center w-24">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (notif of notifications; track notif.id; let idx = $index) {
+            <tr 
+              [class.unread-row]="notif.unread" 
+              class="table-row"
+              (click)="notif.unread && markAsRead(notif.id)"
+            >
+              <td class="text-center font-semibold text-slate-400">{{ idx + 1 }}</td>
+              <td class="font-bold text-slate-800">{{ notif.title }}</td>
+              <td class="text-slate-600">{{ notif.description }}</td>
+              <td class="text-slate-500">{{ notif.time }}</td>
+              <td class="text-center">
+                <ms-badge 
+                  [type]="notif.unread ? 'warning' : 'success'" 
+                  [text]="notif.unread ? 'Unread' : 'Read'"
+                ></ms-badge>
+              </td>
+              <td class="text-center" (click)="$event.stopPropagation()">
+                <div class="actions-cell justify-center">
+                  @if (notif.unread) {
+                    <button
+                      (click)="markAsRead(notif.id)"
+                      class="icon-btn-view"
+                      title="Mark as Read"
+                    >
+                      <ng-icon name="heroCheck" size="14"></ng-icon>
+                    </button>
+                  }
+                  <button
+                    (click)="deleteNotification(notif.id)"
+                    class="icon-btn-delete"
+                    title="Delete Notification"
+                  >
+                    <ng-icon name="heroTrash" size="14"></ng-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+
+          @if (notifications.length === 0) {
+            <tr>
+              <td colspan="6" class="empty-cell py-12 text-center text-slate-400">
+                <div class="flex-empty-state">
+                  <ng-icon name="heroBell" size="32" class="text-slate-300"></ng-icon>
+                  <p class="font-semibold text-slate-500 mt-2">No notifications found</p>
+                  <p class="text-xs text-slate-400">You are all caught up!</p>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
