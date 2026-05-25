@@ -1,0 +1,337 @@
+@use 'variables' as *;
+
+.pf-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: $font-sans;
+}
+
+.pf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pf-title {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  color: $text-primary;
+  margin: 0;
+  font-family: $font-display;
+}
+
+.pf-subtitle {
+  font-size: 13px;
+  color: $text-secondary;
+  font-weight: 500;
+  margin: 4px 0 0;
+}
+
+// ─── Toolbar ────────────────────────────────────────────────
+.pf-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pf-tabs {
+  display: flex;
+  gap: 4px;
+  background: $white;
+  border: 1px solid $border;
+  border-radius: $radius-full;
+  padding: 4px;
+}
+
+.pf-tab {
+  border: none;
+  background: transparent;
+  color: $text-muted;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: $radius-full;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: $font-sans;
+  white-space: nowrap;
+
+  &:hover {
+    color: $text-primary;
+    background: $surface;
+  }
+
+  &--active {
+    background: $primary;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba($primary, 0.25);
+
+    &:hover {
+      background: $primary-dark;
+      color: #fff;
+    }
+  }
+}
+
+.pf-search {
+  position: relative;
+  min-width: 240px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+.pf-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $text-muted;
+  pointer-events: none;
+}
+
+.pf-search-input {
+  width: 100%;
+  font-size: 13px;
+  padding: 9px 12px 9px 38px;
+  background-color: $white;
+  border: 1px solid $border;
+  border-radius: $radius-xl;
+  outline: none;
+  font-family: $font-sans;
+  box-sizing: border-box;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+
+  &::placeholder {
+    color: $text-muted;
+  }
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.1);
+  }
+}
+
+// ─── Grid ───────────────────────────────────────────────────
+.pf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.pf-card {
+  background: $white;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: $shadow-card;
+  transition: box-shadow 0.2s, transform 0.15s;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba($primary, 0.08);
+    transform: translateY(-2px);
+  }
+}
+
+.pf-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.pf-card-top-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pf-card-avatar {
+  flex-shrink: 0;
+}
+
+.pf-card-name {
+  font-family: $font-display;
+  font-size: 15px;
+  font-weight: 700;
+  color: $text-primary;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.pf-card-age {
+  font-size: 12px;
+  color: $text-muted;
+  font-weight: 500;
+}
+
+.pf-card-badge {
+  padding: 3px 10px;
+  border-radius: $radius-full;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #F1F5F9;
+  color: $text-muted;
+
+  &--active {
+    background: #D1FAE5;
+    color: $success;
+  }
+}
+
+// ─── Card Body (Label-Value Rows) ──
+.pf-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid $border;
+  border-bottom: 1px solid $border;
+}
+
+.pf-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pf-row-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pf-row-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: $text-primary;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pf-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #D1D5DB;
+  display: inline-block;
+
+  &--active {
+    background: $success;
+    box-shadow: 0 0 0 3px rgba($success, 0.2);
+  }
+}
+
+.pf-btn-dossier {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid $primary;
+  border-radius: $radius-md;
+  background: $white;
+  color: $primary;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: $font-sans;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    background: $primary-light;
+    border-color: $primary-dark;
+    color: $primary-dark;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  ng-icon {
+    display: flex;
+    align-items: center;
+  }
+}
+
+// ─── Loading ────────────────────────────────────────────────
+.pf-sk-card {
+  background: $white;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.pf-sk-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, $surface 25%, $border 37%, $surface 63%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.pf-sk-text {
+  height: 12px;
+  width: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, $surface 25%, $border 37%, $surface 63%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+
+  &.short { width: 40%; }
+  &.medium { width: 70%; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+// ─── Empty ──────────────────────────────────────────────────
+.pf-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 32px;
+  text-align: center;
+
+  .pf-empty-icon {
+    font-size: 48px;
+    color: $text-muted;
+    opacity: 0.4;
+    margin-bottom: 12px;
+  }
+
+  .pf-empty-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: $text-primary;
+    margin-bottom: 4px;
+  }
+
+  .pf-empty-desc {
+    font-size: 13px;
+    color: $text-secondary;
+    max-width: 260px;
+  }
+}

@@ -1,0 +1,79 @@
+<div class="appointments-container">
+  <!-- Header -->
+  <div class="header-row">
+    <div>
+      <h2 class="page-title">Doctor Appointments</h2>
+      <p class="page-subtitle">Inspect scheduled clinic consultations.</p>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <ms-stat-card
+      label="Today's Appointments"
+      [value]="todayCount()"
+      icon="heroClock"
+      iconColor="purple"
+    ></ms-stat-card>
+    <ms-stat-card
+      label="Upcoming (7 days)"
+      [value]="upcomingCount()"
+      icon="heroCalendarDays"
+      iconColor="blue"
+    ></ms-stat-card>
+    <ms-stat-card
+      label="Completed this month"
+      [value]="completedCount()"
+      [trend]="completedTrend()"
+      [trendUp]="true"
+      icon="heroCheckCircle"
+      iconColor="green"
+    ></ms-stat-card>
+    <ms-stat-card
+      label="Cancellation rate"
+      [value]="cancellationRate()"
+      [trend]="cancellationTrend()"
+      [trendUp]="false"
+      icon="heroXCircle"
+      iconColor="red"
+    ></ms-stat-card>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="filter-tabs">
+      @for (tab of tabs; track tab) {
+        <button
+          class="filter-tab"
+          [class.filter-tab--active]="activeTab() === tab"
+          (click)="setTab(tab)"
+        >
+          {{ tab }}
+        </button>
+      }
+    </div>
+    <div class="toolbar-right">
+      <div class="search-wrapper">
+        <ng-icon name="heroMagnifyingGlass" class="search-icon" size="18"></ng-icon>
+        <input
+          type="text"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          placeholder="Search by patient..."
+          class="search-input"
+        />
+      </div>
+      <ms-date-picker
+        [value]="selectedDate()"
+        (valueChange)="onDateChange($event)"
+        placeholder="Select date"
+      ></ms-date-picker>
+    </div>
+  </div>
+
+  <ms-data-table
+    [columns]="columns"
+    [rows]="filteredAppointments()"
+    [loading]="loading()"
+  ></ms-data-table>
+</div>

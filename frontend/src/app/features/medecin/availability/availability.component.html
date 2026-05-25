@@ -1,0 +1,270 @@
+<div class="availability-page">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">My Availability</h2>
+      <p class="page-subtitle">Manage your weekly schedule, block time off, and track leave requests.</p>
+    </div>
+    <button class="save-btn" (click)="saveSchedule()" [disabled]="saving()">
+      <ng-icon name="heroCheck" size="16"></ng-icon>
+      {{ saving() ? 'Saving…' : 'Save Schedule' }}
+    </button>
+  </div>
+
+  <!-- ═══ SPLIT LAYOUT ═══ -->
+  <div class="split-layout">
+
+    <!-- ─── LEFT PANEL: Weekly Schedule Editor ─── -->
+    <div class="left-panel">
+      <div class="panel-header">
+        <ng-icon name="heroCalendarDays" size="18"></ng-icon>
+        <h3>Weekly Schedule Editor</h3>
+      </div>
+
+      <div class="day-rows">
+        @for (day of availabilityDays(); track day.day; let i = $index) {
+          <div class="day-row" [class.day-row--fixed]="day.isFixed">
+
+            <div class="day-toggle-col">
+              @if (!day.isFixed) {
+                <button
+                  class="toggle-switch"
+                  [class.toggle-switch--on]="day.enabled"
+                  (click)="toggleDay(i)"
+                  attr.aria-label="Toggle {{ day.day }}"
+                >
+                  <span class="toggle-knob"></span>
+                </button>
+              }
+            </div>
+
+            <div class="day-label-col">
+              <span class="day-name">{{ day.day | slice:0:3 }}</span>
+            </div>
+
+            @if (day.isFixed) {
+              <div class="day-fixed-col">
+                <span
+                  class="fixed-badge"
+                  [class.fixed-badge--orange]="day.fixedColor === 'orange'"
+                  [class.fixed-badge--gray]="day.fixedColor === 'gray'"
+                >{{ day.fixedLabel }}</span>
+              </div>
+            } @else if (day.enabled) {
+              <div class="day-inputs-col">
+                <div class="primary-time-row">
+                  <input
+                    class="time-input"
+                    type="time"
+                    [value]="day.startTime"
+                    (change)="updateDayTime(i, 'startTime', $any($event).target.value)"
+                  />
+                  <span class="time-sep">to</span>
+                  <input
+                    class="time-input"
+                    type="time"
+                    [value]="day.endTime"
+                    (change)="updateDayTime(i, 'endTime', $any($event).target.value)"
+                  />
+                </div>
+
+                @if (day.slots.length > 0) {
+                  <div class="extra-slots">
+                    @for (slot of day.slots; track slot; let si = $index) {
+                      <div class="extra-slot-row">
+                        <input
+                          class="time-input time-input--sm"
+                          type="time"
+                          [value]="slot.start"
+                          (change)="updateSlotTime(i, si, 'start', $any($event).target.value)"
+                        />
+                        <span class="time-sep">–</span>
+                        <input
+                          class="time-input time-input--sm"
+                          type="time"
+                          [value]="slot.end"
+                          (change)="updateSlotTime(i, si, 'end', $any($event).target.value)"
+                        />
+                        <button class="remove-slot-btn" (click)="removeSlot(i, si)">
+                          <ng-icon name="heroXMark" size="12"></ng-icon>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+
+                <button class="add-slot-btn" (click)="addSlot(i)">
+                  <ng-icon name="heroPlus" size="12"></ng-icon>
+                  Add slot
+                </button>
+              </div>
+            } @else {
+              <div class="day-disabled-col">
+                <span class="disabled-text">Unavailable</span>
+              </div>
+            }
+
+          </div>
+        }
+      </div>
+
+      <!-- ── Duration & Break ── -->
+      <div class="config-row">
+        <div class="config-group">
+          <label class="config-label">Slot Duration</label>
+          <div class="duration-pills">
+            @for (d of durationOptions; track d) {
+              <button
+                class="duration-pill"
+                [class.duration-pill--active]="slotDuration() === d"
+                (click)="setDuration(d)"
+              >{{ d }}min</button>
+            }
+          </div>
+        </div>
+        <div class="config-group">
+          <label class="config-label">Break Buffer</label>
+          <div class="break-input-wrapper">
+            <input
+              class="break-input"
+              type="number"
+              [value]="breakDuration()"
+              (change)="updateBreak($any($event).target.value)"
+              min="0"
+              max="120"
+            />
+            <span class="break-unit">min</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── RIGHT PANEL: Blocked Time & Leave ─── -->
+    <div class="right-panel">
+      <div class="panel-header">
+        <ng-icon name="heroClock" size="18"></ng-icon>
+        <h3>Blocked Time &amp; Leave</h3>
+      </div>
+
+      <!-- Blocked list -->
+      <div class="blocked-list">
+        @if (blockedSlots().length === 0) {
+          <div class="blocked-empty">
+            <ng-icon name="heroCalendarDays" size="24"></ng-icon>
+            <p>No blocked time scheduled.</p>
+          </div>
+        }
+        @for (slot of blockedSlots(); track slot.id) {
+          <div class="blocked-item">
+            <div class="blocked-item-header">
+              <span class="blocked-date">{{ formatDate(slot.date) }}</span>
+              <span class="blocked-badge" [class.blocked-badge--full]="isFullDay(slot)">
+                {{ getTimeDisplay(slot) }}
+              </span>
+            </div>
+            @if (slot.reason) {
+              <p class="blocked-reason">{{ slot.reason }}</p>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Block Time button -->
+      <button class="block-time-btn" (click)="openBlockModal()">
+        <ng-icon name="heroPlusCircle" size="18"></ng-icon>
+        Block Time
+      </button>
+
+      <!-- Staff Leave Requests -->
+      <div class="staff-leave-section">
+        <div class="staff-leave-header">
+          <ng-icon name="heroUsers" size="16"></ng-icon>
+          <h4>Internal Staff Leave Requests</h4>
+        </div>
+        <div class="staff-leave-empty">
+          <p>No pending leave requests.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ BLOCK TIME MODAL ═══ -->
+  @if (showBlockModal()) {
+    <div class="modal-backdrop" (click)="closeBlockModal()">
+      <div class="block-modal" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+          <h3>Block Time</h3>
+          <button class="modal-close" (click)="closeBlockModal()">
+            <ng-icon name="heroXMark" size="18"></ng-icon>
+          </button>
+        </div>
+
+        <div class="modal-body">
+
+          <!-- Request Type -->
+          <label class="modal-label">Request Type</label>
+          <div class="request-type-toggle">
+            <button
+              class="type-btn"
+              [class.type-btn--active]="blockType === 'fullDay'"
+              (click)="blockType = 'fullDay'"
+            >
+              <ng-icon name="heroCalendarDays" size="16"></ng-icon>
+              Full Day Off
+            </button>
+            <button
+              class="type-btn"
+              [class.type-btn--active]="blockType === 'specific'"
+              (click)="blockType = 'specific'"
+            >
+              <ng-icon name="heroClock" size="16"></ng-icon>
+              Specific Time Block
+            </button>
+          </div>
+
+          <!-- Date -->
+          <label class="modal-label" for="block-date">Date</label>
+          <ms-date-picker [(value)]="blockDate" placeholder="Select date"></ms-date-picker>
+
+          <!-- Time Range (conditional) -->
+          @if (blockType === 'specific') {
+            <div class="time-range-row">
+              <div class="time-field">
+                <label class="modal-label">Start Time</label>
+                <input class="modal-input" type="time" [(ngModel)]="blockStart" />
+              </div>
+              <div class="time-field">
+                <label class="modal-label">End Time</label>
+                <input class="modal-input" type="time" [(ngModel)]="blockEnd" />
+              </div>
+            </div>
+          }
+
+          <!-- Reason -->
+          <label class="modal-label" for="block-reason">Reason / Explanation</label>
+          <textarea
+            id="block-reason"
+            class="modal-textarea"
+            [(ngModel)]="blockReason"
+            placeholder="Why do you need this time blocked?"
+            rows="3"
+          ></textarea>
+
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn--cancel" (click)="closeBlockModal()">Cancel</button>
+          <button class="btn btn--confirm" (click)="submitBlockTime()">
+            <ng-icon name="heroCheckCircle" size="16"></ng-icon>
+            Confirm Block
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>

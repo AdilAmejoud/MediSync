@@ -1,0 +1,945 @@
+@use 'variables' as *;
+
+.dossier {
+  padding: 0 0 24px;
+  font-family: $font-sans;
+  color: $text-primary;
+
+  &-loading {
+    text-align: center;
+    padding: 60px;
+    color: $text-muted;
+    font-weight: 500;
+  }
+
+  // ─── Back Button ──────────────────────────────────────────
+  &-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid $border;
+    border-radius: $radius-md;
+    background: $white;
+    color: $text-secondary;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: $font-sans;
+    margin-bottom: 20px;
+    transition: all 0.15s;
+
+    &:hover {
+      background: $surface;
+      color: $primary;
+      border-color: $primary;
+    }
+
+    ng-icon {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  // ─── Split Layout ─────────────────────────────────────────
+  &-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    align-items: start;
+
+    @media (max-width: 1024px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  // ─── Left Panel ───────────────────────────────────────────
+  &-left {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  // ─── Patient Header ───────────────────────────────────────
+  &-patient-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: $white;
+    border: 1px solid $border;
+    border-radius: $radius-lg;
+    padding: 20px 24px;
+    box-shadow: $shadow-card;
+  }
+
+  &-patient-name {
+    font-family: $font-display;
+    font-size: 20px;
+    font-weight: 800;
+    color: $text-primary;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  &-patient-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: $text-muted;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+
+  &-meta-sep {
+    color: $border;
+  }
+
+  &-patient-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: $success;
+    margin-top: 6px;
+  }
+
+  &-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: $success;
+    display: inline-block;
+  }
+
+  // ─── Sections ─────────────────────────────────────────────
+  &-section {
+    background: $white;
+    border: 1px solid $border;
+    border-radius: $radius-lg;
+    padding: 20px;
+    box-shadow: $shadow-card;
+  }
+
+  &-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+
+    h2 {
+      font-family: $font-display;
+      font-size: 14px;
+      font-weight: 700;
+      color: $text-primary;
+      margin: 0;
+    }
+
+    ng-icon {
+      color: $primary;
+      flex-shrink: 0;
+    }
+
+    .icon-danger {
+      color: $danger;
+    }
+  }
+
+  &-empty-sm {
+    font-size: 13px;
+    color: $text-muted;
+    font-style: italic;
+    padding: 8px 0;
+  }
+
+  // ─── Allergies ────────────────────────────────────────────
+  &-allergy-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &-allergy-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: #FFFBF5;
+    border: 1px solid #FED7AA;
+    border-radius: $radius-md;
+  }
+
+  &-allergy-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: $text-primary;
+  }
+
+  // ─── Badges ───────────────────────────────────────────────
+  .dossier-badge {
+    padding: 2px 10px;
+    border-radius: $radius-full;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+
+    &--danger { background: #FEE2E2; color: $danger; }
+    &--warning { background: #FEF3C7; color: $warning; }
+    &--info { background: #DBEAFE; color: $info; }
+    &--neutral { background: #F3F4F6; color: $text-muted; }
+  }
+
+  // ─── Pathologies ──────────────────────────────────────────
+  &-pathology-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &-pathology-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: $radius-md;
+  }
+
+  &-pathology-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: $text-primary;
+  }
+
+  &-pathology-since {
+    font-size: 11px;
+    color: $text-muted;
+    font-weight: 500;
+  }
+
+  // ─── Tab Bar ──────────────────────────────────────────────
+  &-tabs {
+    display: flex;
+    gap: 4px;
+    background: $white;
+    border: 1px solid $border;
+    border-radius: $radius-lg;
+    padding: 4px;
+    overflow-x: auto;
+  }
+
+  &-tab {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: $text-muted;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: $font-sans;
+    white-space: nowrap;
+    text-align: center;
+
+    &:hover {
+      color: $text-primary;
+      background: $surface;
+    }
+
+    &--active {
+      background: $primary;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba($primary, 0.25);
+
+      &:hover {
+        background: $primary-dark;
+        color: #fff;
+      }
+    }
+  }
+
+  // ─── Vital Signs ──────────────────────────────────────────
+  &-vitals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+
+    &--row {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  &-vital-card {
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: $radius-md;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &-vital-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: $text-muted;
+  }
+
+  &-vital-value {
+    font-family: $font-display;
+    font-size: 20px;
+    font-weight: 800;
+    color: $text-primary;
+    line-height: 1.2;
+  }
+
+  // ─── Timeline ─────────────────────────────────────────────
+  &-timeline {
+    position: relative;
+    padding-left: 20px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 4px;
+      bottom: 4px;
+      width: 2px;
+      background: $border;
+      border-radius: 2px;
+    }
+  }
+
+  &-timeline-item {
+    position: relative;
+    padding-bottom: 20px;
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+  }
+
+  &-timeline-dot {
+    position: absolute;
+    left: -18px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: $primary;
+    border: 2px solid $white;
+    box-shadow: 0 0 0 2px $primary;
+  }
+
+  &-timeline-content {
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: $radius-md;
+    padding: 12px 16px;
+  }
+
+  &-timeline-date {
+    font-size: 11px;
+    font-weight: 700;
+    color: $primary;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 2px;
+  }
+
+  &-timeline-doctor {
+    font-size: 13px;
+    font-weight: 600;
+    color: $text-primary;
+    margin-bottom: 2px;
+  }
+
+  &-timeline-diagnosis {
+    font-size: 12px;
+    font-weight: 600;
+    color: $text-secondary;
+    margin-bottom: 2px;
+  }
+
+  &-timeline-notes {
+    font-size: 12px;
+    color: $text-muted;
+    line-height: 1.4;
+  }
+
+  // ─── RIGHT PANEL ──────────────────────────────────────────
+  &-right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  // ─── Quick Actions ────────────────────────────────────────
+  &-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid $border;
+    border-radius: $radius-md;
+    background: $white;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    width: 100%;
+    font-family: $font-sans;
+
+    &:hover {
+      border-color: $primary;
+      background: $primary-light;
+      box-shadow: 0 2px 8px rgba($primary, 0.08);
+    }
+
+    ng-icon {
+      color: $primary;
+      flex-shrink: 0;
+    }
+  }
+
+  &-action-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  &-action-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  &-action-desc {
+    font-size: 11px;
+    color: $text-muted;
+  }
+
+  // ─── Documents (Card Style) ───────────────────────────────
+  &-doc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &-doc-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border: 1px solid $border;
+    border-radius: $radius-md;
+    background: $surface;
+    transition: all 0.15s;
+
+    &:hover {
+      border-color: $primary;
+      background: $primary-light;
+    }
+  }
+
+  &-doc-card-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  &-doc-card-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  &-doc-card-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: $radius-md;
+    border: none;
+    background: transparent;
+    color: $text-muted;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+
+    &:hover {
+      background: $white;
+      color: $primary;
+    }
+
+    ng-icon { display: flex; }
+  }
+
+  &-doc-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-md;
+    background: $primary-light;
+    color: $primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    ng-icon {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  &-doc-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+  }
+
+  &-doc-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: $text-primary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &-doc-meta {
+    font-size: 10px;
+    color: $text-muted;
+    font-weight: 500;
+  }
+
+  // ─── Prescription List ─────────────────────────────────────
+  &-prescription-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &-prec-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border: 1px solid $border;
+    border-radius: $radius-md;
+    background: $surface;
+    transition: all 0.15s;
+
+    &:hover {
+      border-color: $primary;
+      background: $primary-light;
+    }
+  }
+
+  &-prec-card-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  &-prec-card-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  &-prec-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-md;
+    background: $primary-light;
+    color: $primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    ng-icon { display: flex; }
+  }
+
+  &-prec-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  &-prec-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  &-prec-date {
+    font-size: 10px;
+    color: $text-muted;
+    font-weight: 500;
+  }
+
+  &-prec-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: $radius-md;
+    border: none;
+    background: transparent;
+    color: $text-muted;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+
+    &:hover {
+      background: $white;
+      color: $primary;
+    }
+
+    ng-icon { display: flex; }
+  }
+
+  &-prec-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border: 1px solid $border;
+    border-radius: $radius-full;
+    background: $white;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: $font-sans;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+
+    &--active {
+      border-color: $success;
+      color: $success;
+      background: #F0FDF4;
+
+      &:hover {
+        background: #DCFCE7;
+      }
+    }
+
+    &--expired {
+      border-color: $text-muted;
+      color: $text-muted;
+      background: #F9FAFB;
+
+      &:hover {
+        background: #F3F4F6;
+      }
+    }
+  }
+
+  &-prec-toggle-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+
+    .dossier-prec-toggle--active & {
+      background: $success;
+      box-shadow: 0 0 0 2px rgba($success, 0.25);
+    }
+
+    .dossier-prec-toggle--expired & {
+      background: #D1D5DB;
+    }
+  }
+
+  // ─── Prescription Viewer Modal ─────────────────────────────
+  &-prec-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: fadeIn 0.15s ease;
+  }
+
+  &-prec-viewer {
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: $white;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-lg;
+    animation: modalIn 0.2s ease;
+  }
+
+  &-prec-viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 0;
+
+    h3 {
+      font-family: $font-display;
+      font-size: 17px;
+      font-weight: 800;
+      color: $text-primary;
+      margin: 0;
+    }
+  }
+
+  &-prec-viewer-status {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 10px;
+    border-radius: $radius-full;
+    background: #F9FAFB;
+    color: $text-muted;
+
+    &.status--active {
+      background: #F0FDF4;
+      color: $success;
+    }
+  }
+
+  &-prec-viewer-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: $surface;
+    color: $text-muted;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+
+    &:hover {
+      background: $danger-bg;
+      color: $danger;
+    }
+
+    ng-icon { display: flex; }
+  }
+
+  &-prec-viewer-body {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &-prec-viewer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &-prec-viewer-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  &-prec-viewer-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  &-prec-viewer-divider {
+    height: 1px;
+    background: $border;
+    margin: 4px 0;
+  }
+
+  &-prec-viewer-meds {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &-prec-viewer-med {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 12px;
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: $radius-md;
+
+    .med-icon {
+      color: $success;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .med-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: $text-primary;
+      display: block;
+    }
+
+    .med-detail {
+      font-size: 11px;
+      color: $text-muted;
+      font-weight: 500;
+      display: block;
+      margin-top: 1px;
+    }
+  }
+
+  &-prec-viewer-text {
+    font-size: 13px;
+    color: $text-secondary;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  &-prec-viewer-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 0 24px 20px;
+  }
+
+  // ═══ Animations ═══════════════════════════════════════════
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  // ─── Prescription Form ───────────────────────────────────
+  &-prescription-form {
+    margin-top: 0;
+  }
+
+  &-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &-form-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: $text-primary;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  &-form-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid $border;
+    border-radius: $radius-md;
+    font-size: 13px;
+    font-family: $font-sans;
+    background: $white;
+    color: $text-primary;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba($primary, 0.08);
+    }
+  }
+
+  &-form-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid $border;
+    border-radius: $radius-md;
+    font-size: 13px;
+    font-family: $font-sans;
+    background: $white;
+    color: $text-primary;
+    outline: none;
+    resize: vertical;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba($primary, 0.08);
+    }
+  }
+
+  &-form-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 4px;
+  }
+
+  &-btn {
+    padding: 8px 18px;
+    border-radius: $radius-md;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: $font-sans;
+    cursor: pointer;
+    border: 1px solid $border;
+    transition: all 0.15s;
+
+    &--primary {
+      background: $primary;
+      color: $white;
+      border-color: $primary;
+
+      &:hover {
+        background: $primary-dark;
+        border-color: $primary-dark;
+      }
+    }
+
+    &--secondary {
+      background: $white;
+      color: $text-secondary;
+
+      &:hover {
+        background: $surface;
+      }
+    }
+  }
+}

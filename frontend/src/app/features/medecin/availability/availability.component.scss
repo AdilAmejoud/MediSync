@@ -1,0 +1,790 @@
+@use '../../../../styles/variables' as *;
+
+.availability-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: $font-sans;
+  color: $text-primary;
+}
+
+// ═══ HEADER ═══════════════════════════════════════════════════
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title {
+  font-family: $font-display;
+  font-size: 20px;
+  font-weight: 800;
+  color: $text-primary;
+  margin: 0 0 2px;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: $text-secondary;
+  margin: 0;
+}
+
+.save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border: none;
+  border-radius: $radius-md;
+  background: $gradient-primary;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: $font-sans;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 2px 8px rgba($primary, 0.25);
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 4px 16px rgba($primary, 0.35);
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  ng-icon { display: flex; }
+}
+
+// ═══ SPLIT LAYOUT ════════════════════════════════════════════
+.split-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  align-items: start;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── Shared Panel ──
+.left-panel,
+.right-panel {
+  background: $white;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 20px;
+  border-bottom: 1px solid $border;
+  background: $surface;
+
+  ng-icon { color: $primary; }
+
+  h3 {
+    font-family: $font-display;
+    font-size: 15px;
+    font-weight: 800;
+    color: $text-primary;
+    margin: 0;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LEFT PANEL — DAY ROWS
+// ═══════════════════════════════════════════════════════════════
+.day-rows {
+  padding: 4px 0;
+}
+
+.day-row {
+  display: grid;
+  grid-template-columns: 48px 64px 1fr;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid $border;
+  transition: background 0.1s;
+  min-height: 52px;
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: #fafaff; }
+
+  &--fixed {
+    background: $surface;
+    cursor: default;
+    &:hover { background: $surface; }
+  }
+}
+
+.day-toggle-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// ── Toggle Switch ──
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: $radius-full;
+  border: none;
+  background: $border;
+  cursor: pointer;
+  transition: background 0.2s;
+  padding: 0;
+
+  &--on {
+    background: $primary;
+  }
+
+  .toggle-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s;
+
+    .toggle-switch--on & {
+      transform: translateX(16px);
+    }
+  }
+}
+
+.day-label-col {
+  .day-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: $text-primary;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+}
+
+// ── Fixed Badges (Sat/Sun) ──
+.day-fixed-col {
+  display: flex;
+  align-items: center;
+}
+
+.fixed-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 12px;
+  border-radius: $radius-full;
+
+  &--orange {
+    background: #FFF7ED;
+    color: #EA580C;
+    border: 1px solid #FED7AA;
+  }
+
+  &--gray {
+    background: #F3F4F6;
+    color: #6B7280;
+    border: 1px solid #E5E7EB;
+  }
+}
+
+// ── Day Inputs ──
+.day-inputs-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: center;
+  height: 100%;
+  min-height: 42px;
+}
+
+.primary-time-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.time-input {
+  width: 135px;
+  padding: 7px 10px;
+  border: 1px solid $border;
+  border-radius: $radius-sm;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: $font-sans;
+  color: $text-primary;
+  background: $white;
+  outline: none;
+  transition: border-color 0.15s;
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.08);
+  }
+
+  &--sm {
+    width: 115px;
+    padding: 5px 8px;
+  }
+}
+
+.time-sep {
+  font-size: 11px;
+  font-weight: 600;
+  color: $text-muted;
+  flex-shrink: 0;
+}
+
+// ── Extra Slots ──
+.extra-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.extra-slot-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 2px;
+}
+
+.remove-slot-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: $danger-bg;
+  color: $danger;
+  cursor: pointer;
+  transition: all 0.12s;
+
+  &:hover {
+    background: $danger;
+    color: #fff;
+  }
+
+  ng-icon { display: flex; }
+}
+
+.add-slot-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px dashed $primary;
+  background: $primary-light;
+  color: $primary;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: $font-sans;
+  cursor: pointer;
+  padding: 5px 14px;
+  border-radius: $radius-sm;
+  transition: all 0.15s;
+  width: fit-content;
+  margin-top: 2px;
+
+  &:hover {
+    background: $primary;
+    color: #fff;
+    border-style: solid;
+  }
+
+  ng-icon { display: flex; }
+}
+
+.day-disabled-col {
+  display: flex;
+  align-items: center;
+
+  .disabled-text {
+    font-size: 12px;
+    color: $text-muted;
+    font-style: italic;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONFIG ROW (Duration & Break)
+// ═══════════════════════════════════════════════════════════════
+.config-row {
+  display: flex;
+  gap: 32px;
+  padding: 16px 20px;
+  border-top: 1px solid $border;
+  background: $surface;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+.config-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.config-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.duration-pills {
+  display: flex;
+  gap: 4px;
+}
+
+.duration-pill {
+  padding: 6px 16px;
+  border: 1px solid $border;
+  border-radius: $radius-full;
+  background: $white;
+  color: $text-secondary;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: $font-sans;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: $primary;
+    color: $primary;
+  }
+
+  &--active {
+    background: $primary;
+    border-color: $primary;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba($primary, 0.25);
+  }
+}
+
+.break-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.break-input {
+  width: 70px;
+  padding: 6px 10px;
+  border: 1px solid $border;
+  border-radius: $radius-sm;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: $font-sans;
+  color: $text-primary;
+  background: $white;
+  outline: none;
+  text-align: center;
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.08);
+  }
+}
+
+.break-unit {
+  font-size: 12px;
+  font-weight: 600;
+  color: $text-muted;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RIGHT PANEL — BLOCKED LIST
+// ═══════════════════════════════════════════════════════════════
+.blocked-list {
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.blocked-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 0;
+  color: $text-muted;
+
+  ng-icon { opacity: 0.4; }
+
+  p {
+    font-size: 13px;
+    margin: 0;
+    font-style: italic;
+  }
+}
+
+.blocked-item {
+  padding: 12px 14px;
+  border: 1px solid $border;
+  border-radius: $radius-md;
+  background: $surface;
+  transition: box-shadow 0.12s;
+
+  &:hover {
+    box-shadow: $shadow-card;
+  }
+}
+
+.blocked-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.blocked-date {
+  font-size: 13px;
+  font-weight: 700;
+  color: $text-primary;
+}
+
+.blocked-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 10px;
+  border-radius: $radius-full;
+  background: $primary-light;
+  color: $primary;
+  white-space: nowrap;
+
+  &--full {
+    background: #FEF3C7;
+    color: #D97706;
+  }
+}
+
+.blocked-reason {
+  font-size: 12px;
+  color: $text-secondary;
+  margin: 6px 0 0;
+  line-height: 1.4;
+}
+
+// ── Block Time Button ──
+.block-time-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: calc(100% - 40px);
+  margin: 0 20px 16px;
+  padding: 11px;
+  border: 1px dashed $primary;
+  border-radius: $radius-md;
+  background: $primary-light;
+  color: $primary;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: $font-sans;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    background: $primary;
+    color: #fff;
+    border-style: solid;
+  }
+
+  ng-icon { display: flex; }
+}
+
+// ── Staff Leave ──
+.staff-leave-section {
+  border-top: 1px solid $border;
+  padding: 16px 20px;
+}
+
+.staff-leave-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  ng-icon { color: $text-muted; }
+
+  h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: $text-primary;
+    margin: 0;
+  }
+}
+
+.staff-leave-empty {
+  text-align: center;
+  padding: 16px 0;
+
+  p {
+    font-size: 12px;
+    color: $text-muted;
+    font-style: italic;
+    margin: 0;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BLUR MODAL
+// ═══════════════════════════════════════════════════════════════
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: fadeIn 0.15s ease;
+}
+
+.block-modal {
+  width: 100%;
+  max-width: 480px;
+  background: $white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-lg;
+  overflow: hidden;
+  animation: modalIn 0.2s ease;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 0;
+
+  h3 {
+    font-family: $font-display;
+    font-size: 17px;
+    font-weight: 800;
+    color: $text-primary;
+    margin: 0;
+  }
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: $surface;
+  color: $text-muted;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+
+  &:hover {
+    background: $danger-bg;
+    color: $danger;
+  }
+
+  ng-icon { display: flex; }
+}
+
+.modal-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid $border;
+  border-radius: $radius-md;
+  font-size: 13px;
+  font-family: $font-sans;
+  color: $text-primary;
+  background: $white;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.08);
+  }
+}
+
+.modal-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid $border;
+  border-radius: $radius-md;
+  font-size: 13px;
+  font-family: $font-sans;
+  color: $text-primary;
+  background: $white;
+  outline: none;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 70px;
+  transition: border-color 0.15s;
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.08);
+  }
+
+  &::placeholder {
+    color: $text-muted;
+    font-weight: 400;
+  }
+}
+
+// ── Request Type Toggle ──
+.request-type-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.type-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 8px;
+  border: 1px solid $border;
+  border-radius: $radius-md;
+  background: $white;
+  color: $text-secondary;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: $font-sans;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: $primary;
+    color: $primary;
+  }
+
+  &--active {
+    background: $primary-light;
+    border-color: $primary;
+    color: $primary;
+  }
+
+  ng-icon { display: flex; }
+}
+
+// ── Time Range (Specific) ──
+.time-range-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.time-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+// ── Modal Footer ──
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0 24px 20px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 22px;
+  border-radius: $radius-md;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: $font-sans;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  ng-icon { display: flex; }
+
+  &--cancel {
+    background: $white;
+    border: 1px solid $border;
+    color: $text-secondary;
+
+    &:hover {
+      background: $surface;
+    }
+  }
+
+  &--confirm {
+    background: $gradient-primary;
+    border: none;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba($primary, 0.25);
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba($primary, 0.35);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+// ═══ ANIMATIONS ═══════════════════════════════════════════════
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}

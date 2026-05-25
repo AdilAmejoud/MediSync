@@ -1,0 +1,404 @@
+@if (loading()) {
+  <div class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading dashboard data...</p>
+  </div>
+} @else if (error()) {
+  <div class="error-container">
+    <p>{{ error() }}</p>
+  </div>
+} @else {
+<div class="dashboard-container">
+
+  <!-- Doctor Header Card -->
+  <div class="doctor-header-card">
+    <div class="doctor-header-left">
+      <div class="doctor-header-greeting">
+        <h1 class="doctor-header-title">Doctor's Workspace</h1>
+        <p class="doctor-header-welcome">Welcome back, {{ doctorName }}</p>
+        <p class="doctor-header-subtitle">Your clinic is running smoothly — {{ todayAppointmentsCount() }} appointment{{ todayAppointmentsCount() !== 1 ? 's' : '' }} scheduled today</p>
+      </div>
+    </div>
+    <div class="doctor-header-right">
+      <div class="doctor-header-date-pill">
+        <ng-icon name="heroCalendarDays" size="14"></ng-icon>
+        <span>{{ currentTime() | date:'EEEE, MMMM d, y' }}</span>
+      </div>
+      <div class="doctor-header-status">
+        <span class="status-dot status-dot--active"></span>
+        <span class="status-text">Active Office</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 1: Stat Cards -->
+  <div class="stats-grid">
+    <ms-stat-card label="Today's Appointments" [value]="todayAppointmentsCount()" trend="" [trendUp]="true" icon="heroCalendar" iconColor="blue" [sparkline]="[]"></ms-stat-card>
+    <ms-stat-card label="Patients in Waiting Room" [value]="waitingRoomCount()" trend="" [trendUp]="true" icon="heroUsers" iconColor="green" [sparkline]="[]"></ms-stat-card>
+    <ms-stat-card label="Pending Reviews/Labs" [value]="pendingReviewsCount()" trend="" [trendUp]="true" icon="heroExclamationTriangle" iconColor="amber" [sparkline]="[]"></ms-stat-card>
+  </div>
+
+  <!-- Row 2: Two-column layout -->
+  <div class="dashboard-two-col">
+
+    <!-- LEFT COLUMN -->
+    <div class="left-col">
+
+      <!-- NEXT APPOINTMENT CARD -->
+      <div class="card next-appt-card">
+        <div class="next-appt-header">
+          <span class="badge-next">NEXT APPOINTMENT</span>
+          @if (activePatient()) {
+            <span class="badge-tele"><span class="dot"></span> {{ activePatient()?.mode || 'In-Person' }}</span>
+          }
+        </div>
+
+        @if (activePatient(); as patient) {
+          <div class="patient-profile-block">
+            <div class="patient-avatar">{{ patient.patientInitials || '--' }}</div>
+            <div class="patient-meta">
+              <h3 class="patient-name">
+                {{ patient.patientName || 'Unknown' }}
+                @if (patient.type === 'Follow-up') {
+                  <button class="history-inline-btn" (click)="openMedicalRecord(patient)" title="View Medical History">
+                    <ng-icon name="heroClipboardDocumentList" size="13"></ng-icon>
+                    History
+                  </button>
+                }
+              </h3>
+              <p class="patient-id">{{ patient.patientId || '' }}</p>
+            </div>
+          </div>
+
+          <div class="appt-details-rows">
+            <div class="details-row">
+              <span class="row-label">Specialty:</span>
+              <span class="row-val">{{ patient.specialty || 'General' }}</span>
+            </div>
+            <div class="details-row">
+              <span class="row-label">Schedule:</span>
+              <span class="row-val schedule-highlight">{{ formatApptDate(patient.date || patient.slotDate) }}</span>
+            </div>
+            <div class="details-row">
+              <span class="row-label">Reason:</span>
+              <span class="row-val">{{ patient.notes || patient.type || 'Routine Check-up' }}</span>
+            </div>
+          </div>
+
+          <div class="vitals-mini-grid">
+            <div class="vital-mini-item">
+              <span class="vital-lbl">BP</span>
+              <span class="vital-val">{{ getPatientVitals(patient).bp }}</span>
+            </div>
+            <div class="vital-mini-item">
+              <span class="vital-lbl">HR</span>
+              <span class="vital-val">{{ getPatientVitals(patient).hr }}</span>
+            </div>
+            <div class="vital-mini-item">
+              <span class="vital-lbl">Weight</span>
+              <span class="vital-val">{{ getPatientVitals(patient).weight }}</span>
+            </div>
+          </div>
+
+          <div class="action-buttons-group">
+            @if (appointmentState() === 'launch') {
+              <button class="btn-launch" (click)="onLaunchAppointment()">
+                <ng-icon name="heroComputerDesktop" size="16"></ng-icon>
+                Launch Appointment
+              </button>
+            }
+            @if (appointmentState() === 'finish') {
+              <button class="btn-launch btn-finish" (click)="onFinishAppointment()">
+                <ng-icon name="heroCheckCircle" size="16"></ng-icon>
+                Finish Appointment
+              </button>
+            }
+            @if (appointmentState() === 'next') {
+              <button class="btn-launch btn-next" (click)="onNextAppointment()">
+                <ng-icon name="heroForward" size="16"></ng-icon>
+                Next Appointment
+              </button>
+            }
+            @if (appointmentState() === 'empty') {
+              <button class="btn-launch" disabled>
+                <ng-icon name="heroXCircle" size="16"></ng-icon>
+                No more patients
+              </button>
+            }
+            <div class="split-buttons-compact">
+              <button class="btn-message-compact" title="Send Message">
+                <ng-icon name="heroEnvelope" size="14"></ng-icon>
+                <span>Message</span>
+              </button>
+              <button class="btn-call-compact" title="Start Call">
+                <ng-icon name="heroPhone" size="14"></ng-icon>
+                <span>Call</span>
+              </button>
+            </div>
+          </div>
+        } @else {
+          <div class="empty-patient-state">
+            <ng-icon name="heroUser" size="32"></ng-icon>
+            <p>No patients in queue</p>
+            <span class="empty-sub">All consultations completed for today</span>
+          </div>
+        }
+      </div>
+
+      <!-- PENDING REVIEWS / LABS CARD -->
+      <div class="card pending-reviews-card">
+        <div class="pending-reviews-header">
+          <div class="pending-header-left">
+            <ng-icon name="heroBeaker" size="16"></ng-icon>
+            <h4>Pending Reviews / Labs</h4>
+          </div>
+          <span class="pending-count-badge">{{ pendingReviewsCount() }}</span>
+        </div>
+        <div class="pending-scroll-list">
+          @for (rpat of pendingReviewPatients(); track rpat.id) {
+              <div class="pending-item">
+                <div class="pending-patient-info">
+                  <span class="pending-name">
+                    {{ rpat.patientName }}
+                    <span class="pending-source-indicator" [class.from-backlog]="rpat.source === 'backlog'" [class.from-session]="!rpat.source || rpat.source === 'session'"></span>
+                  </span>
+                  <span class="pending-meta">
+                    <span class="pending-type">{{ rpat.type || 'Check-up' }}</span>
+                    @if (rpat.source === 'backlog' && rpat.date) {
+                      <span class="pending-date">{{ rpat.date | date:'MMM d, HH:mm' }}</span>
+                    }
+                  </span>
+                </div>
+                <button class="btn-mark-reviewed" (click)="markReviewed(rpat)" title="Mark as Reviewed">
+                  <ng-icon name="heroCheckCircle" size="16"></ng-icon>
+                </button>
+              </div>
+          } @empty {
+            <p class="empty-pending">No pending reviews.</p>
+          }
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+
+      <!-- CLINIC FLOW & WAITING ROOM -->
+      <div class="card overview-chart-card">
+        <div class="chart-header-row">
+          <div>
+            <h3 class="chart-title">Clinic Flow & Waiting Room</h3>
+            <p class="chart-subtitle">Click a phase to filter patients below</p>
+          </div>
+        </div>
+
+        <div class="clinic-flow-timeline">
+          <div class="timeline-step"
+               [class.active]="activePhase() === 'all' || activePhase() === 'checked-in'"
+               (click)="filterByPhase('checked-in')"
+               role="button"
+               tabindex="0"
+               (keydown.enter)="filterByPhase('checked-in')">
+            <div class="step-marker checked-in">
+              <ng-icon name="heroUsers" size="14"></ng-icon>
+            </div>
+            <span class="step-label">Checked-in ({{ waitingRoomCount() }})</span>
+          </div>
+          <div class="timeline-arrow">➔</div>
+          <div class="timeline-step"
+               [class.active]="activePhase() === 'all' || activePhase() === 'consultation'"
+               (click)="filterByPhase('consultation')"
+               role="button"
+               tabindex="0"
+               (keydown.enter)="filterByPhase('consultation')">
+            <div class="step-marker in-consultation">
+              <ng-icon name="heroClock" size="14"></ng-icon>
+            </div>
+            <span class="step-label">In Consultation ({{ inConsultationCount() }})</span>
+          </div>
+          <div class="timeline-arrow">➔</div>
+          <div class="timeline-step"
+               [class.active]="activePhase() === 'all' || activePhase() === 'completed'"
+               (click)="filterByPhase('completed')"
+               role="button"
+               tabindex="0"
+               (keydown.enter)="filterByPhase('completed')">
+            <div class="step-marker completed">
+              <ng-icon name="heroCheck" size="14"></ng-icon>
+            </div>
+            <span class="step-label">Completed ({{ completedCount() }})</span>
+          </div>
+        </div>
+
+        <div class="waiting-room-list">
+          <h4 class="list-heading">
+            @switch (activePhase()) {
+              @case ('all') { All Patients }
+              @case ('checked-in') { Checked-in Queue }
+              @case ('consultation') { In Consultation }
+              @case ('completed') { Completed }
+            }
+          </h4>
+          <div class="queue-scroll">
+            @for (appt of filteredAppointments(); track appt.id) {
+              <div class="queue-item">
+                <div class="queue-left">
+                  <div class="queue-avatar">{{ appt.patientInitials }}</div>
+                  <div class="queue-meta">
+                    <span class="queue-name">{{ appt.patientName }}</span>
+                    <span class="queue-time">{{ appt.time }} — {{ appt.type }}</span>
+                  </div>
+                </div>
+                <div class="queue-right">
+                  <span class="badge" [class]="statusBadgeClass(appt.status)">
+                    {{ statusLabel(appt.status) }}
+                  </span>
+                </div>
+              </div>
+            } @empty {
+              <p class="empty-queue-text">No {{ activePhase() === 'all' ? '' : activePhase() }} patients to display.</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- VISIT TRACKING -->
+      <div class="card visit-tracking-card">
+        <div class="table-header-row">
+          <h3 class="table-title">Visit Tracking</h3>
+          <a href="#" class="history-link">Full history &gt;</a>
+        </div>
+        <div class="table-wrapper">
+          <table class="visit-table">
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Patient</th>
+                <th>Date & Time</th>
+                <th>Type</th>
+                <th>Mode</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of completedVisits(); track row.no) {
+                <tr>
+                  <td class="col-no">{{ row.no }}</td>
+                  <td class="col-patient">
+                    <div class="patient-cell">
+                      <div class="avatar-cell">{{ row.name[0] }}</div>
+                      <div class="name-details">
+                        <span class="name">{{ row.name }}</span>
+                        <span class="id-muted">{{ row.sub }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="col-date">{{ row.date }}</td>
+                  <td class="col-type">
+                    <span class="type-text" [class.follow-up]="row.type === 'Follow-up'">
+                      {{ row.type }}
+                    </span>
+                  </td>
+                  <td class="col-mode">
+                    <span class="badge badge-neutral">{{ row.mode }}</span>
+                  </td>
+                  <td class="col-status">
+                    <span class="badge badge-success">Completed</span>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="empty-table">No completed visits yet.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MEDICAL HISTORY MODAL -->
+<ms-modal [visible]="showMedicalRecord()" title="Medical Record" size="lg" (close)="closeMedicalRecord()">
+  @if (loadingMedicalRecord()) {
+    <div class="modal-loading">
+      <div class="spinner"></div>
+      <p>Loading patient records...</p>
+    </div>
+  } @else {
+    @if (medicalRecordPatient(); as mPat) {
+    <div class="medical-dossier">
+      <div class="dossier-header">
+        <div class="dossier-avatar">{{ mPat.patientInitials || '?' }}</div>
+        <div class="dossier-patient-meta">
+          <h2>{{ mPat.patientName || 'Unknown Patient' }}</h2>
+          <span class="dossier-id">{{ mPat.patientId || 'No ID' }}</span>
+          <span class="dossier-type-badge" [class.follow-up]="mPat.type === 'Follow-up'">
+            {{ mPat.type || 'First Visit' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="dossier-body">
+        <div class="dossier-section">
+          <h4 class="dossier-section-title">Patient Vitals</h4>
+          <div class="vitals-grid-dossier">
+            <div class="vital-card">
+              <span class="vital-label">Blood Pressure</span>
+              <span class="vital-value">{{ getPatientVitals(mPat).bp }}</span>
+            </div>
+            <div class="vital-card">
+              <span class="vital-label">Heart Rate</span>
+              <span class="vital-value">{{ getPatientVitals(mPat).hr }}</span>
+            </div>
+            <div class="vital-card">
+              <span class="vital-label">Weight</span>
+              <span class="vital-value">{{ getPatientVitals(mPat).weight }}</span>
+            </div>
+            <div class="vital-card">
+              <span class="vital-label">Temperature</span>
+              <span class="vital-value">{{ getPatientVitals(mPat).temp || '36.8 °C' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dossier-section">
+          <h4 class="dossier-section-title">Visit History</h4>
+          @if (medicalRecordData(); as records) {
+            @if (records.length > 0) {
+              <div class="visit-history-list">
+                @for (rec of records; track rec.id) {
+                  <div class="visit-history-item">
+                    <div class="visit-date">{{ rec.slotDate || 'N/A' }}</div>
+                    <div class="visit-detail">
+                      <span class="visit-status-badge" [class]="statusBadgeClass(rec.status || '')">
+                        {{ statusLabel(rec.status || '') }}
+                      </span>
+                      @if (rec.amount) {
+                        <span class="visit-fee">Fee: {{ rec.amount }} MAD</span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="dossier-empty">No previous visit records found.</p>
+            }
+          }
+        </div>
+
+        <div class="dossier-section">
+          <h4 class="dossier-section-title">Clinical Notes</h4>
+          <textarea class="dossier-notes-input"
+                    placeholder="Add clinical notes for this patient..."
+                    rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+    }
+  }
+</ms-modal>
+}

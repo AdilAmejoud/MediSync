@@ -1,0 +1,83 @@
+<div class="prescriptions-container">
+  
+  <div class="header-row">
+    <div>
+      <h2 class="page-title">Prescriptions</h2>
+      <p class="page-subtitle">Issue and manage electronic prescriptions for patients.</p>
+    </div>
+    <button (click)="toggleAddPanel(); $event.stopPropagation()" class="btn-primary flex items-center gap-2">
+      <mat-icon>add</mat-icon>
+      <span>New Prescription</span>
+    </button>
+  </div>
+
+  <ms-data-table [columns]="columns" [rows]="prescriptions" (actionClick)="onActionClick($event)"></ms-data-table>
+
+  <ms-modal [visible]="showAddPanel" title="New Prescription" (close)="toggleAddPanel()">
+    <form (ngSubmit)="onSavePrescription()" class="add-form">
+      <div class="form-group">
+        <label class="form-label">Select Patient</label>
+        <select name="selectedPatient" [(ngModel)]="selectedPatient" class="form-select">
+          <option value="" disabled>-- Select Patient --</option>
+          @for (pat of patientsCatalog; track pat.id) {
+            <option [value]="pat.name">{{ pat.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Add Medication</label>
+        <div class="flex gap-2">
+          <input type="text" name="typedMedication" [(ngModel)]="typedMedication" placeholder="e.g. Lisinopril 10mg" class="form-input flex-1" />
+          <button type="button" (click)="addMedication()" class="add-med-btn">Add</button>
+        </div>
+        <div class="meds-list mt-2">
+          @for (med of medicationsList; track med; let idx = $index) {
+            <span class="med-tag">
+              {{ med }}
+              <button type="button" (click)="removeMedication(idx)" class="remove-tag-btn">✕</button>
+            </span>
+          }
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Dosage</label>
+        <input type="text" name="dosage" [(ngModel)]="dosage" class="form-input" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Frequency</label>
+        <select name="frequency" [(ngModel)]="frequency" class="form-select">
+          <option value="Once daily">Once daily</option>
+          <option value="Twice daily">Twice daily</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Duration (days)</label>
+        <input type="text" name="duration" [(ngModel)]="duration" class="form-input" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Instructions</label>
+        <textarea name="instructions" [(ngModel)]="instructions" class="form-textarea"></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn btn-primary">
+        Save & Print PDF
+      </button>
+    </form>
+  </ms-modal>
+
+</div>
+
+@if (showPrescriptionViewer && prescriptionViewerData) {
+  <ms-document-viewer
+    [pdfData]="prescriptionViewerData"
+    [title]="prescriptionViewerTitle"
+    [showDownload]="true"
+    (close)="closePrescriptionViewer()"
+    (download)="downloadViewedPrescription()"
+  ></ms-document-viewer>
+}

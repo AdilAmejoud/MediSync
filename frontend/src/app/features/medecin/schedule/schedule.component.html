@@ -1,0 +1,333 @@
+<div class="schedule">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="schedule-header">
+    <div class="schedule-header-left">
+      <h2 class="schedule-title">My Schedule</h2>
+      <p class="schedule-subtitle">Manage your appointments and availability.</p>
+    </div>
+    <div class="schedule-header-right">
+      <button class="schedule-today-btn" (click)="goToToday()">Today</button>
+      <div class="schedule-nav">
+        <button class="schedule-nav-btn" (click)="navigateBack()">
+          <ng-icon name="heroChevronLeft" size="18"></ng-icon>
+        </button>
+        <span class="schedule-nav-label">{{ viewLabel() }}</span>
+        <button class="schedule-nav-btn" (click)="navigateForward()">
+          <ng-icon name="heroChevronRight" size="18"></ng-icon>
+        </button>
+      </div>
+      <div class="view-toggle">
+        @for (v of viewModes; track v) {
+          <button
+            class="view-toggle-btn"
+            [class.view-toggle-btn--active]="viewMode() === v"
+            (click)="setView(v)"
+          >{{ v }}</button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MAIN LAYOUT ═══ -->
+  <div class="schedule-layout">
+
+    <!-- ─── LEFT: GRID ─── -->
+    <div class="schedule-grid-wrapper">
+
+      @if (loading()) {
+        <div class="schedule-loading">Loading schedule…</div>
+
+      } @else if (viewMode() === 'week') {
+
+        <!-- ── WEEK VIEW ── -->
+        <div class="week-grid">
+          <div class="grid-row grid-header-row">
+            <div class="grid-cell grid-time-gutter"></div>
+            @for (day of weekDays(); track day.dateStr) {
+              <div
+                class="grid-cell grid-day-header"
+                [class.grid-day-header--today]="day.isToday"
+                [class.grid-day-header--inactive]="!isDayActive(day.dateStr)"
+              >
+                <span class="day-label">{{ day.label }}</span>
+                <span class="day-num" [class.day-num--today]="day.isToday">{{ day.dateNum }}</span>
+                @if (!isDayActive(day.dateStr) && getConflictsOnInactiveDays(day.dateStr).length > 0) {
+                  <div class="conflict-badge">
+                    <ng-icon name="heroExclamationTriangle" size="10"></ng-icon>
+                    {{ getConflictsOnInactiveDays(day.dateStr).length }}
+                  </div>
+                }
+              </div>
+            }
+          </div>
+          @for (slot of scheduleState.gridSlots(); track slot) {
+            <div class="grid-row grid-time-row">
+              <div class="grid-cell grid-time-label">{{ slot }}</div>
+              @for (day of weekDays(); track day.dateStr) {
+                <div
+                  class="grid-cell grid-data-cell"
+                  [class.grid-cell--blocked]="isBlocked(day.dateStr, slot)"
+                  [class.grid-cell--inactive]="!isDayActive(day.dateStr)"
+                  [class.grid-cell--outside-shift]="isDayActive(day.dateStr) && isOutsideShift(day.dateStr, slot)"
+                  [class.grid-cell--today-col]="day.isToday"
+                >
+                  @if (!isDayActive(day.dateStr)) {
+                    <div class="inactive-overlay">
+                      <ng-icon name="heroLockClosed" size="12"></ng-icon>
+                      <span>Unavailable</span>
+                    </div>
+                  } @else if (isOutsideShift(day.dateStr, slot)) {
+                    <div class="inactive-overlay inactive-overlay--muted">
+                      <span>Outside hrs</span>
+                    </div>
+                  } @else if (isBlocked(day.dateStr, slot)) {
+                    <div class="blocked-overlay">
+                      <ng-icon name="heroLockClosed" size="12"></ng-icon>
+                      <span>Blocked</span>
+                    </div>
+                  }
+                  @for (appt of getAppointmentsForCell(day.dateStr, slot); track appt.id) {
+                    <div
+                      class="appt-card {{ appointmentClass(appt) }}"
+                      (click)="openAppointmentModal(appt)"
+                    >
+                      <span class="appt-time">{{ appt.slotTime }}</span>
+                      <span class="appt-name">{{ appt.userData?.name || appt.patientName }}</span>
+                      <span class="appt-type-label">{{ appt.type || 'Visit' }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+      } @else if (viewMode() === 'day') {
+
+        <!-- ── DAY VIEW ── -->
+        <div class="day-grid">
+          <div class="day-header-row">
+            <div class="day-header-gutter"></div>
+            <div
+              class="day-header-cell"
+              [class.day-header-cell--inactive]="!isDayActive(currentDay().toISOString().split('T')[0])"
+            >
+              <span class="day-label">{{ currentDay().toLocaleDateString('en-US', { weekday: 'short' }) }}</span>
+              <span
+                class="day-num"
+                [class.day-num--today]="isCurrentDayToday()"
+              >{{ currentDay().getDate() }}</span>
+              @if (!isDayActive(currentDay().toISOString().split('T')[0])) {
+                <div class="day-unavailable-tag">Unavailable</div>
+              }
+            </div>
+          </div>
+          @for (slot of scheduleState.gridSlots(); track slot) {
+            <div
+              class="day-row"
+              [class.day-row--inactive]="!isDayActive(currentDay().toISOString().split('T')[0])"
+            >
+              <div class="day-time-label">{{ slot }}</div>
+              <div
+                class="day-cell"
+                [class.day-cell--blocked]="isDayBlocked(slot)"
+                [class.day-cell--inactive]="!isDayActive(currentDay().toISOString().split('T')[0])"
+                [class.day-cell--outside-shift]="isDayActive(currentDay().toISOString().split('T')[0]) && isOutsideShift(currentDay().toISOString().split('T')[0], slot)"
+              >
+                @if (!isDayActive(currentDay().toISOString().split('T')[0])) {
+                  <div class="inactive-overlay">
+                    <ng-icon name="heroLockClosed" size="12"></ng-icon>
+                    <span>Unavailable</span>
+                  </div>
+                } @else if (isOutsideShift(currentDay().toISOString().split('T')[0], slot)) {
+                  <div class="inactive-overlay inactive-overlay--muted">
+                    <span>Outside hrs</span>
+                  </div>
+                }
+                @if (isDayBlocked(slot) && isDayActive(currentDay().toISOString().split('T')[0]) && !isOutsideShift(currentDay().toISOString().split('T')[0], slot)) {
+                  <div class="blocked-overlay">
+                    <ng-icon name="heroLockClosed" size="12"></ng-icon>
+                    <span>Blocked</span>
+                  </div>
+                }
+                @for (appt of getDayAppointments(slot); track appt.id) {
+                  <div
+                    class="appt-card {{ appointmentClass(appt) }}"
+                    (click)="openAppointmentModal(appt)"
+                  >
+                    <span class="appt-time">{{ appt.slotTime }}</span>
+                    <span class="appt-name">{{ appt.userData?.name || appt.patientName }}</span>
+                    <span class="appt-type-label">{{ appt.type || 'Visit' }}</span>
+                    @if (appt.mode) {
+                      <span class="appt-mode-badge">{{ appt.mode }}</span>
+                    }
+                    @if (appt.notes) {
+                      <span class="appt-notes-preview">{{ appt.notes }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+          <div class="grid-footer-info">
+            <span class="buffer-indicator">
+              <ng-icon name="heroClock" size="12"></ng-icon>
+              {{ scheduleState.slotDuration() }}min slots{{ scheduleState.breakDuration() > 0 ? ' \u00B7 ' + scheduleState.breakDuration() + 'min break buffer' : '' }}
+            </span>
+            <span class="slots-count">{{ scheduleState.gridSlots().length }} slots today</span>
+          </div>
+        </div>
+
+      } @else if (viewMode() === 'month') {
+
+        <!-- ── MONTH VIEW ── -->
+        <div class="month-grid">
+          <div class="month-header-row">
+            @for (label of ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; track label) {
+              <div class="month-header-cell">{{ label }}</div>
+            }
+          </div>
+          @for (week of monthWeeks(); track week[0].dateStr) {
+            <div class="month-row">
+              @for (day of week; track day.dateStr) {
+                <div
+                  class="month-cell"
+                  [class.month-cell--today]="day.isToday"
+                  [class.month-cell--other]="day.isOtherMonth"
+                  [class.month-cell--inactive]="!isDayActive(day.dateStr)"
+                  (click)="goToDay(day)"
+                >
+                  <span class="month-day-num">{{ day.dateNum }}</span>
+                  @if (!isDayActive(day.dateStr)) {
+                    <div class="month-inactive-icon">
+                      <ng-icon name="heroLockClosed" size="10"></ng-icon>
+                    </div>
+                  }
+                  @if (getAppointmentsForDay(day.dateStr).length > 0) {
+                    <div class="month-cell-appts">
+                      @for (appt of getAppointmentsForDay(day.dateStr).slice(0, 3); track appt.id) {
+                        <span class="month-appt-dot {{ appointmentDotClass(appt) }}"
+                              [class.month-appt-dot--conflict]="!isDayActive(day.dateStr)"></span>
+                      }
+                      @if (getAppointmentsForDay(day.dateStr).length > 3) {
+                        <span class="month-more-count">+{{ getAppointmentsForDay(day.dateStr).length - 3 }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+      }
+
+    </div>
+
+    <!-- ─── RIGHT: TODAY'S PATIENTS ─── -->
+    <div class="schedule-sidebar">
+      <div class="sidebar-header">
+        <ng-icon name="heroCalendarDays" size="18"></ng-icon>
+        <h3>Today's Patients</h3>
+      </div>
+
+      <div class="sidebar-timeline">
+        @if (todayAppointments().length === 0) {
+          <div class="sidebar-empty">No patients for today.</div>
+        }
+        @for (appt of todayAppointments(); track appt.id) {
+          <div class="timeline-item" (click)="openAppointmentModal(appt)">
+            <div class="timeline-dot {{ appointmentDotClass(appt) }}"></div>
+            <div class="timeline-content">
+              <span class="timeline-time">{{ appt.slotTime }}</span>
+              <span class="timeline-name">{{ appt.userData?.name || appt.patientName }}</span>
+              <span class="timeline-type">{{ appt.type || 'Visit' }}</span>
+              <span class="timeline-status {{ appt.status.toLowerCase() }}">{{ appt.status }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <button class="block-time-btn" (click)="openBlockModal()">
+        <ng-icon name="heroClock" size="18"></ng-icon>
+        + Block Time
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ═══ MICRO MODAL ═══ -->
+  @if (selectedAppointment(); as a) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="micro-modal" (click)="$event.stopPropagation()">
+        <button class="micro-modal-close" (click)="closeModal()">
+          <ng-icon name="heroXMark" size="16"></ng-icon>
+        </button>
+        <div class="micro-modal-avatar">
+          {{ (a.userData?.name || a.patientName || '?').charAt(0) }}
+        </div>
+        <h4 class="micro-modal-name">{{ a.userData?.name || a.patientName }}</h4>
+        <div class="micro-modal-detail">
+          <span class="mm-label">Time</span>
+          <span class="mm-value">{{ a.slotDate }} at {{ a.slotTime }}</span>
+        </div>
+        <div class="micro-modal-detail">
+          <span class="mm-label">Reason</span>
+          <span class="mm-value">{{ a.type || 'General Visit' }}</span>
+        </div>
+        <div class="micro-modal-detail">
+          <span class="mm-label">Status</span>
+          <span class="mm-value mm-status {{ a.status.toLowerCase() }}">{{ a.status }}</span>
+        </div>
+        @if (a.notes) {
+          <div class="micro-modal-detail">
+            <span class="mm-label">Notes</span>
+            <span class="mm-value">{{ a.notes }}</span>
+          </div>
+        }
+        <button class="micro-modal-dossier-btn" (click)="viewDossier(a)">
+          <ng-icon name="heroFolderOpen" size="16"></ng-icon>
+          View Dossier
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ═══ BLOCK TIME MODAL ═══ -->
+  @if (showBlockModal()) {
+    <div class="modal-overlay" (click)="closeBlockModal()">
+      <div class="block-modal" (click)="$event.stopPropagation()">
+        <div class="block-modal-header">
+          <h3>Block Time</h3>
+          <button class="micro-modal-close" (click)="closeBlockModal()">
+            <ng-icon name="heroXMark" size="16"></ng-icon>
+          </button>
+        </div>
+        <div class="block-modal-body">
+          <label class="block-label">Date</label>
+          <ms-date-picker [(value)]="blockDate" placeholder="Select date"></ms-date-picker>
+
+          <div class="block-time-row">
+            <div>
+              <label class="block-label">Start Time</label>
+              <input class="block-input" type="time" [(ngModel)]="blockStart" />
+            </div>
+            <div>
+              <label class="block-label">End Time</label>
+              <input class="block-input" type="time" [(ngModel)]="blockEnd" />
+            </div>
+          </div>
+
+          <label class="block-label">Reason (optional)</label>
+          <input class="block-input" type="text" [(ngModel)]="blockReason" placeholder="e.g. Lunch break" />
+        </div>
+        <div class="block-modal-actions">
+          <button class="block-btn block-btn--cancel" (click)="closeBlockModal()">Cancel</button>
+          <button class="block-btn block-btn--save" (click)="submitBlockTime()">Save</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

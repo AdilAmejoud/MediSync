@@ -1,0 +1,134 @@
+@use 'variables' as *;
+
+.appointments-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header-row {
+  text-align: left;
+
+  .page-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  .page-subtitle {
+    font-size: 13px;
+    color: $text-secondary;
+  }
+}
+
+// ─── Stats Grid ─────────────────────────────────────────────
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─── Toolbar ────────────────────────────────────────────────
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 4px;
+  background: $white;
+  border: 1px solid $border;
+  border-radius: $radius-full;
+  padding: 4px;
+}
+
+.filter-tab {
+  border: none;
+  background: transparent;
+  color: $text-muted;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: $radius-full;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: $font-sans;
+  white-space: nowrap;
+
+  &:hover {
+    color: $text-primary;
+    background: $surface;
+  }
+
+  &--active {
+    background: $primary;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba($primary, 0.25);
+
+    &:hover {
+      background: $primary-dark;
+      color: #fff;
+    }
+  }
+}
+
+.search-wrapper {
+  position: relative;
+  min-width: 240px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $text-muted;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  font-size: 13px;
+  padding: 9px 12px 9px 38px;
+  background-color: $white;
+  border: 1px solid $border;
+  border-radius: $radius-xl;
+  outline: none;
+  font-family: $font-sans;
+  box-sizing: border-box;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+
+  &::placeholder {
+    color: $text-muted;
+  }
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.1);
+  }
+}
+
+

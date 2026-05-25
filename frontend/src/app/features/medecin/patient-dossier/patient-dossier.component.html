@@ -1,0 +1,373 @@
+<div class="dossier">
+
+  @if (loading()) {
+    <div class="dossier-loading">Loading patient dossier...</div>
+  } @else {
+    <button class="dossier-back" (click)="goBack()">
+      <ng-icon name="heroArrowLeft" size="18"></ng-icon>
+      Back to Patient Files
+    </button>
+
+    <div class="dossier-layout">
+
+      <!-- ── LEFT PANEL ── -->
+      <div class="dossier-left">
+
+        <!-- Patient Header -->
+        <div class="dossier-patient-header">
+          <ms-avatar
+            [name]="patient()?.name || 'Patient'"
+            [size]="56"
+          ></ms-avatar>
+          <div>
+            <h1 class="dossier-patient-name">{{ patient()?.name || 'Unknown Patient' }}</h1>
+            <div class="dossier-patient-meta">
+              <span>{{ getAge(patient()?.dateOfBirth) }} y/o</span>
+              <span class="dossier-meta-sep">|</span>
+              <span>{{ patient()?.gender || '—' }}</span>
+              <span class="dossier-meta-sep">|</span>
+              <span>{{ patient()?.bloodType || '—' }}</span>
+            </div>
+            <div class="dossier-patient-status">
+              <span class="dossier-status-dot"></span>
+              {{ patient()?.status === 'Active' ? 'Active Patient' : 'Inactive' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Tab Bar ── -->
+        <div class="dossier-tabs">
+          @for (tab of dossierTabs; track tab.key) {
+            <button
+              class="dossier-tab"
+              [class.dossier-tab--active]="activeDossierTab() === tab.key"
+              (click)="setDossierTab(tab.key)"
+            >
+              {{ tab.label }}
+            </button>
+          }
+        </div>
+
+        <!-- ═══ Tab: Overview ═══ -->
+        @if (activeDossierTab() === 'overview') {
+
+          <!-- Allergies -->
+          <div class="dossier-section">
+            <div class="dossier-section-header">
+              <ng-icon name="heroExclamationTriangle" size="16" class="icon-danger"></ng-icon>
+              <h2>Allergies &amp; Drug Alerts</h2>
+            </div>
+            <div class="dossier-allergy-list">
+              @for (a of allergies(); track a.allergen) {
+                <div class="dossier-allergy-item">
+                  <span class="dossier-allergy-name">{{ a.allergen }}</span>
+                  <span class="dossier-badge {{ severityClass(a.severity) }}">{{ a.severity }}</span>
+                </div>
+              }
+              @empty {
+                <div class="dossier-empty-sm">No known allergies</div>
+              }
+            </div>
+          </div>
+
+          <!-- Chronic Pathologies -->
+          <div class="dossier-section">
+            <div class="dossier-section-header">
+              <ng-icon name="heroClipboardDocumentList" size="16"></ng-icon>
+              <h2>Chronic Pathologies</h2>
+            </div>
+            <div class="dossier-pathology-list">
+              @for (p of pathologies(); track p.name) {
+                <div class="dossier-pathology-item">
+                  <span class="dossier-pathology-name">{{ p.name }}</span>
+                  <span class="dossier-pathology-since">Since {{ p.since }}</span>
+                </div>
+              }
+              @empty {
+                <div class="dossier-empty-sm">No chronic conditions recorded</div>
+              }
+            </div>
+          </div>
+
+          <!-- Vital Signs -->
+          <div class="dossier-section">
+            <div class="dossier-section-header">
+              <ng-icon name="heroHeart" size="16"></ng-icon>
+              <h2>Vital Signs</h2>
+            </div>
+            @if (vitals(); as v) {
+              <div class="dossier-vitals-grid dossier-vitals-grid--row">
+                <div class="dossier-vital-card">
+                  <span class="dossier-vital-label">Weight</span>
+                  <span class="dossier-vital-value">{{ v.weight }}</span>
+                </div>
+                <div class="dossier-vital-card">
+                  <span class="dossier-vital-label">Height</span>
+                  <span class="dossier-vital-value">{{ v.height }}</span>
+                </div>
+                <div class="dossier-vital-card">
+                  <span class="dossier-vital-label">BMI</span>
+                  <span class="dossier-vital-value">{{ v.bmi }}</span>
+                </div>
+                <div class="dossier-vital-card">
+                  <span class="dossier-vital-label">Blood Pressure</span>
+                  <span class="dossier-vital-value">{{ v.bloodPressure }}</span>
+                </div>
+              </div>
+            } @else {
+              <div class="dossier-empty-sm">No vitals recorded</div>
+            }
+          </div>
+        }
+
+        <!-- ═══ Tab: Consultations ═══ -->
+        @if (activeDossierTab() === 'consultations') {
+          <div class="dossier-section">
+            <div class="dossier-section-header">
+              <ng-icon name="heroClock" size="16"></ng-icon>
+              <h2>Consultation History</h2>
+            </div>
+            <div class="dossier-timeline">
+              @for (c of consultations(); track c.date) {
+                <div class="dossier-timeline-item">
+                  <div class="dossier-timeline-dot"></div>
+                  <div class="dossier-timeline-content">
+                    <div class="dossier-timeline-date">{{ c.date }}</div>
+                    <div class="dossier-timeline-doctor">{{ c.doctor }}</div>
+                    <div class="dossier-timeline-diagnosis">{{ c.diagnosis }}</div>
+                    <div class="dossier-timeline-notes">{{ c.notes }}</div>
+                  </div>
+                </div>
+              }
+              @empty {
+                <div class="dossier-empty-sm">No completed consultations</div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- ═══ Tab: Prescriptions ═══ -->
+        @if (activeDossierTab() === 'prescriptions') {
+          <!-- Issue Prescription -->
+          <div class="dossier-section">
+            <div class="dossier-section-header">
+              <ng-icon name="heroDocumentText" size="16"></ng-icon>
+              <h2>Issue Prescription</h2>
+            </div>
+            <div class="dossier-form">
+              <label class="dossier-form-label">Medications <span class="text-danger">*</span></label>
+              <textarea
+                class="dossier-form-textarea"
+                [(ngModel)]="prescriptionMedications"
+                placeholder="Enter each medication on a new line&#10;e.g. Amoxicillin 500mg"
+                rows="4"
+              ></textarea>
+              <label class="dossier-form-label">Instructions</label>
+              <input
+                class="dossier-form-input"
+                [(ngModel)]="prescriptionInstructions"
+                placeholder="e.g. Take twice daily with food"
+              />
+              <label class="dossier-form-label">Notes</label>
+              <textarea
+                class="dossier-form-textarea"
+                [(ngModel)]="prescriptionNotes"
+                placeholder="Additional notes..."
+                rows="2"
+              ></textarea>
+              <div class="dossier-form-actions">
+                <button class="dossier-btn dossier-btn--primary" (click)="submitPrescription()">Issue Prescription</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prescription List -->
+          @if (prescriptions().length > 0) {
+            <div class="dossier-section">
+              <div class="dossier-section-header">
+                <ng-icon name="heroClipboardDocumentList" size="16"></ng-icon>
+                <h2>All Prescriptions</h2>
+              </div>
+              <div class="dossier-prescription-list">
+                @for (p of prescriptions(); track p.id) {
+                  <div class="dossier-prec-card">
+                    <div class="dossier-prec-card-left">
+                      <div class="dossier-prec-icon">
+                        <ng-icon name="heroDocumentText" size="20"></ng-icon>
+                      </div>
+                      <div class="dossier-prec-info">
+                        <span class="dossier-prec-title">Prescription</span>
+                        <span class="dossier-prec-date">Issued {{ formatPrescriptionDate(p.createdAt) }}</span>
+                      </div>
+                    </div>
+                    <div class="dossier-prec-card-right">
+                      <button class="dossier-prec-btn dossier-prec-btn--view" (click)="viewPrescription(p)" title="View Prescription">
+                        <ng-icon name="heroEye" size="14"></ng-icon>
+                      </button>
+                      <button
+                        class="dossier-prec-toggle"
+                        [class.dossier-prec-toggle--active]="p.isActive"
+                        [class.dossier-prec-toggle--expired]="!p.isActive"
+                        (click)="togglePrescriptionStatus(p)"
+                        title="{{ p.isActive ? 'Mark as Expired' : 'Mark as Active' }}"
+                      >
+                        <span class="dossier-prec-toggle-dot"></span>
+                        {{ p.isActive ? 'Active' : 'Expired' }}
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        }
+
+        <!-- ═══ Tab: Documents ═══ -->
+        @if (activeDossierTab() === 'documents') {
+          <div class="dossier-section">
+            <div class="dossier-section-header">
+              <ng-icon name="heroFolderOpen" size="16"></ng-icon>
+              <h2>Medical Documents</h2>
+            </div>
+            <div class="dossier-doc-list">
+              @for (doc of documents(); track doc.id) {
+                <div class="dossier-doc-card">
+                  <div class="dossier-doc-card-left">
+                    <div class="dossier-doc-icon">
+                      <ng-icon name="heroDocumentText" size="20"></ng-icon>
+                    </div>
+                    <div class="dossier-doc-info">
+                      <span class="dossier-doc-name">{{ doc.name }}</span>
+                      <span class="dossier-doc-meta">{{ doc.type }} — {{ doc.date }}</span>
+                    </div>
+                  </div>
+                  <div class="dossier-doc-card-right">
+                    <button class="dossier-doc-card-btn" (click)="viewDocument(doc)" title="View">
+                      <ng-icon name="heroEye" size="14"></ng-icon>
+                    </button>
+                    <button class="dossier-doc-card-btn" (click)="downloadDocument(doc)" title="Download">
+                      <ng-icon name="heroArrowDownTray" size="14"></ng-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+              @empty {
+                <div class="dossier-empty-sm">No documents available</div>
+              }
+            </div>
+          </div>
+        }
+
+      </div>
+
+      <!-- ── RIGHT PANEL ── -->
+      <div class="dossier-right">
+
+        <!-- Quick Actions -->
+        <div class="dossier-section">
+          <div class="dossier-section-header">
+            <ng-icon name="heroBolt" size="16"></ng-icon>
+            <h2>Quick Actions</h2>
+          </div>
+          <div class="dossier-actions">
+            <button class="dossier-action-btn" (click)="triggerUpload()">
+              <ng-icon name="heroArrowUpTray" size="20"></ng-icon>
+              <div class="dossier-action-text">
+                <span class="dossier-action-title">+ Upload Document</span>
+                <span class="dossier-action-desc">Attach lab results, scans, or forms</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  }
+
+  <!-- ═══ PRESCRIPTION VIEWER MODAL ═══ -->
+  @if (showPrescriptionViewer() && viewedPrescription(); as p) {
+    <div class="dossier-prec-backdrop" (click)="closePrescriptionViewer()">
+      <div class="dossier-prec-viewer" (click)="$event.stopPropagation()">
+
+        <div class="dossier-prec-viewer-header">
+          <div>
+            <h3>Prescription Details</h3>
+            <span class="dossier-prec-viewer-status" [class.status--active]="p.isActive">
+              {{ p.isActive ? 'Active' : 'Expired' }}
+            </span>
+          </div>
+          <button class="dossier-prec-viewer-close" (click)="closePrescriptionViewer()">
+            <ng-icon name="heroXMark" size="18"></ng-icon>
+          </button>
+        </div>
+
+        <div class="dossier-prec-viewer-body">
+          <div class="dossier-prec-viewer-row">
+            <span class="dossier-prec-viewer-label">Patient</span>
+            <span class="dossier-prec-viewer-value">{{ p.patientName }}</span>
+          </div>
+          <div class="dossier-prec-viewer-row">
+            <span class="dossier-prec-viewer-label">Prescribed by</span>
+            <span class="dossier-prec-viewer-value">{{ p.doctorName }}</span>
+          </div>
+          <div class="dossier-prec-viewer-row">
+            <span class="dossier-prec-viewer-label">Specialty</span>
+            <span class="dossier-prec-viewer-value">{{ p.specialty }}</span>
+          </div>
+          <div class="dossier-prec-viewer-row">
+            <span class="dossier-prec-viewer-label">Issued</span>
+            <span class="dossier-prec-viewer-value">{{ formatPrescriptionDate(p.createdAt) }}</span>
+          </div>
+
+          <div class="dossier-prec-viewer-divider"></div>
+
+          <div class="dossier-prec-viewer-label">Medications</div>
+          <div class="dossier-prec-viewer-meds">
+            @for (m of p.medications; track $index) {
+              <div class="dossier-prec-viewer-med">
+                <ng-icon name="heroCheckCircle" size="14" class="med-icon"></ng-icon>
+                <div>
+                  <span class="med-name">{{ m.name }}</span>
+                  @if (m.dosage || m.frequency || m.duration) {
+                    <span class="med-detail">
+                      {{ m.dosage }}{{ m.dosage && m.frequency ? ' — ' : '' }}{{ m.frequency }}{{ m.frequency && m.duration ? ', ' : '' }}{{ m.duration ? m.duration + ' days' : '' }}
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          @if (p.instructions) {
+            <div class="dossier-prec-viewer-divider"></div>
+            <div class="dossier-prec-viewer-label">Instructions</div>
+            <p class="dossier-prec-viewer-text">{{ p.instructions }}</p>
+          }
+
+          @if (p.notes) {
+            <div class="dossier-prec-viewer-divider"></div>
+            <div class="dossier-prec-viewer-label">Notes</div>
+            <p class="dossier-prec-viewer-text">{{ p.notes }}</p>
+          }
+        </div>
+
+        <div class="dossier-prec-viewer-footer">
+          <button class="dossier-btn dossier-btn--secondary" (click)="closePrescriptionViewer()">Close</button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+@if (showDocViewer && docViewerData) {
+  <ms-document-viewer
+    [pdfData]="docViewerData"
+    [title]="docViewerTitle"
+    [showDownload]="true"
+    (close)="closeDocViewer()"
+    (download)="selectedDoc && downloadDocument(selectedDoc)"
+  ></ms-document-viewer>
+}
+
+</div>

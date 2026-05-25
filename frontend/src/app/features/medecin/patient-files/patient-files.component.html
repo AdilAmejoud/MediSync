@@ -1,0 +1,97 @@
+<div class="pf-page">
+
+  <!-- Header -->
+  <div class="pf-header">
+    <div>
+      <h1 class="pf-title">Patient Files</h1>
+      <p class="pf-subtitle">Inspect comprehensive clinical records and diagnostics histories.</p>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="pf-toolbar">
+    <div class="pf-tabs">
+      @for (tab of tabs; track tab) {
+        <button
+          class="pf-tab"
+          [class.pf-tab--active]="activeTab() === tab"
+          (click)="setTab(tab)"
+        >
+          {{ tab }}
+        </button>
+      }
+    </div>
+    <div class="pf-search">
+      <ng-icon name="heroMagnifyingGlass" class="pf-search-icon" size="18"></ng-icon>
+      <input
+        type="text"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+        placeholder="Search patients..."
+        class="pf-search-input"
+      />
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="pf-grid">
+      @for (_ of [1,2,3,4,5,6]; track $index) {
+        <div class="pf-sk-card">
+          <div class="pf-sk-avatar"></div>
+          <div class="pf-sk-text short"></div>
+          <div class="pf-sk-text"></div>
+          <div class="pf-sk-text medium"></div>
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Grid -->
+    <div class="pf-grid">
+      @for (p of filteredFiles(); track p.id) {
+        <div class="pf-card">
+          <div class="pf-card-top">
+            <div class="pf-card-top-left">
+              <ms-avatar [name]="p.name" [size]="44" class="pf-card-avatar"></ms-avatar>
+              <div>
+                <h3 class="pf-card-name">{{ p.name }}</h3>
+                <span class="pf-card-age">{{ p.age }} y/o</span>
+              </div>
+            </div>
+            <span class="pf-card-badge" [class.pf-card-badge--active]="p.status === 'COMPLETED'">
+              {{ p.status === 'COMPLETED' ? 'Active' : p.status === 'CANCELLED' ? 'Inactive' : 'Pending' }}
+            </span>
+          </div>
+          <div class="pf-card-body">
+            <div class="pf-card-row">
+              <span class="pf-row-label">Last Visit</span>
+              <span class="pf-row-value">{{ p.lastVisit || '—' }}</span>
+            </div>
+            <div class="pf-card-row">
+              <span class="pf-row-label">Clinical Unit</span>
+              <span class="pf-row-value">{{ p.clinicalUnit || '—' }}</span>
+            </div>
+            <div class="pf-card-row">
+              <span class="pf-row-label">Status Tracker</span>
+              <span class="pf-row-value">
+                <span class="pf-status-dot" [class.pf-status-dot--active]="p.status === 'COMPLETED'"></span>
+                {{ p.status === 'COMPLETED' ? 'Active' : p.status === 'CANCELLED' ? 'Inactive' : 'Pending' }}
+              </span>
+            </div>
+          </div>
+          <button class="pf-btn-dossier" (click)="viewDossier(p)">
+            <ng-icon name="heroDocumentText" size="16"></ng-icon>
+            View Dossier
+          </button>
+        </div>
+      } @empty {
+        <div class="pf-empty">
+          <ng-icon name="heroFolderOpen" class="pf-empty-icon"></ng-icon>
+          <div class="pf-empty-title">No patients found</div>
+          <div class="pf-empty-desc">Try adjusting your search or filter criteria.</div>
+        </div>
+      }
+    </div>
+  }
+
+</div>

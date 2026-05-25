@@ -1,0 +1,129 @@
+@use '../../../../styles/variables' as *;
+
+.prescriptions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+
+  .page-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  .page-subtitle {
+    font-size: 13px;
+    color: $text-secondary;
+  }
+}
+
+.add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+
+  .form-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: $text-secondary;
+  }
+
+  .form-input, .form-select, .form-textarea {
+    border: 1px solid $border-input;
+    border-radius: $radius-md;
+    padding: 10px 12px;
+    font-size: 13px;
+    outline: none;
+    background: $white;
+
+    &:focus {
+      border-color: $primary;
+    }
+  }
+
+  .form-input, .form-select {
+    height: 40px;
+  }
+
+  .form-textarea {
+    height: 80px;
+    resize: none;
+  }
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.gap-2 {
+  gap: 8px;
+}
+
+.add-med-btn {
+  height: 40px;
+  padding: 0 16px;
+  background: $primary-light;
+  color: $primary;
+  border: 1px solid rgba($primary, 0.1);
+  border-radius: $radius-md;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba($primary, 0.1);
+  }
+}
+
+.meds-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.med-tag {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: $radius-full;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: $text-primary;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  .remove-tag-btn {
+    border: none;
+    background: transparent;
+    color: $text-muted;
+    cursor: pointer;
+    font-size: 10px;
+
+    &:hover {
+      color: $danger;
+    }
+  }
+}
+
+.submit-btn {
+  height: 44px;
+}
