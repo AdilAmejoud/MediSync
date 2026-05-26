@@ -1,0 +1,138 @@
+<div class="services-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header__text">
+      <h2 class="page-title">Manage Services</h2>
+      <p class="page-subtitle">Configure procedure fees, consulting catalogs and medical acts.</p>
+    </div>
+    <button (click)="openAddModal(); $event.stopPropagation()" class="btn-add">
+      <ng-icon name="heroPlus" size="16"></ng-icon>
+      <span>New Service</span>
+    </button>
+  </div>
+
+  <!-- Responsive Card Grid -->
+  @if (loading()) {
+    <div class="table-loading">
+      <div class="spinner"></div>
+      <p>Loading clinical services...</p>
+    </div>
+  } @else {
+    <div class="services-grid">
+      @if (services().length === 0) {
+        <div class="grid-empty">
+          <ng-icon name="heroClipboardDocumentList" size="32"></ng-icon>
+          <p>No services registered yet</p>
+        </div>
+      }
+      @for (srv of services(); track srv.id) {
+        <div class="service-card">
+          <!-- Top Row -->
+          <div class="card-top">
+            <div class="card-title-group">
+              <ng-icon [name]="srv.iconName" size="20" class="service-icon"></ng-icon>
+              <h4 class="service-title">{{ srv.title }}</h4>
+            </div>
+            <span class="status-pill">Active</span>
+          </div>
+
+          <!-- Description Section -->
+          <div class="description-section">
+            <p class="description-text">{{ srv.description }}</p>
+          </div>
+
+          <!-- Information Grid -->
+          <div class="info-grid">
+            <div class="info-block">
+              <span class="info-label">FEE</span>
+              <span class="info-value">{{ srv.fees }} MAD</span>
+            </div>
+            <div class="info-block">
+              <span class="info-label">DOCTORS</span>
+              <span class="info-value">{{ srv.doctorsCount }} Doctors</span>
+            </div>
+            <div class="info-block">
+              <span class="info-label">DURATION</span>
+              <span class="info-value">{{ srv.duration }} mins</span>
+            </div>
+          </div>
+
+          <!-- Card Actions -->
+          <div class="card-actions">
+            <button (click)="openConfigureModal(srv); $event.stopPropagation()" class="btn-configure">
+              Configure
+            </button>
+            <button (click)="deleteService(srv.id)" class="btn-delete" title="Delete service">
+              <ng-icon name="heroTrash" size="14"></ng-icon>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Glassmorphic Add/Configure Modal -->
+  <ms-modal [visible]="showAddModal()" [title]="modalTitle()" (close)="showAddModal.set(false)">
+    <form (ngSubmit)="saveService()" class="add-form">
+      <div class="form-group">
+        <label class="form-label">Service Title *</label>
+        <input 
+          type="text" 
+          name="title" 
+          [(ngModel)]="serviceForm.title" 
+          placeholder="e.g. Cardiology Consultation"
+          class="form-input" 
+          required 
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Service Description *</label>
+        <textarea 
+          name="description" 
+          [(ngModel)]="serviceForm.description" 
+          placeholder="Enter service details and clinical acts..."
+          class="form-textarea" 
+          rows="4"
+          required
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Speciality *</label>
+        <input 
+          type="text" 
+          name="speciality" 
+          [(ngModel)]="serviceForm.speciality" 
+          placeholder="e.g. Cardiologist"
+          class="form-input" 
+          required 
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Standard Price (Fees) *</label>
+        <input 
+          type="number" 
+          name="fees" 
+          [(ngModel)]="serviceForm.fees" 
+          placeholder="e.g. 400"
+          class="form-input" 
+          min="0"
+          required 
+        />
+      </div>
+
+      <div class="form-actions border-t pt-4 mt-6 flex justify-end gap-3">
+        <button type="button" (click)="showAddModal.set(false)" class="btn-secondary">
+          Cancel
+        </button>
+        <button type="submit" class="btn-primary">
+          Save Service
+        </button>
+      </div>
+    </form>
+  </ms-modal>
+
+</div>

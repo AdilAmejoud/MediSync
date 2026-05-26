@@ -1,0 +1,190 @@
+<div class="appointments-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header__text">
+      <h2 class="page-title">Manage Appointments</h2>
+      <p class="page-subtitle">Inspect clinic appointments ledger logs.</p>
+    </div>
+  </div>
+
+  <!-- ─── Current Week Analytics ───────────────────────────────────────────── -->
+  <div class="weekly-metrics-grid">
+    <div class="metric-card metric-card--completed">
+      <span class="metric-label">COMPLETED THIS WEEK</span>
+      <span class="metric-value">{{ weeklyMetrics().completed }}</span>
+      <span class="metric-sub">Closed successfully</span>
+    </div>
+    <div class="metric-card metric-card--pending">
+      <span class="metric-label">PENDING THIS WEEK</span>
+      <span class="metric-value">{{ weeklyMetrics().pending }}</span>
+      <span class="metric-sub">Awaiting consultations</span>
+    </div>
+    <div class="metric-card metric-card--cancelled">
+      <span class="metric-label">CANCELLED THIS WEEK</span>
+      <span class="metric-value">{{ weeklyMetrics().cancelled }}</span>
+      <span class="metric-sub">Patient cancellations</span>
+    </div>
+    <div class="metric-card metric-card--paid">
+      <span class="metric-label">PAID THIS WEEK</span>
+      <span class="metric-value">{{ weeklyMetrics().paid }}</span>
+      <span class="metric-sub">Cleared payments</span>
+    </div>
+  </div>
+
+  <!-- ─── Filter and Tool Bar ─────────────────────────────────────────────── -->
+  <div class="toolbar">
+    <!-- Left side: Claimed Status tabs -->
+    <div class="segment-tabs">
+      <button 
+        class="seg-tab" 
+        [class.seg-tab--active]="activeFilter() === 'all'" 
+        (click)="activeFilter.set('all')"
+      >All</button>
+      <button 
+        class="seg-tab" 
+        [class.seg-tab--active]="activeFilter() === 'pending'" 
+        (click)="activeFilter.set('pending')"
+      >Pending</button>
+      <button 
+        class="seg-tab" 
+        [class.seg-tab--active]="activeFilter() === 'confirmed'" 
+        (click)="activeFilter.set('confirmed')"
+      >Confirmed</button>
+      <button 
+        class="seg-tab" 
+        [class.seg-tab--active]="activeFilter() === 'completed'" 
+        (click)="activeFilter.set('completed')"
+      >Completed</button>
+      <button 
+        class="seg-tab" 
+        [class.seg-tab--active]="activeFilter() === 'cancelled'" 
+        (click)="activeFilter.set('cancelled')"
+      >Cancelled</button>
+    </div>
+
+    <!-- Center-Right Grouping: search + doctor select + date range select -->
+    <div class="toolbar__right">
+      <div class="search-box">
+        <ng-icon name="heroMagnifyingGlass" size="16" class="search-box__icon"></ng-icon>
+        <input 
+          type="text" 
+          class="search-box__input" 
+          placeholder="Search by patient name or ID..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+        />
+      </div>
+
+      <div class="filter-dropdown">
+        <select 
+          class="doctor-select"
+          [ngModel]="selectedDoctorFilter()"
+          (ngModelChange)="selectedDoctorFilter.set($event)"
+        >
+          @for (doc of doctorList(); track doc) {
+            <option [value]="doc">{{ doc }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-dropdown">
+        <select 
+          class="date-select"
+          [ngModel]="selectedDateRange()"
+          (ngModelChange)="selectedDateRange.set($event)"
+        >
+          @for (range of dateRanges; track range) {
+            <option [value]="range">{{ range }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Custom Premium Grid ──────────────────────────────────────────────── -->
+  <div class="table-card">
+    @if (loading()) {
+      <div class="table-loading">
+        <div class="spinner"></div>
+        <p>Loading clinic ledger...</p>
+      </div>
+    } @else {
+      <table class="appointments-table">
+        <thead>
+          <tr>
+            <th class="col-no">NO.</th>
+            <th class="col-patient">PATIENT</th>
+            <th class="col-doctor">DOCTOR</th>
+            <th class="col-datetime">DATE & TIME</th>
+            <th class="col-consultation">CONSULTATION</th>
+            <th class="col-mode">TYPE & MODE</th>
+            <th class="col-fees">FEES</th>
+            <th class="col-status">STATUS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredAppointments().length === 0) {
+            <tr>
+              <td colspan="8" class="table-empty">
+                <ng-icon name="heroCalendar" size="32"></ng-icon>
+                <p>No appointments found matching filters</p>
+              </td>
+            </tr>
+          }
+          @for (appt of filteredAppointments(); track appt.id; let idx = $index) {
+            <tr class="appointment-row">
+              <td class="col-no">
+                <span class="no-label">{{ idx + 1 }}</span>
+              </td>
+              <td class="col-patient">
+                <div class="patient-cell">
+                  <div class="avatar" [style.background-color]="appt.avatarColor">
+                    {{ appt.patientInitials }}
+                  </div>
+                  <div class="patient-info">
+                    <span class="patient-name">{{ appt.patientName }}</span>
+                    <span class="patient-id">{{ appt.patientId }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="col-doctor">
+                <span class="doctor-name">{{ appt.doctorName }}</span>
+              </td>
+              <td class="col-datetime">
+                <span class="datetime-text">{{ appt.formattedDateTime }}</span>
+              </td>
+              <td class="col-consultation">
+                <span class="consultation-type">{{ appt.category }}</span>
+              </td>
+              <td class="col-mode">
+                <span 
+                  class="mode-pill" 
+                  [class.mode-pill--online]="appt.mode === 'Online'"
+                  [class.mode-pill--inperson]="appt.mode === 'In-Person'"
+                >
+                  {{ appt.mode }}
+                </span>
+              </td>
+              <td class="col-fees">
+                <span class="fees-val">{{ appt.amount }} MAD</span>
+              </td>
+              <td class="col-status">
+                <span 
+                  class="status-pill" 
+                  [class.status-pill--pending]="appt.status === 'Pending'"
+                  [class.status-pill--confirmed]="appt.status === 'Confirmed'"
+                  [class.status-pill--completed]="appt.status === 'Completed'"
+                  [class.status-pill--cancelled]="appt.status === 'Cancelled'"
+                >
+                  {{ appt.status }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+</div>

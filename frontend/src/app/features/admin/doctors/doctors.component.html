@@ -1,0 +1,245 @@
+<div class="doctors-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header__text">
+      <h2 class="page-title">Manage Doctors</h2>
+      <p class="page-subtitle">Configure medical registry and consulting fees.</p>
+    </div>
+  </div>
+
+  <!-- ─── Action & Filter Bar ─────────────────────────────────────────────── -->
+  <div class="toolbar">
+    <!-- Left side: Segment tabs for status filtering -->
+    <div class="segment-tabs">
+      <button 
+        class="seg-tab" 
+        [class.seg-tab--active]="activeFilter() === 'all'" 
+        (click)="activeFilter.set('all')"
+      >All</button>
+      <button 
+        class="seg-tab" 
+        [class.seg-tab--active]="activeFilter() === 'active'" 
+        (click)="activeFilter.set('active')"
+      >Active</button>
+      <button 
+        class="seg-tab" 
+        [class.seg-tab--active]="activeFilter() === 'inactive'" 
+        (click)="activeFilter.set('inactive')"
+      >Inactive</button>
+    </div>
+
+    <!-- Right side: Search, Specialty select, and Add button -->
+    <div class="toolbar__right">
+      <div class="search-box">
+        <ng-icon name="heroMagnifyingGlass" size="16" class="search-box__icon"></ng-icon>
+        <input 
+          type="text" 
+          class="search-box__input" 
+          placeholder="Search doctors by name or specialty..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+        />
+      </div>
+
+      <div class="filter-dropdown">
+        <select 
+          class="specialty-select"
+          [ngModel]="selectedSpecialty()"
+          (ngModelChange)="selectedSpecialty.set($event)"
+        >
+          @for (spec of specialtiesList; track spec) {
+            <option [value]="spec">{{ spec }}</option>
+          }
+        </select>
+      </div>
+
+      <button (click)="toggleAddPanel()" class="btn-add">
+        <ng-icon name="heroPlus" size="16"></ng-icon>
+        <span>Add Doctor</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── Custom Premium Table ────────────────────────────────────────────── -->
+  <div class="table-card">
+    @if (loading()) {
+      <div class="table-loading">
+        <div class="spinner"></div>
+        <p>Loading medical registry...</p>
+      </div>
+    } @else {
+      <table class="doctors-table">
+        <thead>
+          <tr>
+            <th class="col-no">NO.</th>
+            <th class="col-doctor">DOCTOR</th>
+            <th class="col-email">EMAIL</th>
+            <th class="col-specialty">SPECIALTY</th>
+            <th class="col-patients">PATIENTS COUNT</th>
+            <th class="col-fees">FEES (MAD)</th>
+            <th class="col-status">STATUS</th>
+            <th class="col-actions">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredDoctors().length === 0) {
+            <tr>
+              <td colspan="8" class="table-empty">
+                <ng-icon name="heroUser" size="32"></ng-icon>
+                <p>No doctors found matching filters</p>
+              </td>
+            </tr>
+          }
+          @for (doc of filteredDoctors(); track doc.id; let idx = $index) {
+            <tr class="doctor-row">
+              <td class="col-no">
+                <span class="no-label">{{ idx + 1 }}</span>
+              </td>
+              <td class="col-doctor">
+                <div class="patient-cell">
+                  <div class="avatar" [style.background-color]="doc.avatarColor">
+                    {{ doc.initials }}
+                  </div>
+                  <div class="doctor-info">
+                    <span class="doctor-name">{{ doc.name }}</span>
+                    <span class="doctor-room">{{ doc.roomText }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="col-email">
+                <span class="email-text">{{ doc.email }}</span>
+              </td>
+              <td class="col-specialty">
+                <span class="specialty-badge">{{ doc.speciality || 'General Medicine' }}</span>
+              </td>
+              <td class="col-patients">
+                <span class="patients-count">{{ getPatientsCount(doc.id) }} pts</span>
+              </td>
+              <td class="col-fees">
+                <span class="fees-val">{{ doc.fees ? doc.fees.toFixed(0) : '300' }} MAD</span>
+              </td>
+              <td class="col-status">
+                <span 
+                  class="status-pill" 
+                  [class.status-pill--active]="doc.available"
+                  [class.status-pill--inactive]="!doc.available"
+                >
+                  {{ doc.available ? 'Available' : 'Inactive' }}
+                </span>
+              </td>
+              <td class="col-actions">
+                <div class="actions-group">
+                  <button (click)="toggleAvailability(doc)" class="action-btn action-btn--edit" title="Toggle Status">
+                    Edit Status
+                  </button>
+                  <button (click)="openProfile(doc)" class="action-btn action-btn--view" title="View clinical profile">
+                    View Profile
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <!-- ─── Centered Add Doctor Modal ───────────────────────────────────────── -->
+  <ms-modal [visible]="showAddPanel()" title="Add New Doctor" (close)="toggleAddPanel()">
+    <form (ngSubmit)="onSaveDoctor()" class="add-form">
+      <div class="form-group">
+        <label class="form-label">Full Name *</label>
+        <input type="text" name="name" [(ngModel)]="newDoctor.name" placeholder="Dr. John Doe" class="form-input" required />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address *</label>
+        <input type="email" name="email" [(ngModel)]="newDoctor.email" placeholder="john.doe@medisync.com" class="form-input" required />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Speciality</label>
+        <select name="speciality" [(ngModel)]="newDoctor.speciality" class="form-select">
+          <option value="Cardiology">Cardiology</option>
+          <option value="Orthopedics">Orthopedics</option>
+          <option value="Pediatrics">Pediatrics</option>
+          <option value="General Medicine">General Medicine</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Fees (MAD)</label>
+        <input type="number" name="fees" [(ngModel)]="newDoctor.fees" class="form-input" />
+      </div>
+
+      <div class="form-actions border-t pt-4 mt-6 flex justify-end gap-3">
+        <button type="button" (click)="toggleAddPanel()" class="btn-secondary">
+          Cancel
+        </button>
+        <button type="submit" class="btn-primary">
+          Save Doctor Profile
+        </button>
+      </div>
+    </form>
+  </ms-modal>
+
+  <!-- ─── Backdrop Blur Profile Modal ──────────────────────────────────────── -->
+  @if (selectedDoctor()) {
+    <div class="profile-modal-overlay" (click)="closeProfile()">
+      <div class="profile-modal" (click)="$event.stopPropagation()">
+        <!-- Header -->
+        <div class="profile-modal__header">
+          <div class="profile-avatar" [style.background-color]="selectedDoctor()!.avatarColor">
+            {{ selectedDoctor()!.initials }}
+          </div>
+          <div class="profile-title-block">
+            <h3>{{ selectedDoctor()!.name }}</h3>
+            <p class="profile-specialty">{{ selectedDoctor()!.speciality || 'General Medicine' }}</p>
+          </div>
+          <button class="profile-modal__close" (click)="closeProfile()">&times;</button>
+        </div>
+
+        <!-- Body content -->
+        <div class="profile-modal__body">
+          <div class="info-grid">
+            <div class="info-card">
+              <span class="info-label">Assigned Room</span>
+              <span class="info-val">{{ selectedDoctor()!.roomText }}</span>
+            </div>
+            <div class="info-card">
+              <span class="info-label">Clinical Experience</span>
+              <span class="info-val">10+ Years</span>
+            </div>
+            <div class="info-card">
+              <span class="info-label">Credentials</span>
+              <span class="info-val">M.D., Consulting Specialist</span>
+            </div>
+            <div class="info-card">
+              <span class="info-label">Daily Shift Limits</span>
+              <span class="info-val">Max 8 Hours</span>
+            </div>
+          </div>
+
+          <div class="profile-details-section">
+            <h4 class="section-heading">Contact Details</h4>
+            <div class="contact-row">
+              <ng-icon name="heroEnvelope" size="14"></ng-icon>
+              <span>{{ selectedDoctor()!.email }}</span>
+            </div>
+            <div class="contact-row">
+              <ng-icon name="heroPhone" size="14"></ng-icon>
+              <span>+212 522-456789</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="profile-modal__footer">
+          <button (click)="closeProfile()" class="btn-close-modal">Close Profile</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

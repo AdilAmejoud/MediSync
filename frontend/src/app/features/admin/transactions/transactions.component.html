@@ -1,0 +1,157 @@
+<div class="txn-page">
+
+  <!-- ─── Page Header ──────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header__text">
+      <h2 class="page-title">Transactions Ledger</h2>
+      <p class="page-subtitle">Review and track financial cashflows, patient refunds, and insurance settlements.</p>
+    </div>
+    <button class="btn-export" (click)="exportLedger()">
+      <ng-icon name="heroArrowDownTray" size="16"></ng-icon>
+      Export Ledger
+    </button>
+  </div>
+
+  <!-- ─── Analytics Cards ──────────────────────────────────────────────────── -->
+  <div class="analytics-grid">
+    <div class="analytic-card">
+      <span class="analytic-card__label">TOTAL TRANSACTIONS</span>
+      <div class="analytic-card__value">{{ totalTransactions.toFixed(2) }} MAD</div>
+      <span class="analytic-card__sub">Deposits today</span>
+      <div class="analytic-card__badge analytic-card__badge--up">
+        <ng-icon name="heroArrowTrendingUp" size="14"></ng-icon>
+      </div>
+    </div>
+
+    <div class="analytic-card">
+      <span class="analytic-card__label">REFUNDED AMOUNTS</span>
+      <div class="analytic-card__value">{{ refundedAmount.toFixed(2) }} MAD</div>
+      <span class="analytic-card__sub">Refunded today</span>
+      <div class="analytic-card__badge analytic-card__badge--down">
+        <ng-icon name="heroArrowTrendingDown" size="14"></ng-icon>
+      </div>
+    </div>
+
+    <div class="analytic-card">
+      <span class="analytic-card__label">PROCESSING ASSETS</span>
+      <div class="analytic-card__value">{{ processingAmount.toFixed(2) }} MAD</div>
+      <span class="analytic-card__sub">Pending clearance</span>
+      <div class="analytic-card__badge analytic-card__badge--neutral">
+        <ng-icon name="heroArrowPath" size="14"></ng-icon>
+      </div>
+    </div>
+
+    <div class="analytic-card">
+      <span class="analytic-card__label">NET CASH FLOW</span>
+      <div class="analytic-card__value analytic-card__value--green">+{{ netCashFlow.toFixed(2) }} MAD</div>
+      <span class="analytic-card__sub">This month total</span>
+      <div class="analytic-card__badge analytic-card__badge--up">
+        <ng-icon name="heroArrowTrendingUp" size="14"></ng-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Toolbar: Segment Tabs (left) · Search + Export (right) ──────────── -->
+  <div class="toolbar">
+
+    <!-- Segment Tabs (far left) -->
+    <div class="segment-tabs">
+      @for (f of paymentFilters; track f.key) {
+        <button
+          class="seg-tab"
+          [class.seg-tab--active]="activeFilter() === f.key"
+          (click)="setFilter(f.key)"
+          [id]="'txn-filter-' + f.key"
+        >{{ f.label }}</button>
+      }
+    </div>
+
+    <!-- Right side: search + date picker placeholder -->
+    <div class="toolbar__right">
+      <div class="search-box">
+        <ng-icon name="heroMagnifyingGlass" size="16" class="search-box__icon"></ng-icon>
+        <input
+          id="txn-search"
+          type="text"
+          class="search-box__input"
+          placeholder="Search transactions by invoice ID or patient..."
+          [(ngModel)]="searchQuery"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Table ─────────────────────────────────────────────────────────────── -->
+  <div class="table-card">
+    @if (loading()) {
+      <div class="table-loading">
+        <div class="spinner"></div>
+        <p>Loading transactions...</p>
+      </div>
+    } @else {
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th class="col-no">NO.</th>
+            <th class="col-datetime">DATE &amp; TIME</th>
+            <th class="col-patient">PATIENT</th>
+            <th class="col-invoice">INVOICE ID</th>
+            <th class="col-mode">PAYMENT MODE</th>
+            <th class="col-amount">AMOUNT</th>
+            <th class="col-status">STATUS</th>
+            <th class="col-actions">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredTransactions.length === 0) {
+            <tr>
+              <td colspan="8" class="table-empty">
+                <ng-icon name="heroDocumentText" size="32"></ng-icon>
+                <p>No transactions found</p>
+              </td>
+            </tr>
+          }
+          @for (t of filteredTransactions; track t.rawId) {
+            <tr class="ledger-row">
+              <td class="col-no">
+                <span class="txn-no">{{ t.id }}</span>
+              </td>
+              <td class="col-datetime">{{ formatDate(t.dateTime) }}</td>
+              <td class="col-patient">
+                <div class="patient-cell">
+                  <div class="avatar" [style.background-color]="t.avatarColor">{{ t.patientInitials }}</div>
+                  <span class="patient-name">{{ t.patientName }}</span>
+                </div>
+              </td>
+              <td class="col-invoice">
+                <span class="invoice-id">{{ t.invoiceId }}</span>
+              </td>
+              <td class="col-mode">
+                <div class="payment-mode">
+                  <ng-icon [name]="getPaymentIcon(t.paymentMode)" size="15" class="mode-icon"></ng-icon>
+                  <span>{{ getPaymentLabel(t.paymentMode) }}</span>
+                </div>
+              </td>
+              <td class="col-amount">
+                <span class="amount" [class.amount--positive]="t.amountSign === '+'" [class.amount--negative]="t.amountSign === '-'">
+                  {{ t.amountDisplay }}
+                </span>
+              </td>
+              <td class="col-status">
+                <span class="status-pill" [class]="'status-pill--' + t.status.toLowerCase()">
+                  {{ t.status }}
+                </span>
+              </td>
+              <td class="col-actions">
+                <button class="btn-receipt" (click)="openReceipt(t)" title="Generate Receipt">
+                  Receipt
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+</div>

@@ -1,0 +1,501 @@
+<div class="settings-container">
+  
+  <!-- Left Side: Tab List -->
+  <div class="card tabs-card">
+    <div class="tabs-list">
+      <button 
+        (click)="setTab('profile')" 
+        class="tab-item" 
+        [class.active]="activeTab() === 'profile'"
+      >
+        <ng-icon name="heroUser" size="18"></ng-icon>
+        <span>Profile</span>
+      </button>
+
+      <button 
+        (click)="setTab('clinic')" 
+        class="tab-item" 
+        [class.active]="activeTab() === 'clinic'"
+      >
+        <ng-icon name="heroBriefcase" size="18"></ng-icon>
+        <span>Clinic Info</span>
+      </button>
+
+      <button 
+        (click)="setTab('security')" 
+        class="tab-item" 
+        [class.active]="activeTab() === 'security'"
+      >
+        <ng-icon name="heroLockClosed" size="18"></ng-icon>
+        <span>Security & 2FA</span>
+      </button>
+
+      <button 
+        (click)="setTab('notifications')" 
+        class="tab-item" 
+        [class.active]="activeTab() === 'notifications'"
+      >
+        <ng-icon name="heroBell" size="18"></ng-icon>
+        <span>Notifications</span>
+      </button>
+
+      <button 
+        (click)="setTab('billing')" 
+        class="tab-item" 
+        [class.active]="activeTab() === 'billing'"
+      >
+        <ng-icon name="heroReceiptPercent" size="18"></ng-icon>
+        <span>Billing Config</span>
+      </button>
+
+      <button 
+        (click)="setTab('preferences')" 
+        class="tab-item" 
+        [class.active]="activeTab() === 'preferences'"
+      >
+        <ng-icon name="heroCog6Tooth" size="18"></ng-icon>
+        <span>Preferences</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Right Side: Content Panel -->
+  <div class="card content-card">
+    
+    <!-- Profile Tab -->
+    @if (activeTab() === 'profile') {
+      <div class="panel-header">
+        <div>
+          <h3 class="panel-title">Admin Profile</h3>
+          <p class="panel-desc">Manage your personal settings and credentials.</p>
+        </div>
+        <button (click)="onSaveProfile()" class="btn-save-changes">Save Changes</button>
+      </div>
+
+      <div class="panel-body">
+        <!-- Avatar Section -->
+        <div class="avatar-upload-section">
+          <div class="avatar-circle-large">SJ</div>
+          <button class="btn-change-photo">Change Photo</button>
+          <span class="upload-rules">Allowed: JPG, PNG. Max 2MB.</span>
+        </div>
+
+        <!-- Form Grid -->
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input type="text" [(ngModel)]="firstName" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" [(ngModel)]="lastName" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" [value]="email" disabled class="form-input disabled" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="text" [(ngModel)]="phone" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date of Birth</label>
+            <ms-date-picker [(value)]="dob" placeholder="Select date"></ms-date-picker>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <input type="text" [value]="department" disabled class="form-input disabled" />
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">Address</label>
+            <textarea [(ngModel)]="address" rows="2" class="form-textarea"></textarea>
+          </div>
+        </div>
+
+        <div class="btn-row-right">
+          <button (click)="onSaveProfile()" class="btn-save-changes">Save Profile</button>
+        </div>
+      </div>
+    }
+
+    <!-- Clinic Info Tab -->
+    @if (activeTab() === 'clinic') {
+      <div class="panel-header">
+        <div>
+          <h3 class="panel-title">Clinic Information</h3>
+          <p class="panel-desc">Configure clinic credentials, specialties, and logo.</p>
+        </div>
+        <button (click)="onSave()" class="btn-save-changes">Save Changes</button>
+      </div>
+
+      <div class="panel-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Clinic Name</label>
+            <input type="text" [(ngModel)]="clinicName" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Clinic Email</label>
+            <input type="email" [(ngModel)]="clinicEmail" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Clinic Phone</label>
+            <input type="text" [(ngModel)]="clinicPhone" class="form-input" />
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">Clinic Address</label>
+            <input type="text" [(ngModel)]="clinicAddress" class="form-input" />
+          </div>
+
+          <!-- Specialties Tag Input -->
+          <div class="form-group full-width">
+            <label class="form-label">Medical Specialties</label>
+            <div class="tags-container">
+              @for (spec of specialties(); track spec; let idx = $index) {
+                <span class="tag-pill">
+                  {{ spec }}
+                  <button (click)="removeSpecialty(idx)" class="btn-remove-tag">&times;</button>
+                </span>
+              }
+            </div>
+            <div class="add-tag-row">
+              <input type="text" placeholder="Add new specialty..." [(ngModel)]="newSpecialty" class="form-input tag-input" (keyup.enter)="addSpecialty()" />
+              <button (click)="addSpecialty()" class="btn-add-tag">Add</button>
+            </div>
+          </div>
+
+          <!-- Logo Upload Placeholder -->
+          <div class="form-group full-width">
+            <label class="form-label">Clinic Logo</label>
+            <div class="logo-dashed-uploader">
+              <ng-icon name="heroBriefcase" size="28" color="var(--text-muted)"></ng-icon>
+              <span>Upload 120x120 Logo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Security & 2FA Tab -->
+    @if (activeTab() === 'security') {
+      <div class="panel-header">
+        <div>
+          <h3 class="panel-title">Security & 2-Factor Authentication</h3>
+          <p class="panel-desc">Manage login credentials and secure access logs.</p>
+        </div>
+      </div>
+
+      <div class="panel-body">
+        <!-- 2FA Section -->
+        <div class="section-divider-title">Two-Factor Authentication</div>
+        <div class="two-fa-block">
+          @if (twoFAEnabled()) {
+            <div class="two-fa-header">
+              <span class="badge success">Enabled</span>
+              <p class="two-fa-desc">Two-factor authentication is active on your account.</p>
+            </div>
+            <div class="two-fa-row">
+              <button (click)="disable2FA()" [disabled]="loading2FA()" class="btn-danger-2fa">
+                @if (loading2FA()) { Disabling... } @else { Disable 2FA }
+              </button>
+            </div>
+          } @else if (twoFASetupMode()) {
+            <div class="two-fa-header">
+              <span class="badge warning">Setup</span>
+              <p class="two-fa-desc">Scan the QR code with Google Authenticator, then enter the 6-digit code below.</p>
+            </div>
+            <div class="two-fa-row">
+              <div class="qr-placeholder">
+                <img [src]="twoFAQrCode()" alt="QR Code" style="width: 160px; height: 160px;" />
+              </div>
+              <div class="manual-key-block">
+                <span class="key-label">MANUAL KEY</span>
+                <code class="key-pill">{{ twoFASecret() }}</code>
+                <div class="verify-2fa-row">
+                  <input type="text" placeholder="000000" maxlength="6" [(ngModel)]="twoFAToken" class="form-input otp-input" />
+                  <button (click)="verify2FA()" [disabled]="loading2FA()" class="btn-verify-2fa">
+                    @if (loading2FA()) { Verifying... } @else { Verify & Enable }
+                  </button>
+                </div>
+                <button (click)="cancel2FASetup()" class="btn-cancel-2fa">Cancel</button>
+              </div>
+            </div>
+          } @else {
+            <div class="two-fa-header">
+              <span class="badge inactive">Disabled</span>
+              <p class="two-fa-desc">Protect your account with two-factor authentication.</p>
+            </div>
+            <div class="two-fa-row">
+              <button (click)="setup2FA()" [disabled]="loading2FA()" class="btn-verify-2fa">
+                @if (loading2FA()) { Loading... } @else { Enable 2FA }
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Audit Log Table -->
+        <div class="section-divider-title">Recent Security Audit Logs</div>
+        <div class="audit-log-wrapper">
+          @if (loadingAudit()) {
+            <p style="padding: 1rem; text-align: center;">Loading audit logs…</p>
+          } @else if (auditLogs().length === 0) {
+            <p style="padding: 1rem; text-align: center;">No audit logs found.</p>
+          } @else {
+            <table class="audit-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Action</th>
+                  <th>IP Address</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (log of auditLogs(); track log.timestamp) {
+                  <tr>
+                    <td>{{ log.timestamp }}</td>
+                    <td>{{ log.action }}</td>
+                    <td class="ip-address">{{ log.ip }}</td>
+                    <td>
+                      <span class="status-dot-badge" [class]="log.status.toLowerCase()">
+                        {{ log.status }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+
+        <!-- Change Password Section -->
+        <div class="section-divider-title">Change Password</div>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Current Password</label>
+            <input type="password" [(ngModel)]="currentPassword" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">New Password</label>
+            <input type="password" [(ngModel)]="newPassword" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" [(ngModel)]="confirmPassword" class="form-input" />
+          </div>
+        </div>
+        <div class="btn-row-right">
+          <button (click)="onSavePassword()" class="btn-save-changes">Change Password</button>
+        </div>
+      </div>
+    }
+
+    <!-- Notifications Tab -->
+    @if (activeTab() === 'notifications') {
+      <div class="panel-header">
+        <div>
+          <h3 class="panel-title">Notifications Settings</h3>
+          <p class="panel-desc">Configure clinic-wide notification rules.</p>
+        </div>
+        <button (click)="onSave()" class="btn-save-changes">Save Changes</button>
+      </div>
+
+      <div class="panel-body">
+        <div class="toggles-list">
+          <div class="toggle-row">
+            <div class="toggle-meta">
+              <span class="toggle-name">New appointment booked</span>
+              <span class="toggle-desc">Receive alert when a patient schedules an appointment.</span>
+            </div>
+            <label class="switch-toggle">
+              <input type="checkbox" [(ngModel)]="notifs.newBooking" />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-row">
+            <div class="toggle-meta">
+              <span class="toggle-name">Appointment reminder (24h before)</span>
+              <span class="toggle-desc">Send automated SMS reminder to patients 24 hours prior.</span>
+            </div>
+            <label class="switch-toggle">
+              <input type="checkbox" [(ngModel)]="notifs.reminder24h" />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-row">
+            <div class="toggle-meta">
+              <span class="toggle-name">Appointment reminder (1h before)</span>
+              <span class="toggle-desc">Send mobile push reminder to patients 1 hour prior.</span>
+            </div>
+            <label class="switch-toggle">
+              <input type="checkbox" [(ngModel)]="notifs.reminder1h" />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-row">
+            <div class="toggle-meta">
+              <span class="toggle-name">Appointment cancelled</span>
+              <span class="toggle-desc">Notify clinic manager and doctor immediately upon cancellation.</span>
+            </div>
+            <label class="switch-toggle">
+              <input type="checkbox" [(ngModel)]="notifs.cancelled" />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-row">
+            <div class="toggle-meta">
+              <span class="toggle-name">New patient assigned</span>
+              <span class="toggle-desc">Send alert when a new patient registration completes.</span>
+            </div>
+            <label class="switch-toggle">
+              <input type="checkbox" [(ngModel)]="notifs.newPatient" />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-row">
+            <div class="toggle-meta">
+              <span class="toggle-name">Daily schedule summary</span>
+              <span class="toggle-desc">Email daily briefing of appointments at 07:00 AM.</span>
+            </div>
+            <label class="switch-toggle">
+              <input type="checkbox" [(ngModel)]="notifs.dailySummary" />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Billing Config Tab -->
+    @if (activeTab() === 'billing') {
+      <div class="panel-header">
+        <div>
+          <h3 class="panel-title">Billing Configuration</h3>
+          <p class="panel-desc">Define base currencies, fee templates, and taxes.</p>
+        </div>
+        <button (click)="onSave()" class="btn-save-changes">Save Changes</button>
+      </div>
+
+      <div class="panel-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Default Currency</label>
+            <select [(ngModel)]="currency" class="form-input">
+              <option value="MAD">Moroccan Dirham (MAD)</option>
+              <option value="USD">US Dollar (USD)</option>
+              <option value="EUR">Euro (EUR)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Invoice Prefix</label>
+            <input type="text" [(ngModel)]="invoicePrefix" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tax Rate</label>
+            <div class="input-suffix-group">
+              <input type="number" [(ngModel)]="taxRate" class="form-input" />
+              <span class="suffix-pill">%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider-title">Consultation Slot Fee Template</div>
+        <div class="billing-table-wrapper">
+          <table class="billing-table">
+            <thead>
+              <tr>
+                <th>Slot Name</th>
+                <th>Duration</th>
+                <th>Fee</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (fee of slotFees(); track fee.name) {
+                <tr>
+                  <td>{{ fee.name }}</td>
+                  <td>{{ fee.duration }} min</td>
+                  <td class="font-bold">{{ fee.fee }} MAD</td>
+                  <td class="text-right">
+                    <button class="btn-edit-fee" title="Edit Fee">
+                      <ng-icon name="heroCog6Tooth" size="14"></ng-icon>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- Preferences Tab -->
+    @if (activeTab() === 'preferences') {
+      <div class="panel-header">
+        <div>
+          <h3 class="panel-title">Preferences</h3>
+          <p class="panel-desc">Configure calendar views and local languages.</p>
+        </div>
+        <button (click)="onSave()" class="btn-save-changes">Save Changes</button>
+      </div>
+
+      <div class="panel-body">
+        <div class="pref-group">
+          <label class="form-label">System Language</label>
+          <div class="pill-selectors">
+            <label class="pill-label">
+              <input type="radio" name="lang" value="en" [(ngModel)]="language" />
+              <span class="pill-box">English</span>
+            </label>
+            <label class="pill-label">
+              <input type="radio" name="lang" value="fr" [(ngModel)]="language" />
+              <span class="pill-box">French</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="pref-group">
+          <label class="form-label">Visual Theme</label>
+          <div class="pill-selectors">
+            <label class="pill-label">
+              <input type="radio" name="theme" value="light" [(ngModel)]="theme" />
+              <span class="pill-box">Light</span>
+            </label>
+            <label class="pill-label">
+              <input type="radio" name="theme" value="dark" [(ngModel)]="theme" />
+              <span class="pill-box">Dark</span>
+            </label>
+            <label class="pill-label">
+              <input type="radio" name="theme" value="system" [(ngModel)]="theme" />
+              <span class="pill-box">System</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="pref-group">
+          <label class="form-label">Default Calendar View</label>
+          <div class="pill-selectors">
+            <label class="pill-label">
+              <input type="radio" name="view" value="day" [(ngModel)]="calendarView" />
+              <span class="pill-box">Day</span>
+            </label>
+            <label class="pill-label">
+              <input type="radio" name="view" value="week" [(ngModel)]="calendarView" />
+              <span class="pill-box">Week</span>
+            </label>
+            <label class="pill-label">
+              <input type="radio" name="view" value="month" [(ngModel)]="calendarView" />
+              <span class="pill-box">Month</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

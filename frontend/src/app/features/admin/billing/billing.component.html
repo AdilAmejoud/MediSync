@@ -1,0 +1,176 @@
+<div class="billing-page">
+
+  <!-- ─── Page Header ──────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header__text">
+      <h2 class="page-title">Clinic Invoices</h2>
+      <p class="page-subtitle">Generate clinical invoices, trace unpaid debts, and manage invoice layouts.</p>
+    </div>
+    <!-- No "+ Add Invoice" button per requirements -->
+  </div>
+
+  <!-- ─── Analytics Cards ──────────────────────────────────────────────────── -->
+  <div class="analytics-grid">
+    <div class="analytic-card">
+      <span class="analytic-card__label">TOTAL INVOICED</span>
+      <div class="analytic-card__value">{{ totalInvoiced.toLocaleString() }} MAD</div>
+      <span class="analytic-card__sub analytic-card__sub--blue">
+        {{ allInvoices.length }} invoices total
+      </span>
+    </div>
+
+    <div class="analytic-card">
+      <span class="analytic-card__label">PAID INVOICES</span>
+      <div class="analytic-card__value">{{ paidAmount.toLocaleString() }} MAD</div>
+      <span class="analytic-card__sub analytic-card__sub--green">
+        {{ paidCount }} Paid today
+      </span>
+    </div>
+
+    <div class="analytic-card">
+      <span class="analytic-card__label">OUTSTANDING / UNPAID</span>
+      <div class="analytic-card__value">{{ unpaidAmount.toLocaleString() }} MAD</div>
+      <span class="analytic-card__sub analytic-card__sub--orange">
+        {{ pendingCount }} Pending clearance
+      </span>
+    </div>
+
+    <div class="analytic-card">
+      <span class="analytic-card__label">OVERDUE CLAIMS</span>
+      <div class="analytic-card__value">{{ overdueAmount.toLocaleString() }} MAD</div>
+      <span class="analytic-card__sub analytic-card__sub--red">
+        Needs immediate collection
+      </span>
+    </div>
+  </div>
+
+  <!-- ─── Toolbar: Segment Tabs (left) · Search (right) ───────────────────── -->
+  <div class="toolbar">
+
+    <!-- Segment tabs (far left — All / Paid / Unpaid / Overdue / Draft) -->
+    <div class="segment-tabs">
+      @for (f of statusFilters; track f.key) {
+        <button
+          class="seg-tab"
+          [class.seg-tab--active]="activeFilter() === f.key"
+          (click)="setFilter(f.key)"
+          [id]="'inv-filter-' + f.key"
+        >{{ f.label }}</button>
+      }
+    </div>
+
+    <!-- Right: search -->
+    <div class="toolbar__right">
+      <div class="search-box">
+        <ng-icon name="heroMagnifyingGlass" size="16" class="search-box__icon"></ng-icon>
+        <input
+          id="inv-search"
+          type="text"
+          class="search-box__input"
+          placeholder="Search invoices by patient or FAC ID..."
+          [(ngModel)]="searchQuery"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Table ─────────────────────────────────────────────────────────────── -->
+  <div class="table-card">
+    @if (loading()) {
+      <div class="table-loading">
+        <div class="spinner"></div>
+        <p>Loading invoices...</p>
+      </div>
+    } @else {
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th class="col-id">INVOICE ID</th>
+            <th class="col-patient">PATIENT</th>
+            <th class="col-doctor">RESPONSIBLE DOCTOR</th>
+            <th class="col-issue">ISSUE DATE</th>
+            <th class="col-due">DUE DATE</th>
+            <th class="col-amount">TOTAL AMOUNT</th>
+            <th class="col-status">STATUS</th>
+            <th class="col-actions">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredInvoices.length === 0) {
+            <tr>
+              <td colspan="8" class="table-empty">
+                <ng-icon name="heroDocumentText" size="32"></ng-icon>
+                <p>No invoices found</p>
+              </td>
+            </tr>
+          }
+          @for (inv of filteredInvoices; track inv.id) {
+            <tr class="invoice-row">
+              <td class="col-id">
+                <span class="invoice-number">{{ inv.invoiceId }}</span>
+              </td>
+
+              <td class="col-patient">
+                <div class="patient-cell">
+                  <div class="avatar" [style.background-color]="inv.avatarColor">
+                    {{ inv.patientInitials }}
+                  </div>
+                  <span class="patient-name">{{ inv.patientName }}</span>
+                </div>
+              </td>
+
+              <td class="col-doctor">
+                <span class="doctor-name">{{ inv.doctorName }}</span>
+              </td>
+
+              <td class="col-issue">
+                <span class="date-cell">{{ formatDate(inv.issueDate) }}</span>
+              </td>
+
+              <td class="col-due">
+                <span class="date-cell" [class.date-cell--overdue]="isDueDateOverdue(inv.dueDate) && inv.status !== 'Paid'">
+                  {{ formatDate(inv.dueDate) }}
+                </span>
+              </td>
+
+              <td class="col-amount">
+                <span class="amount">{{ inv.amount.toFixed(2) }} MAD</span>
+              </td>
+
+              <td class="col-status">
+                <span class="status-pill" [class]="'status-pill--' + inv.status.toLowerCase()">
+                  {{ inv.status }}
+                </span>
+              </td>
+
+              <!-- Actions: View + Download ONLY (no delete per requirements) -->
+              <td class="col-actions">
+                <div class="action-group">
+                  <button class="action-btn action-btn--view" (click)="viewInvoice(inv)" title="View Invoice">
+                    <ng-icon name="heroEye" size="15"></ng-icon>
+                  </button>
+                  <button class="action-btn action-btn--download" (click)="downloadInvoice(inv)" title="Download Invoice">
+                    <ng-icon name="heroArrowDownTray" size="15"></ng-icon>
+                  </button>
+                  <!-- NO trash/delete button per requirements -->
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+</div>
+
+<!-- Invoice PDF Viewer Overlay -->
+@if (showInvoiceViewer && invoiceViewerData) {
+  <ms-document-viewer
+    [pdfData]="invoiceViewerData"
+    [title]="invoiceViewerTitle"
+    [showDownload]="true"
+    (close)="closeViewer()"
+    (download)="downloadViewedInvoice()"
+  ></ms-document-viewer>
+}

@@ -1,0 +1,243 @@
+<div class="dashboard-page">
+
+  <!-- ─── Welcome Header Banner ────────────────────────────────────────────── -->
+  <div class="welcome-banner">
+    <div class="banner-left">
+      <h2 class="banner-title">Administration Portal</h2>
+      <p class="banner-subtitle">Welcome back, {{ adminName }}. Track your clinic's activity in real time.</p>
+    </div>
+    <div class="banner-right">
+      <span class="role-pill">PRINCIPAL SUPERVISOR</span>
+    </div>
+  </div>
+
+  <!-- ─── Premium Analytics Cards ──────────────────────────────────────────── -->
+  <div class="analytics-row">
+    <!-- Active Doctors -->
+    <div class="premium-card premium-card--doctors">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-label">ACTIVE DOCTORS</span>
+          <span class="card-value">{{ stats?.totalDoctors ?? 0 }}</span>
+        </div>
+        <div class="card-icon card-icon--blue">
+          <ng-icon name="heroUserGroup" size="20"></ng-icon>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="trend-badge trend-badge--up">+4.2% this month</span>
+      </div>
+    </div>
+
+    <!-- Registered Patients -->
+    <div class="premium-card premium-card--patients">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-label">REGISTERED PATIENTS</span>
+          <span class="card-value">{{ stats?.totalPatients ?? 0 }}</span>
+        </div>
+        <div class="card-icon card-icon--green">
+          <ng-icon name="heroUsers" size="20"></ng-icon>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="trend-badge trend-badge--up">+12.1% this month</span>
+      </div>
+    </div>
+
+    <!-- Scheduled Appointments -->
+    <div class="premium-card premium-card--appointments">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-label">SCHEDULED APPOINTMENTS</span>
+          <span class="card-value">{{ stats?.totalAppointments ?? 0 }}</span>
+        </div>
+        <div class="card-icon card-icon--amber">
+          <ng-icon name="heroCalendar" size="20"></ng-icon>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="trend-badge trend-badge--down">-2.4% this month</span>
+      </div>
+    </div>
+
+    <!-- Total Revenue -->
+    <div class="premium-card premium-card--revenue">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-label">TOTAL REVENUE</span>
+          <span class="card-value">{{ (stats?.totalRevenue ?? 0) | number }} MAD</span>
+        </div>
+        <div class="card-icon card-icon--purple">
+          <ng-icon name="heroBanknotes" size="20"></ng-icon>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="trend-badge trend-badge--up">+8.7% this month</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Weekly Shifts & Cashflow Chart ────────────────────────────────────── -->
+  <div class="card chart-card">
+    <div class="chart-header">
+      <div class="chart-header-left">
+        <h3 class="section-title">Weekly Revenue & Completed Consultations</h3>
+        <span class="section-subtitle">Weekly financial performance and validation tracking metrics</span>
+      </div>
+      <div class="chart-header-right">
+        <!-- Legend -->
+        <div class="chart-legend">
+          <div class="legend-item">
+            <span class="legend-dot legend-dot--completed"></span>
+            <span>Completed Consultations</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-dot--revenue"></span>
+            <span>Revenue (MAD)</span>
+          </div>
+        </div>
+
+        <!-- Custom Month Picker -->
+        <div class="month-picker-container">
+          <button type="button" class="btn-month-picker" (click)="toggleMonthPicker()">
+            <ng-icon name="heroCalendar" class="icon-calendar" size="16"></ng-icon>
+            <span class="selected-date-text">{{ getFormattedSelectedDate() }}</span>
+            <ng-icon [name]="showMonthPicker() ? 'heroChevronUp' : 'heroChevronDown'" class="icon-chevron" size="14"></ng-icon>
+          </button>
+
+          @if (showMonthPicker()) {
+            <div class="month-picker-popover">
+              <div class="popover-header">
+                <button type="button" class="btn-nav" (click)="prevYear($event)">
+                  <ng-icon name="heroChevronLeft" size="14"></ng-icon>
+                </button>
+                <span class="popover-year">{{ currentPickerYear() }}</span>
+                <button type="button" class="btn-nav" (click)="nextYear($event)">
+                  <ng-icon name="heroChevronRight" size="14"></ng-icon>
+                </button>
+              </div>
+              <div class="months-grid">
+                @for (m of monthsList; track m.value) {
+                  <button 
+                    type="button" 
+                    class="btn-month" 
+                    [class.btn-month--active]="m.value === selectedMonth() && currentPickerYear() === selectedYear()"
+                    (click)="selectMonth(m.value)"
+                  >
+                    {{ m.abbr }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-wrapper">
+      <svg viewBox="0 0 600 240" class="bar-chart-svg">
+        <!-- Horizontal Grid Lines -->
+        <line x1="45" y1="30" x2="570" y2="30" stroke="var(--border-color)" stroke-width="1" stroke-dasharray="3,3"></line>
+        <line x1="45" y1="80" x2="570" y2="80" stroke="var(--border-color)" stroke-width="1" stroke-dasharray="3,3"></line>
+        <line x1="45" y1="130" x2="570" y2="130" stroke="var(--border-color)" stroke-width="1" stroke-dasharray="3,3"></line>
+        <line x1="45" y1="180" x2="570" y2="180" stroke="var(--border-color)" stroke-width="1"></line>
+      
+        <!-- Y-Axis Labels -->
+        <text x="35" y="34" fill="#9EA5B4" font-size="9" text-anchor="end">{{ revenueYLabels[0] | number }}</text>
+        <text x="35" y="84" fill="#9EA5B4" font-size="9" text-anchor="end">{{ revenueYLabels[1] | number }}</text>
+        <text x="35" y="134" fill="#9EA5B4" font-size="9" text-anchor="end">{{ revenueYLabels[2] | number }}</text>
+        <text x="35" y="184" fill="#9EA5B4" font-size="9" text-anchor="end">0</text>
+      
+        <!-- Grouped Bars -->
+        @for (data of chartData(); track data.week; let idx = $index) {
+          <g>
+            <!-- Completed Consultations Bar (Light Purple) -->
+            <rect
+              [attr.x]="85 + idx * 100"
+              [attr.y]="180 - (data.completed / maxCompleted()) * 150"
+              width="14"
+              [attr.height]="(data.completed / maxCompleted()) * 150"
+              fill="#D8B4FE"
+              rx="3"
+              class="interactive-bar"
+              (mouseenter)="showTooltip($event, data.week, 'Completed Consultations', data.completed)"
+              (mouseleave)="hideTooltip()"
+            ></rect>
+
+            <!-- Revenue Bar (Deep Purple) -->
+            <rect
+              [attr.x]="103 + idx * 100"
+              [attr.y]="180 - (data.revenue / maxRevenue()) * 150"
+              width="14"
+              [attr.height]="(data.revenue / maxRevenue()) * 150"
+              fill="#7C3AED"
+              rx="3"
+              class="interactive-bar"
+              (mouseenter)="showTooltip($event, data.week, 'Revenue', data.revenue)"
+              (mouseleave)="hideTooltip()"
+            ></rect>
+
+            <!-- Week Label -->
+            <text [attr.x]="101 + idx * 100" y="200" fill="#9EA5B4" font-size="10" text-anchor="middle" font-weight="600">{{ data.week }}</text>
+          </g>
+        }
+      </svg>
+
+      <!-- Interactive Tooltip -->
+      @if (hoveredBar()) {
+        <div class="chart-tooltip" [style.left.px]="hoveredBar()!.x + 12" [style.top.px]="hoveredBar()!.y - 50">
+          <div class="tooltip-day">{{ hoveredBar()!.week }}</div>
+          <div class="tooltip-metric">
+            <span class="metric-label">{{ hoveredBar()!.type }}:</span>
+            <span class="metric-value">{{ hoveredBar()!.value | number }} {{ hoveredBar()!.type === 'Revenue' ? 'MAD' : '' }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ─── Active Departments & On-Duty Doctors ─────────────────────────────── -->
+  <div class="departments-doctors-grid">
+    <!-- Active Departments -->
+    <div class="card active-depts-card">
+      <div class="card-header border-b">
+        <h3 class="section-title">Active Departments</h3>
+      </div>
+      <div class="dept-list">
+        @for (dept of activeDepartments; track dept.name) {
+          <div class="dept-row">
+            <div class="dept-meta">
+              <span class="dept-name">{{ dept.name }}</span>
+              <span class="dept-percentage">{{ dept.value }}%</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" [style.width.%]="dept.value" [style.background-color]="dept.color"></div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- On-Duty Doctors -->
+    <div class="card on-duty-card">
+      <div class="card-header border-b">
+        <h3 class="section-title">On-Duty Doctors</h3>
+      </div>
+      <div class="doctors-row-grid">
+        @for (doc of onDutyDoctors; track doc.name) {
+          <div class="doctor-avatar-card">
+            <div class="avatar-circle" [style.background-color]="doc.color">{{ doc.initials }}</div>
+            <h4 class="doc-name">{{ doc.name }}</h4>
+            <p class="doc-room">{{ doc.room }}</p>
+            <span class="status-pill" [class]="'status-pill--' + doc.status.toLowerCase().replace(' ', '-')">
+              <span class="status-dot"></span>
+              {{ doc.status }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+</div>

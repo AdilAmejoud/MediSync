@@ -1,0 +1,116 @@
+<div class="patients-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header__text">
+      <h2 class="page-title">Manage Patients</h2>
+      <p class="page-subtitle">Inspect registered patient files and activity logs.</p>
+    </div>
+  </div>
+
+  <!-- ─── Action & Filter Bar ─────────────────────────────────────────────── -->
+  <div class="toolbar">
+    <!-- Left side: Segment tabs for status filtering -->
+    <div class="segment-tabs">
+      <button 
+        class="seg-tab" 
+        [class.seg-tab--active]="activeFilter() === 'all'" 
+        (click)="activeFilter.set('all')"
+      >All</button>
+      <button 
+        class="seg-tab" 
+        [class.seg-tab--active]="activeFilter() === 'active'" 
+        (click)="activeFilter.set('active')"
+      >Active</button>
+      <button 
+        class="seg-tab" 
+        [class.seg-tab--active]="activeFilter() === 'inactive'" 
+        (click)="activeFilter.set('inactive')"
+      >Inactive</button>
+    </div>
+
+    <!-- Right side: Search field -->
+    <div class="toolbar__right">
+      <div class="search-box">
+        <ng-icon name="heroMagnifyingGlass" size="16" class="search-box__icon"></ng-icon>
+        <input 
+          type="text" 
+          class="search-box__input" 
+          placeholder="Search by patient name or ID..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Custom Premium Table ────────────────────────────────────────────── -->
+  <div class="table-card">
+    @if (loading()) {
+      <div class="table-loading">
+        <div class="spinner"></div>
+        <p>Loading patient registry...</p>
+      </div>
+    } @else {
+      <table class="patients-table">
+        <thead>
+          <tr>
+            <th class="col-no">NO.</th>
+            <th class="col-patient">PATIENT</th>
+            <th class="col-email">EMAIL</th>
+            <th class="col-gender">GENDER</th>
+            <th class="col-phone">PHONE</th>
+            <th class="col-status">STATUS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredPatients().length === 0) {
+            <tr>
+              <td colspan="6" class="table-empty">
+                <ng-icon name="heroUsers" size="32"></ng-icon>
+                <p>No patients found matching filters</p>
+              </td>
+            </tr>
+          }
+          @for (pat of filteredPatients(); track pat.id; let idx = $index) {
+            <tr class="patient-row">
+              <td class="col-no">
+                <span class="no-label">{{ idx + 1 }}</span>
+              </td>
+              <td class="col-patient">
+                <div class="patient-cell">
+                  <div class="avatar" [style.background-color]="pat.avatarColor">
+                    {{ pat.initials }}
+                  </div>
+                  <div class="patient-info">
+                    <span class="patient-name">{{ pat.name }}</span>
+                    <span class="patient-id">{{ pat.patientId }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="col-email">
+                <span class="email-text">{{ pat.email }}</span>
+              </td>
+              <td class="col-gender">
+                <span class="gender-text">{{ pat.gender }}</span>
+              </td>
+              <td class="col-phone">
+                <span class="phone-text">{{ pat.phone }}</span>
+              </td>
+              <td class="col-status">
+                <span 
+                  class="status-pill" 
+                  [class.status-pill--active]="pat.status.toLowerCase() === 'active'"
+                  [class.status-pill--inactive]="pat.status.toLowerCase() === 'inactive'"
+                >
+                  {{ pat.status }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+</div>

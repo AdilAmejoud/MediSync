@@ -1,0 +1,178 @@
+<div class="staff-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header__text">
+      <h2 class="page-title">Manage Staff</h2>
+      <p class="page-subtitle">Configure receptionist accounts, secretariats, and role access.</p>
+    </div>
+  </div>
+
+  <!-- Toolbar Filters -->
+  <div class="toolbar">
+    <!-- Left side: search input -->
+    <div class="toolbar__left">
+      <div class="search-box">
+        <ng-icon name="heroMagnifyingGlass" size="16" class="search-box__icon"></ng-icon>
+        <input 
+          type="text" 
+          class="search-box__input" 
+          placeholder="Search staff members by name or role..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+        />
+      </div>
+    </div>
+
+    <!-- Right side: Role dropdown -->
+    <div class="toolbar__right">
+      <div class="filter-dropdown">
+        <select 
+          class="role-select"
+          [ngModel]="selectedRoleFilter()"
+          (ngModelChange)="selectedRoleFilter.set($event)"
+        >
+          @for (role of rolesList; track role) {
+            <option [value]="role">{{ role }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Premium Table -->
+  <div class="table-card">
+    @if (loading()) {
+      <div class="table-loading">
+        <div class="spinner"></div>
+        <p>Loading staff registry...</p>
+      </div>
+    } @else {
+      <table class="staff-table">
+        <thead>
+          <tr>
+            <th class="col-no">NO.</th>
+            <th class="col-staff">STAFF MEMBER</th>
+            <th class="col-email">EMAIL</th>
+            <th class="col-role">ROLE</th>
+            <th class="col-status">STATUS</th>
+            <th class="col-actions">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredStaff().length === 0) {
+            <tr>
+              <td colspan="6" class="table-empty">
+                <ng-icon name="heroUserGroup" size="32"></ng-icon>
+                <p>No staff members found matching filters</p>
+              </td>
+            </tr>
+          }
+          @for (member of filteredStaff(); track member.id; let idx = $index) {
+            <tr class="staff-row">
+              <td class="col-no">
+                <span class="no-label">{{ idx + 1 }}</span>
+              </td>
+              <td class="col-staff">
+                <div class="patient-cell">
+                  <div class="avatar" [style.background-color]="member.avatarColor">
+                    {{ member.initials }}
+                  </div>
+                  <div class="staff-info">
+                    <span class="staff-name">{{ member.name }}</span>
+                    @if (member.specialty) {
+                      <span class="staff-specialty">{{ member.specialty }}</span>
+                    }
+                  </div>
+                </div>
+              </td>
+              <td class="col-email">
+                <span class="email-text">{{ member.email }}</span>
+              </td>
+              <td class="col-role">
+                <span class="role-badge" [class]="'role-badge--' + member.role.toLowerCase()">
+                  {{ member.role }}
+                </span>
+              </td>
+              <td class="col-status">
+                <span 
+                  class="status-pill" 
+                  [class.status-pill--active]="member.status === 'Active'"
+                  [class.status-pill--inactive]="member.status === 'Inactive'"
+                >
+                  {{ member.status }}
+                </span>
+              </td>
+              <td class="col-actions">
+                <div class="actions-group">
+                  <button (click)="openEditModal(member)" class="action-btn action-btn--edit" title="Edit staff profile">
+                    <ng-icon name="heroPencil" size="14"></ng-icon>
+                  </button>
+                  <button (click)="deleteStaff(member.id)" class="action-btn action-btn--delete" title="Delete staff profile">
+                    <ng-icon name="heroTrash" size="14"></ng-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <!-- Centered Edit Profile Modal -->
+  <ms-modal [visible]="showEditModal()" title="Edit Staff Profile" (close)="showEditModal.set(false)">
+    <form (ngSubmit)="saveStaffProfile()" class="add-form">
+      <div class="form-group">
+        <label class="form-label">Full Name *</label>
+        <input 
+          type="text" 
+          name="name" 
+          [(ngModel)]="editingStaff.name" 
+          placeholder="e.g. John Doe"
+          class="form-input" 
+          required 
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address *</label>
+        <input 
+          type="email" 
+          name="email" 
+          [(ngModel)]="editingStaff.email" 
+          placeholder="e.g. receptionist@clinic.com"
+          class="form-input" 
+          required 
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select name="role" [(ngModel)]="editingStaff.role" class="form-select">
+          <option value="Admin">Admin</option>
+          <option value="Doctor">Doctor</option>
+          <option value="Secretary">Secretary</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Account Status</label>
+        <select name="status" [(ngModel)]="editingStaff.status" class="form-select">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
+
+      <div class="form-actions border-t pt-4 mt-6 flex justify-end gap-3">
+        <button type="button" (click)="showEditModal.set(false)" class="btn-secondary">
+          Cancel
+        </button>
+        <button type="submit" class="btn-primary">
+          Save Profile
+        </button>
+      </div>
+    </form>
+  </ms-modal>
+
+</div>
