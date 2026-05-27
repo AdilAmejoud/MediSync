@@ -1,0 +1,444 @@
+<div class="appointments-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">Appointment Management</h1>
+      <p class="page-subtitle">Create, modify and confirm all clinic appointments.</p>
+    </div>
+    <button
+      (click)="toggleNewForm()"
+      class="btn-gradient-primary"
+    >
+      <span>{{ showNewForm() ? "✕ Cancel" : "+ New Appointment" }}</span>
+    </button>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-accent stat-accent-primary"></div>
+      <div class="stat-body">
+        <div class="stat-info">
+          <span class="stat-label">Today's Appointments</span>
+          <p class="stat-value">{{ todayCount() }}</p>
+          <span class="stat-badge stat-badge-primary">Active Schedule</span>
+        </div>
+        <div class="stat-icon-wrap">
+          <ng-icon name="heroClock" size="24"></ng-icon>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-accent stat-accent-warning"></div>
+      <div class="stat-body">
+        <div class="stat-info">
+          <span class="stat-label">Pending Confirmation</span>
+          <p class="stat-value stat-value-warning">{{ pendingCount() }}</p>
+          <span class="stat-badge stat-badge-warning">Requires Action</span>
+        </div>
+        <div class="stat-icon-wrap stat-icon-warning">
+          <ng-icon name="heroClock" size="24"></ng-icon>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-accent stat-accent-danger"></div>
+      <div class="stat-body">
+        <div class="stat-info">
+          <span class="stat-label">Cancelled</span>
+          <p class="stat-value stat-value-danger">{{ cancelledCount() }}</p>
+          <span class="stat-badge stat-badge-danger">Released Hours</span>
+        </div>
+        <div class="stat-icon-wrap stat-icon-danger">
+          <ng-icon name="heroXCircle" size="24"></ng-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Appointment Form -->
+  @if (showNewForm()) {
+    <div class="form-card animate-fade-in">
+      <button
+        (click)="showNewForm.set(false)"
+        class="form-close"
+      >
+        <ng-icon name="heroXMark" size="16"></ng-icon>
+      </button>
+
+      <div class="form-heading">
+        <h2 class="form-title">Schedule New Appointment</h2>
+        <p class="form-desc">Onboard is compliant with standard clinic scheduling requirements.</p>
+      </div>
+
+      <form (submit)="handleCreateAppointment(); $event.preventDefault();" class="appointment-form">
+        <div class="form-grid">
+
+          <div class="field-group">
+            <label class="field-label">Select Patient *</label>
+            <div class="input-affix">
+              <ng-icon name="heroMagnifyingGlass" class="input-prefix" size="16"></ng-icon>
+              <input
+                type="text"
+                name="patientSearch"
+                [(ngModel)]="patientSearch"
+                (ngModelChange)="showPatientResults = true"
+                (focus)="showPatientResults = true"
+                placeholder="Search patient name or ID..."
+                class="field-input field-input-icon"
+              />
+            </div>
+            @if (showPatientResults && filteredPatientCatalog.length > 0) {
+              <div class="autocomplete-dropdown">
+                @for (p of filteredPatientCatalog; track p.id) {
+                  <div
+                    (click)="handlePatientSelect(p)"
+                    class="autocomplete-row"
+                  >
+                    <span class="autocomplete-name">{{ p.name }}</span>
+                    <span class="autocomplete-id">{{ p.id }}</span>
+                  </div>
+                }
+              </div>
+            }
+            @if (selectedPatient) {
+              <p class="patient-linked">&#10003; Patient Linked: {{ selectedPatient.name }} ({{ selectedPatient.id }})</p>
+            }
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Select Doctor *</label>
+            <select
+              name="selectedDoctor"
+              [(ngModel)]="selectedDoctor"
+              class="field-select"
+            >
+              @for (doc of doctorOptions; track doc.name) {
+                <option [value]="doc.name">
+                  {{ doc.name }} — {{ doc.specialty }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Date *</label>
+            <ms-date-picker [(value)]="selectedDate" placeholder="Select date"></ms-date-picker>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Time Slot *</label>
+            <div class="slots-grid">
+              @for (slot of timeSlots; track slot.time) {
+                <button
+                  type="button"
+                  [disabled]="slot.booked"
+                  (click)="selectedTimeSlot = slot.time"
+                  [ngClass]="{
+                    'slot-booked': slot.booked,
+                    'slot-selected': selectedTimeSlot === slot.time,
+                    'slot-available': !slot.booked && selectedTimeSlot !== slot.time
+                  }"
+                  class="slot-btn"
+                >
+                  {{ slot.time }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Consultation Type</label>
+            <div class="pills-row">
+              @for (type of consultationTypes; track type) {
+                <button
+                  type="button"
+                  (click)="consultationType = type"
+                  [ngClass]="{
+                    'pill-selected': consultationType === type,
+                    'pill-unselected': consultationType !== type
+                  }"
+                  class="pill-btn"
+                >
+                  {{ type }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Mode</label>
+            <div class="pills-row pills-row-mode">
+              @for (m of modes; track m) {
+                <button
+                  type="button"
+                  (click)="mode = m"
+                  [ngClass]="{
+                    'pill-selected': mode === m,
+                    'pill-unselected': mode !== m
+                  }"
+                  class="pill-btn pill-btn-mode"
+                >
+                  {{ m }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="field-group field-group-full">
+            <label class="field-label">Consultation Notes</label>
+            <textarea
+              name="notes"
+              [(ngModel)]="notes"
+              placeholder="Insert chronic history descriptions, reasons or diagnostic pre-requisites..."
+              class="field-textarea"
+            ></textarea>
+          </div>
+
+          <div class="field-group field-group-full">
+            <div class="toggle-card">
+              <div class="toggle-content">
+                <ng-icon name="heroBell" class="toggle-bell" size="20"></ng-icon>
+                <div>
+                  <span class="toggle-title">Send digital notification alert</span>
+                  <span class="toggle-desc">Auto mailer is activated through certified secure server (HDS compliant).</span>
+                </div>
+              </div>
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  name="sendEmail"
+                  [(ngModel)]="sendEmail"
+                  class="switch-input"
+                />
+                <span class="switch-track"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            (click)="showNewForm.set(false)"
+            class="btn-secondary"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn-gradient-primary btn-submit"
+          >
+            Confirm Appointment
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Toolbar: Tab Filter + Search + Date Filter -->
+  <div class="toolbar">
+    <div class="filter-tabs">
+      @for (tab of tabs; track tab) {
+        <button
+          class="filter-tab"
+          [class.filter-tab--active]="activeTab() === tab"
+          (click)="setTab(tab)"
+        >
+          {{ tab }}
+        </button>
+      }
+    </div>
+    <div class="toolbar-right">
+      <div class="search-wrapper">
+        <ng-icon name="heroMagnifyingGlass" class="search-icon" size="18"></ng-icon>
+        <input
+          type="text"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          placeholder="Search by patient name..."
+          class="search-input"
+        />
+      </div>
+      <ms-date-picker
+        [value]="dateFilter()"
+        (valueChange)="dateFilter.set($event)"
+        placeholder="Filter by date"
+      ></ms-date-picker>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="table-wrapper">
+      <table class="appointments-table">
+        <thead>
+          <tr>
+            <th>PATIENT</th>
+            <th>DATE &amp; TIME</th>
+            <th>TYPE</th>
+            <th>MODE</th>
+            <th>STATUS</th>
+            <th class="text-center">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (_ of [1,2,3,4,5]; track $index) {
+            <tr>
+              <td><div class="skeleton skeleton--avatar-cell"></div></td>
+              <td><div class="skeleton skeleton--medium"></div></td>
+              <td><div class="skeleton skeleton--short"></div></td>
+              <td><div class="skeleton skeleton--short"></div></td>
+              <td><div class="skeleton skeleton--pill"></div></td>
+              <td><div class="skeleton skeleton--actions"></div></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <!-- Table -->
+    <div class="table-wrapper">
+      <table class="appointments-table">
+        <thead>
+          <tr>
+            <th>PATIENT</th>
+            <th>DATE &amp; TIME</th>
+            <th>TYPE</th>
+            <th>MODE</th>
+            <th>STATUS</th>
+            <th class="text-center">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (appt of filteredAppointments(); track appt.id; let idx = $index) {
+            <tr>
+              <td>
+                <div class="cell-patient">
+                  <div class="patient-avatar">{{ getInitials(appt.patientName) }}</div>
+                  <div class="patient-info">
+                    <span class="patient-name">{{ appt.patientName }}</span>
+                    <span class="patient-sub">{{ appt.patientId }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="cell-datetime">{{ appt.dateTime }}</td>
+              <td>
+                <span class="badge-type">{{ appt.type }}</span>
+              </td>
+              <td class="cell-mode">{{ appt.mode }}</td>
+              <td>
+                <span
+                  class="status-pill"
+                  [class]="getStatusClass(appt.status)"
+                >{{ appt.status }}</span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  @if (appt.status === 'Pending') {
+                    <button
+                      (click)="handleConfirm(appt.id)"
+                      class="action-btn action-btn--confirm"
+                      title="Confirm"
+                    >
+                      <ng-icon name="heroCheck" size="16"></ng-icon>
+                    </button>
+                    <button
+                      (click)="handleReject(appt.id)"
+                      class="action-btn action-btn--reject"
+                      title="Reject"
+                    >
+                      <ng-icon name="heroXMark" size="16"></ng-icon>
+                    </button>
+                  }
+                  @if (appt.status === 'Pending' || appt.status === 'Confirmed') {
+                    <button
+                      (click)="openRescheduleModal(appt)"
+                      class="action-btn action-btn--reschedule has-text"
+                      title="Reschedule"
+                    >
+                      <ng-icon name="heroCalendarDays" size="16"></ng-icon>
+                      <span>Reschedule</span>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-row">
+                <ng-icon name="heroFolderOpen" class="empty-icon"></ng-icon>
+                <div class="empty-title">No appointments found</div>
+                <div class="empty-desc">Try adjusting your search or filter criteria.</div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Reschedule Modal -->
+  <ms-modal [visible]="showRescheduleModal" title="Reschedule & Approve Appointment" (close)="showRescheduleModal = false">
+    @if (selectedApptToReschedule) {
+      <form (submit)="confirmReschedule(); $event.preventDefault();" class="reschedule-form">
+        <div class="form-group">
+          <label class="form-label">Patient</label>
+          <div class="readonly-wrapper">
+            <ng-icon name="heroUser" class="field-icon" size="18"></ng-icon>
+            <span class="readonly-value">{{ selectedApptToReschedule.patientName }}</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Doctor</label>
+          <div class="readonly-wrapper">
+            <ng-icon name="heroBriefcase" class="field-icon" size="18"></ng-icon>
+            <span class="readonly-value">
+              {{ selectedApptToReschedule.doctorName }}
+              <span class="speciality-tag">{{ selectedApptToReschedule.specialty }}</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">New Date *</label>
+          <div class="input-with-icon">
+            <ng-icon name="heroCalendar" class="input-icon" size="18"></ng-icon>
+            <ms-date-picker [(value)]="rescheduleDate" placeholder="Select date"></ms-date-picker>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">New Time Slot *</label>
+          <div class="time-slots-grid">
+            @for (slot of timeSlots; track slot.time) {
+              <button
+                type="button"
+                (click)="rescheduleTime = slot.time"
+                [ngClass]="{
+                  'slot-selected': rescheduleTime === slot.time,
+                  'slot-available': rescheduleTime !== slot.time
+                }"
+                class="slot-btn"
+              >
+                {{ slot.time }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="form-actions border-t pt-4 mt-6">
+          <button type="button" (click)="showRescheduleModal = false" class="btn-secondary">
+            Cancel
+          </button>
+          <button type="submit" class="btn-primary">
+            Confirm & Approve Slot
+          </button>
+        </div>
+      </form>
+    }
+  </ms-modal>
+
+</div>

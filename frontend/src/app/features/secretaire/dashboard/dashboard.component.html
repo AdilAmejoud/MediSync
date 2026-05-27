@@ -1,0 +1,345 @@
+<div class="sd">
+
+  <!-- Emergency Banner -->
+  @if (emergenciesActive()) {
+    <div class="sd__alert sd__alert--emergency">
+      <span class="sd__alert-icon">⚠️</span>
+      <span>EMERGENCY ADMISSION — Doctor has been notified</span>
+    </div>
+  }
+
+  <!-- Header -->
+  <div class="sd__header">
+    <div class="sd__header-title">
+      <h1 class="sd__greeting">Front Desk</h1>
+      <p class="sd__subtitle">
+        <ng-icon name="heroClock" size="16"></ng-icon>
+        {{ clockDisplayLabel }}
+      </p>
+    </div>
+    <div class="sd__header-actions">
+      <button class="sd__btn sd__btn--qr" (click)="openQRModal()">
+        <ng-icon name="heroQrCode" size="20"></ng-icon>
+        QR Check-in
+      </button>
+      <button class="sd__btn sd__btn--walkin" (click)="openWalkInModal()">
+        <ng-icon name="heroUserPlus" size="20"></ng-icon>
+        Walk-in
+      </button>
+      <button class="sd__btn sd__btn--emergency" (click)="openEmergencyModal()">
+        <ng-icon name="heroExclamationTriangle" size="20"></ng-icon>
+        Emergency
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="sd__loading">Loading dashboard...</div>
+  } @else if (error()) {
+    <div class="sd__error">{{ error() }}</div>
+  } @else {
+    <!-- Top Row: stats -->
+    <div class="sd__stats-row">
+      <div class="sd__stat-card">
+        <div class="sd__stat-icon sd__stat-icon--appointments">
+          <ng-icon name="heroCalendarDays" size="24"></ng-icon>
+        </div>
+        <div class="sd__stat-info">
+          <span class="sd__stat-value">{{ todayAppointmentsCount() }}</span>
+          <span class="sd__stat-label">Today's Appointments</span>
+        </div>
+      </div>
+      <div class="sd__stat-card">
+        <div class="sd__stat-icon sd__stat-icon--waiting">
+          <ng-icon name="heroUsers" size="24"></ng-icon>
+        </div>
+        <div class="sd__stat-info">
+          <span class="sd__stat-value">{{ waitingRoomCount() }}</span>
+          <span class="sd__stat-label">Waiting Room</span>
+        </div>
+      </div>
+      <div class="sd__stat-card">
+        <div class="sd__stat-icon sd__stat-icon--invoices">
+          <ng-icon name="heroBanknotes" size="24"></ng-icon>
+        </div>
+        <div class="sd__stat-info">
+          <span class="sd__stat-value">{{ invoicesPendingCount() }}</span>
+          <span class="sd__stat-label">Pending Invoices</span>
+        </div>
+      </div>
+      <div class="sd__stat-card">
+        <div class="sd__stat-icon sd__stat-icon--revenue">
+          <ng-icon name="heroArrowTrendingUp" size="24"></ng-icon>
+        </div>
+        <div class="sd__stat-info">
+          <span class="sd__stat-value">{{ todayRevenue() }} MAD</span>
+          <span class="sd__stat-label">Today's Revenue</span>
+        </div>
+      </div>
+      <div class="sd__stat-card">
+        <div class="sd__stat-icon sd__stat-icon--rooms">
+          <ng-icon name="heroBuildingOffice" size="24"></ng-icon>
+        </div>
+        <div class="sd__stat-info">
+          <span class="sd__stat-value">{{ roomsAvailableCount() }}</span>
+          <span class="sd__stat-label">Available Rooms</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Row: Clinic Queue + Invoices -->
+    <div class="sd__two-col">
+      <!-- Clinic Queue -->
+      <div class="sd__card">
+        <div class="sd__card-header">
+          <h2 class="sd__card-title">Clinic Queue</h2>
+          <span class="sd__card-badge">{{ clinicQueue().length }}</span>
+        </div>
+        <div class="sd__card-body sd__card-body--scroll">
+          <table class="sd__table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Patient</th>
+                <th>Doctor</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (appt of clinicQueue(); track appt.id; let i = $index) {
+                <tr>
+                  <td class="sd__table-no">{{ i + 1 }}</td>
+                  <td>
+                    <div class="sd__patient-name">
+                      <span class="sd__avatar">{{ appt.patientInitials }}</span>
+                      <span>{{ appt.patientName }}</span>
+                    </div>
+                  </td>
+                  <td>{{ appt.doctorName }}</td>
+                  <td>{{ appt.time }}</td>
+                  <td>
+                    <span class="status-pill {{ statusBadgeClass(appt.status) }}">
+                      {{ appt.status === 'PENDING' ? 'Arriving' : appt.status === 'CONFIRMED' ? 'Booked' : appt.status === 'CHECKED_IN' ? 'Checked In' : appt.status }}
+                    </span>
+                  </td>
+                  <td class="sd__table-actions">
+                    @if (appt.status === 'PENDING') {
+                      <button class="sd__action-btn sd__action-btn--checkin" (click)="onCheckIn(appt)" title="Check in">
+                        <ng-icon name="heroCheckCircle" size="18"></ng-icon>
+                      </button>
+                    }
+                    @if (appt.status === 'PENDING' || appt.status === 'CONFIRMED' || appt.status === 'CHECKED_IN') {
+                      <button class="sd__action-btn sd__action-btn--cancel" (click)="onCancel(appt)" title="Cancel">
+                        <ng-icon name="heroXCircle" size="18"></ng-icon>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+              @empty {
+                <tr><td colspan="6" class="sd__empty">No appointments today</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Invoices -->
+      <div class="sd__card">
+        <div class="sd__card-header">
+          <h2 class="sd__card-title">Pending Invoices</h2>
+          <span class="sd__card-badge">{{ invoices().length }}</span>
+        </div>
+        <div class="sd__card-body sd__card-body--scroll">
+          <table class="sd__table">
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Amount</th>
+                <th>Due</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (inv of invoices(); track inv.id) {
+                <tr>
+                  <td>
+                    <div class="sd__patient-name">
+                      <span class="sd__avatar">{{ inv.patientInitials }}</span>
+                      <span>{{ inv.patientName }}</span>
+                    </div>
+                  </td>
+                  <td class="sd__amount">{{ inv.amount }} MAD</td>
+                  <td>{{ inv.dueDate | date:'shortDate' }}</td>
+                  <td>
+                    <button class="sd__action-btn sd__action-btn--pay" (click)="onCollectPayment(inv)" title="Collect Payment">
+                      <ng-icon name="heroCreditCard" size="18"></ng-icon>
+                    </button>
+                  </td>
+                </tr>
+              }
+              @empty {
+                <tr><td colspan="4" class="sd__empty">No pending invoices</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Row: Room Status -->
+    <div class="sd__card sd__card--rooms">
+      <div class="sd__card-header">
+        <h2 class="sd__card-title">Room Status</h2>
+        <div class="sd__room-legend">
+          <span><span class="sd__legend-dot" style="background:#10B981"></span>Available</span>
+          <span><span class="sd__legend-dot" style="background:#3B82F6"></span>Waiting</span>
+          <span><span class="sd__legend-dot" style="background:#F97316"></span>In Consultation</span>
+        </div>
+      </div>
+      <div class="sd__card-body">
+        <div class="sd__room-grid">
+          @for (room of rooms(); track room.room) {
+            <div class="sd__room-card">
+              <div class="sd__room-header">
+                <span class="sd__room-name">{{ room.room }}</span>
+                <span class="room-badge {{ roomStatusClass(room.status) }}">
+                  <span class="room-badge__dot" [style.background]="roomStatusDot(room.status)"></span>
+                  {{ room.status }}
+                </span>
+              </div>
+              <div class="sd__room-doctor">{{ room.doctor }}</div>
+              @if (room.patientName) {
+                <div class="sd__room-patient">
+                  <ng-icon name="heroUser" size="14"></ng-icon>
+                  {{ room.patientName }}
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Walk-in Modal -->
+  @if (showWalkInModal()) {
+    <div class="modal-overlay" (click)="closeWalkInModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal__header">
+          <h3>Register Walk-in</h3>
+          <button class="modal__close" (click)="closeWalkInModal()">&times;</button>
+        </div>
+        <div class="modal__body">
+          <div class="form-group">
+            <label>Patient Name</label>
+            <input [(ngModel)]="walkInForm.name" placeholder="Full name" class="form-control" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Age</label>
+              <input type="number" [(ngModel)]="walkInForm.age" placeholder="Age" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label>Phone</label>
+              <input [(ngModel)]="walkInForm.phone" placeholder="Phone" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Reason</label>
+            <input [(ngModel)]="walkInForm.reason" placeholder="Reason for visit" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label>Assigned Doctor</label>
+            <select [(ngModel)]="walkInForm.doctorId" class="form-control">
+              @for (doc of doctors; track doc.id) {
+                <option [value]="doc.id">{{ doc.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button class="sd__btn sd__btn--secondary" (click)="closeWalkInModal()">Cancel</button>
+          <button class="sd__btn sd__btn--walkin" (click)="submitWalkIn()">Register</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Emergency Modal -->
+  @if (showEmergencyModal()) {
+    <div class="modal-overlay" (click)="closeEmergencyModal()">
+      <div class="modal modal--emergency" (click)="$event.stopPropagation()">
+        <div class="modal__header">
+          <h3>🚨 Register Emergency</h3>
+          <button class="modal__close" (click)="closeEmergencyModal()">&times;</button>
+        </div>
+        <div class="modal__body">
+          <div class="form-group">
+            <label>Patient Name</label>
+            <input [(ngModel)]="emergencyForm.name" placeholder="Full name" class="form-control" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Age</label>
+              <input type="number" [(ngModel)]="emergencyForm.age" placeholder="Age" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label>Severity</label>
+              <select [(ngModel)]="emergencyForm.severity" class="form-control">
+                <option>Critical</option>
+                <option>Urgent</option>
+                <option>Moderate</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Complaint</label>
+            <textarea [(ngModel)]="emergencyForm.complaint" placeholder="Description" class="form-control" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Assign Doctor</label>
+            <select [(ngModel)]="emergencyForm.doctorId" class="form-control">
+              @for (doc of doctors; track doc.id) {
+                <option [value]="doc.id">{{ doc.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button class="sd__btn sd__btn--secondary" (click)="closeEmergencyModal()">Cancel</button>
+          <button class="sd__btn sd__btn--emergency" (click)="submitEmergency()">Activate Emergency</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- QR Modal -->
+  @if (showQRModal()) {
+    <div class="modal-overlay" (click)="closeQRModal()">
+      <div class="modal modal--qr" (click)="$event.stopPropagation()">
+        <div class="modal__header">
+          <h3>Clinic QR Code</h3>
+          <button class="modal__close" (click)="closeQRModal()">&times;</button>
+        </div>
+        <div class="modal__body qr-modal__body">
+          @if (qrLoading()) {
+            <div class="qr-loading">Loading QR...</div>
+          } @else if (qrCodeUrl()) {
+            <img [src]="qrCodeUrl()" alt="Clinic QR Code" class="qr-image" />
+            <p class="qr-hint">Patients scan this QR at the clinic entrance to self-check-in</p>
+          }
+        </div>
+        <div class="modal__footer">
+          <button class="sd__btn sd__btn--secondary" (click)="closeQRModal()">Close</button>
+          <button class="sd__btn sd__btn--qr" (click)="loadQRCode()" [disabled]="qrLoading()">
+            <ng-icon name="heroArrowPath" size="16"></ng-icon>
+            Regenerate
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

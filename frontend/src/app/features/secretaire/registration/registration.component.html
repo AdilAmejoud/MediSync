@@ -1,0 +1,464 @@
+<div class="reg-wrapper">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Full Patient Registration</h1>
+      <p class="page-subtitle">Complete onboarding form for new clinic patients.</p>
+    </div>
+  </div>
+
+  @if (isSubmitted) {
+    <!-- Success Screen -->
+    <div class="success-card">
+      <div class="success-icon-wrap">
+        <div class="success-icon">
+          <ng-icon name="heroCheck" size="28"></ng-icon>
+        </div>
+      </div>
+      <h2 class="success-title">Onboarding Complete</h2>
+      <p class="success-desc">
+        Medical record created for <strong>{{ formData.firstName }} {{ formData.lastName }}</strong>.
+        Allergy warnings and primary contact credentials have been pushed to active doctors databases.
+      </p>
+      <div class="success-details">
+        <div class="detail-row">
+          <span class="detail-label">Primary Phone</span>
+          <span class="detail-value">{{ formData.phone }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Emergency Contact</span>
+          <span class="detail-value">{{ formData.emergencyName }} ({{ formData.emergencyPhone }})</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Insurance</span>
+          <span class="detail-value">{{ formData.insuranceProvider }} — {{ formData.policyNumber }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Blood Type</span>
+          <span class="detail-value">{{ formData.bloodType }} <span class="text-muted">(Allergies: {{ formData.allergies }})</span></span>
+        </div>
+      </div>
+      <button (click)="resetForm()" class="btn btn--reset">
+        <ng-icon name="heroArrowPath" size="16"></ng-icon>
+        Onboard Another Patient
+      </button>
+    </div>
+  } @else {
+    <!-- Multi-Step Form -->
+    <div class="form-card">
+
+      <!-- Step Progress Bar -->
+      <div class="step-bar">
+        <div class="step-bar-track">
+          <div class="step-bar-fill" [style.width.%]="((currentStep - 1) / (steps.length - 1)) * 100"></div>
+        </div>
+        @for (st of steps; track st.num) {
+          <div class="step-dot-wrap">
+            <div
+              [ngClass]="{
+                'step-dot--done': currentStep > st.num,
+                'step-dot--active': currentStep === st.num,
+                'step-dot--pending': currentStep < st.num
+              }"
+              class="step-dot"
+            >
+              @if (currentStep > st.num) {
+                <ng-icon name="heroCheck" size="14"></ng-icon>
+              } @else {
+                <span>{{ st.num }}</span>
+              }
+            </div>
+            <span
+              [ngClass]="{
+                'step-label--active': currentStep === st.num,
+                'step-label--done': currentStep > st.num,
+                'step-label--pending': currentStep < st.num
+              }"
+              class="step-label"
+            >{{ st.label }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Form Body -->
+      <form (submit)="handleSubmit(); $event.preventDefault();" class="form-body">
+
+        <!-- STEP 1: Personal Info -->
+        @if (currentStep === 1) {
+          <div class="step-content">
+            <div class="section-header">
+              <ng-icon name="heroUser" size="18" class="section-icon"></ng-icon>
+              <div>
+                <h3 class="section-title">Personal Information</h3>
+                <p class="section-desc">Primary identification criteria according to demographic requirements.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="input-group">
+                <label class="input-label">First Name *</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroUser" size="16" class="input-icon"></ng-icon>
+                  <input type="text" name="firstName" [(ngModel)]="formData.firstName" placeholder="e.g. Robert" class="input-field" required />
+                </div>
+              </div>
+              <div class="input-group">
+                <label class="input-label">Last Name *</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroUser" size="16" class="input-icon"></ng-icon>
+                  <input type="text" name="lastName" [(ngModel)]="formData.lastName" placeholder="e.g. Fox" class="input-field" required />
+                </div>
+              </div>
+              <div class="input-group input-group--wide">
+                <label class="input-label">Date of Birth *</label>
+                <div class="date-select-group">
+                  <div class="input-wrap input-wrap--date">
+                    <ng-icon name="heroCalendar" size="16" class="input-icon"></ng-icon>
+                    <select name="dobDay" [(ngModel)]="dobDay" (ngModelChange)="updateDob()" class="input-field input-field--date">
+                      <option value="">Day</option>
+                      @for (d of days; track d) {
+                        <option [value]="d">{{ d }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="input-wrap input-wrap--date">
+                    <select name="dobMonth" [(ngModel)]="dobMonth" (ngModelChange)="updateDob()" class="input-field input-field--date">
+                      <option value="">Month</option>
+                      @for (m of months; track m.value) {
+                        <option [value]="m.value">{{ m.label }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="input-wrap input-wrap--date">
+                    <select name="dobYear" [(ngModel)]="dobYear" (ngModelChange)="updateDob()" class="input-field input-field--date">
+                      <option value="">Year</option>
+                      @for (y of years; track y) {
+                        <option [value]="y">{{ y }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="input-group">
+                <label class="input-label">Gender *</label>
+                <div class="gender-group">
+                  @for (g of ['Male', 'Female']; track g) {
+                    <button type="button" (click)="setGender(g)"
+                      [ngClass]="{'gender-pill--active': formData.gender === g, 'gender-pill': formData.gender !== g}"
+                      class="gender-pill-base">
+                      @if (g === 'Male') { <ng-icon name="heroUser" size="14"></ng-icon> }
+                      @if (g === 'Female') { <ng-icon name="heroUserCircle" size="14"></ng-icon> }
+                      {{ g }}
+                    </button>
+                  }
+                </div>
+              </div>
+              <div class="input-group">
+                <label class="input-label">Phone *</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroPhone" size="16" class="input-icon"></ng-icon>
+                  <input type="tel" name="phone" [(ngModel)]="formData.phone" placeholder="e.g. +212 6-5544-3322" class="input-field" required />
+                </div>
+              </div>
+              <div class="input-group">
+                <label class="input-label">Email</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroEnvelope" size="16" class="input-icon"></ng-icon>
+                  <input type="email" name="email" [(ngModel)]="formData.email" placeholder="e.g. robert.fox@gmail.com" class="input-field" />
+                </div>
+              </div>
+
+              <div class="input-group input-group--wide">
+                <label class="input-label">National ID / Resident SSN</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroIdentification" size="16" class="input-icon"></ng-icon>
+                  <input type="text" name="nationalId" [(ngModel)]="formData.nationalId" placeholder="e.g. BE-984920" class="input-field" />
+                </div>
+              </div>
+
+              <div class="input-group input-group--wide">
+                <label class="input-label">Full Residential Address *</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroMapPin" size="16" class="input-icon"></ng-icon>
+                  <input type="text" name="address" [(ngModel)]="formData.address" placeholder="e.g. Avenue Hassan II, Res Nour Apt 4" class="input-field" required />
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label class="input-label">City *</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroBuildingOffice" size="16" class="input-icon"></ng-icon>
+                  <input type="text" name="city" [(ngModel)]="formData.city" placeholder="e.g. Casablanca" class="input-field" required />
+                </div>
+              </div>
+              <div class="input-group">
+                <label class="input-label">Postal Code</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroHashtag" size="16" class="input-icon"></ng-icon>
+                  <input type="text" name="postalCode" [(ngModel)]="formData.postalCode" placeholder="e.g. 20000" class="input-field" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Emergency Contact -->
+            <div class="subsection subsection--emergency">
+              <div class="subsection-header">
+                <ng-icon name="heroShieldCheck" size="18" class="subsection-icon"></ng-icon>
+                <span class="subsection-title">Emergency Contact</span>
+              </div>
+              <div class="form-grid">
+                <div class="input-group">
+                  <label class="input-label">Contact Name *</label>
+                  <div class="input-wrap">
+                    <ng-icon name="heroUser" size="16" class="input-icon"></ng-icon>
+                    <input type="text" name="emergencyName" [(ngModel)]="formData.emergencyName" placeholder="e.g. Helen Fox (Spouse)" class="input-field" required />
+                  </div>
+                </div>
+                <div class="input-group">
+                  <label class="input-label">Contact Phone *</label>
+                  <div class="input-wrap">
+                    <ng-icon name="heroPhone" size="16" class="input-icon"></ng-icon>
+                    <input type="tel" name="emergencyPhone" [(ngModel)]="formData.emergencyPhone" placeholder="e.g. +212 6-1122-3344" class="input-field" required />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- STEP 2: Medical History -->
+        @if (currentStep === 2) {
+          <div class="step-content">
+            <div class="section-header">
+              <ng-icon name="heroClipboardDocument" size="18" class="section-icon"></ng-icon>
+              <div>
+                <h3 class="section-title">Medical History</h3>
+                <p class="section-desc">Describe conditions, treatment protocols, and surgical histories accurately.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="input-group">
+                <label class="input-label">Blood Category *</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroHeart" size="16" class="input-icon"></ng-icon>
+                  <select name="bloodType" [(ngModel)]="formData.bloodType" class="input-field">
+                    @for (bt of ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']; track bt) {
+                      <option [value]="bt">{{ bt }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+              <div class="input-group">
+                <label class="input-label">Known Allergies</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroExclamationTriangle" size="16" class="input-icon"></ng-icon>
+                  <input type="text" name="allergies" [(ngModel)]="formData.allergies" placeholder="e.g. Penicillin, Aspirin, Peanuts" class="input-field" />
+                </div>
+              </div>
+
+              <div class="input-group input-group--wide">
+                <label class="input-label">Chronic Conditions</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroDocumentText" size="16" class="input-icon"></ng-icon>
+                  <input type="text" name="chronicConditions" [(ngModel)]="formData.chronicConditions" placeholder="e.g. Asthma, High Blood Pressure, Diabetes (Type 2)" class="input-field" />
+                </div>
+              </div>
+
+              <div class="input-group input-group--wide">
+                <label class="input-label">Current Active Medications</label>
+                <div class="input-wrap input-wrap--textarea">
+                  <ng-icon name="heroBeaker" size="16" class="input-icon input-icon--top"></ng-icon>
+                  <textarea name="medications" [(ngModel)]="formData.medications" placeholder="List commercial names, frequencies, dosage metrics..." class="input-field input-field--textarea" rows="3"></textarea>
+                </div>
+              </div>
+
+              <div class="input-group input-group--wide">
+                <label class="input-label">Previous Surgeries</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroBriefcase" size="16" class="input-icon"></ng-icon>
+                  <input type="text" name="previousSurgeries" [(ngModel)]="formData.previousSurgeries" placeholder="e.g. Appendectomy (2018), Knee Arthroscopy (2021)" class="input-field" />
+                </div>
+              </div>
+
+              <div class="input-group input-group--wide">
+                <label class="input-label">Family Medical History</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroUserGroup" size="16" class="input-icon"></ng-icon>
+                  <input type="text" name="familyHistory" [(ngModel)]="formData.familyHistory" placeholder="e.g. Family history of coronary cardiac artery blocks" class="input-field" />
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- STEP 3: Insurance -->
+        @if (currentStep === 3) {
+          <div class="step-content">
+            <div class="section-header">
+              <ng-icon name="heroCreditCard" size="18" class="section-icon"></ng-icon>
+              <div>
+                <h3 class="section-title">Insurance Credentials</h3>
+                <p class="section-desc">File insurance provider codes and policy coverage numbers.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="input-group">
+                <label class="input-label">Insurance Provider *</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroBuildingOffice" size="16" class="input-icon"></ng-icon>
+                  <select name="insuranceProvider" [(ngModel)]="formData.insuranceProvider" class="input-field">
+                    @for (prov of ['CNOPS', 'CNSS', 'AXA Assurance', 'SAHAM', 'Wafa Assurance', 'RMA Watanya', 'Private Pay']; track prov) {
+                      <option [value]="prov">{{ prov }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+              <div class="input-group">
+                <label class="input-label">Policy / Affiliation Number *</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroHashtag" size="16" class="input-icon"></ng-icon>
+                  <input type="text" name="policyNumber" [(ngModel)]="formData.policyNumber" placeholder="e.g. POL-9849204" class="input-field" required />
+                </div>
+              </div>
+              <div class="input-group input-group--wide">
+                <label class="input-label">Coverage Type / Tier</label>
+                <div class="input-wrap">
+                  <ng-icon name="heroDocumentCheck" size="16" class="input-icon"></ng-icon>
+                  <select name="coverageType" [(ngModel)]="formData.coverageType" class="input-field">
+                    @for (cov of ['Premium Comprehensive', 'Standard Outpatient', 'Critical Care Only', 'Basic Tier Third-Party']; track cov) {
+                      <option [value]="cov">{{ cov }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- STEP 4: Confirmation -->
+        @if (currentStep === 4) {
+          <div class="step-content">
+            <div class="section-header">
+              <ng-icon name="heroCheckCircle" size="18" class="section-icon"></ng-icon>
+              <div>
+                <h3 class="section-title">Verify Onboarding Summary</h3>
+                <p class="section-desc">Review clinical registry inputs before validating data persistence.</p>
+              </div>
+            </div>
+
+            <div class="review-section">
+              <div class="review-card">
+                <div class="review-card-header">
+                  <ng-icon name="heroUser" size="16"></ng-icon>
+                  <span>Demographics</span>
+                </div>
+                <div class="review-grid">
+                  <div class="review-item">
+                    <span class="review-label">Full Name</span>
+                    <span class="review-value">{{ formData.firstName }} {{ formData.lastName }}</span>
+                  </div>
+                  <div class="review-item">
+                    <span class="review-label">Birth Date</span>
+                    <span class="review-value">{{ formData.dob || '—' }}</span>
+                  </div>
+                  <div class="review-item">
+                    <span class="review-label">Gender</span>
+                    <span class="review-value">{{ formData.gender }}</span>
+                  </div>
+                  <div class="review-item">
+                    <span class="review-label">Phone</span>
+                    <span class="review-value">{{ formData.phone }}</span>
+                  </div>
+                  <div class="review-item">
+                    <span class="review-label">City</span>
+                    <span class="review-value">{{ formData.city || '—' }} ({{ formData.postalCode || '—' }})</span>
+                  </div>
+                  <div class="review-item">
+                    <span class="review-label">Emergency</span>
+                    <span class="review-value">{{ formData.emergencyName }} ({{ formData.emergencyPhone || '—' }})</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="review-card">
+                <div class="review-card-header">
+                  <ng-icon name="heroClipboardDocument" size="16"></ng-icon>
+                  <span>Clinical History</span>
+                </div>
+                <div class="review-grid review-grid--2col">
+                  <div class="review-item">
+                    <span class="review-label">Blood Type</span>
+                    <span class="review-value review-value--badge">{{ formData.bloodType }}</span>
+                  </div>
+                  <div class="review-item">
+                    <span class="review-label">Allergies</span>
+                    <span class="review-value">{{ formData.allergies || 'None' }}</span>
+                  </div>
+                  <div class="review-item review-item--wide">
+                    <span class="review-label">Chronic Conditions</span>
+                    <span class="review-value">{{ formData.chronicConditions || 'None' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="review-card">
+                <div class="review-card-header">
+                  <ng-icon name="heroCreditCard" size="16"></ng-icon>
+                  <span>Insurance</span>
+                </div>
+                <div class="review-grid review-grid--3col">
+                  <div class="review-item">
+                    <span class="review-label">Provider</span>
+                    <span class="review-value">{{ formData.insuranceProvider }}</span>
+                  </div>
+                  <div class="review-item">
+                    <span class="review-label">Policy #</span>
+                    <span class="review-value review-value--mono">{{ formData.policyNumber }}</span>
+                  </div>
+                  <div class="review-item">
+                    <span class="review-label">Coverage</span>
+                    <span class="review-value">{{ formData.coverageType }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="notice-banner">
+              <ng-icon name="heroInformationCircle" size="18"></ng-icon>
+              <p>By completing registration, you authorize Trustcare Clinic to process vital files matching HDS safety parameters.</p>
+            </div>
+          </div>
+        }
+
+        <!-- Navigation Buttons -->
+        <div class="nav-buttons">
+          @if (currentStep > 1) {
+            <button type="button" (click)="handlePrevStep()" class="btn btn--prev">
+              <ng-icon name="heroArrowLeft" size="16"></ng-icon>
+              Previous
+            </button>
+          } @else {
+            <div></div>
+          }
+
+          @if (currentStep < 4) {
+            <button type="button" (click)="handleNextStep()" class="btn btn--next">
+              <span>Next Step</span>
+              <ng-icon name="heroArrowRight" size="16"></ng-icon>
+            </button>
+          } @else {
+            <button type="submit" class="btn btn--submit">
+              <ng-icon name="heroCheck" size="16"></ng-icon>
+              Register Patient
+            </button>
+          }
+        </div>
+
+      </form>
+    </div>
+  }
+
+</div>

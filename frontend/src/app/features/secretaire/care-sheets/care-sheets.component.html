@@ -1,0 +1,315 @@
+<div class="page-wrapper">
+
+  <!-- STATS ROW -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--primary">
+        <ng-icon name="heroDocumentText" size="18"></ng-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ totalCount }}</span>
+        <span class="stat-label">Total Care Sheets</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--success">
+        <ng-icon name="heroCheckCircle" size="18"></ng-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ submittedCount }}</span>
+        <span class="stat-label">Submitted</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--warning">
+        <ng-icon name="heroPencilSquare" size="18"></ng-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ draftCount }}</span>
+        <span class="stat-label">Draft</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--info">
+        <ng-icon name="heroBanknotes" size="18"></ng-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ reimbursedCount }}</span>
+        <span class="stat-label">Reimbursed</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER ROW -->
+  <div class="header-row">
+    <div>
+      <h1 class="page-title">Care Sheets</h1>
+      <p class="page-subtitle">Feuilles de soins for insurance and reimbursement filing.</p>
+    </div>
+    <button (click)="showSheetPanel = true" class="btn-primary">
+      <ng-icon name="heroPlus" size="16"></ng-icon>
+      <span>New Care Sheet</span>
+    </button>
+  </div>
+
+  <!-- TOOLBAR: Status Tabs + Search + Date -->
+  <div class="toolbar">
+    <div class="filter-tabs">
+      @for (tab of statusTabs; track tab) {
+        <button
+          class="filter-tab"
+          [class.filter-tab--active]="activeStatusTab === tab"
+          (click)="setStatusTab(tab)"
+        >
+          {{ tab === 'All' ? 'All Statuses' : tab }}
+        </button>
+      }
+    </div>
+    <div class="toolbar-right">
+      <div class="search-wrapper">
+        <ng-icon name="heroMagnifyingGlass" class="search-icon" size="18"></ng-icon>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Search by Sheet #, Patient or Provider..."
+          class="search-input"
+        />
+      </div>
+      <ms-date-picker [(value)]="dateFilter" placeholder="Filter by date"></ms-date-picker>
+      @if (dateFilter) {
+        <button (click)="dateFilter = ''" class="filter-clear-btn">Clear</button>
+      }
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-card">
+    <div class="table-wrap">
+      <table class="care-table">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Sheet #</th>
+            <th>Patient</th>
+            <th>Doctor Assigned</th>
+            <th>Consultation Date</th>
+            <th>Medical Acts</th>
+            <th>Insurance Provider</th>
+            <th>Claim Status</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cs of filteredSheets; track cs.id; let idx = $index) {
+            <tr class="table-row">
+              <td class="cell-mono cell-muted">{{ idx + 1 }}</td>
+              <td class="cell-mono cell-id">CS-{{ cs.id.substring(3) }}</td>
+              <td>
+                <div class="patient-cell">
+                  <ms-avatar [name]="cs.patientName" [size]="28"></ms-avatar>
+                  <div>
+                    <p class="patient-name">{{ cs.patientName }}</p>
+                    <p class="patient-id">{{ cs.patientId }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="cell-doctor">{{ cs.doctorName }}</td>
+              <td class="cell-date">{{ cs.date }}</td>
+              <td>
+                <span class="acts-badge">{{ cs.actsCount }} acts</span>
+              </td>
+              <td class="cell-insurance">{{ cs.insuranceName }}</td>
+              <td>
+                <span
+                  class="status-tag"
+                  [ngClass]="{
+                    'status--submitted': cs.status === 'Submitted',
+                    'status--draft': cs.status === 'Draft',
+                    'status--reimbursed': cs.status === 'Reimbursed'
+                  }"
+                >{{ cs.status }}</span>
+              </td>
+              <td class="text-center">
+                <div class="actions-row">
+                  <button
+                    (click)="viewCareSheet(cs)"
+                    class="btn-action btn-action--view"
+                    title="View care sheet"
+                  >
+                    <ng-icon name="heroEye" size="16"></ng-icon>
+                  </button>
+                  @if (cs.status === 'Draft') {
+                    <button
+                      (click)="submitCareSheet(cs.id)"
+                      class="btn-submit-status"
+                    >
+                      Submit
+                    </button>
+                  } @else {
+                    <span class="transmitted-label">
+                      <ng-icon name="heroCheckCircle" size="14" class="check-icon"></ng-icon>
+                      Transmitted
+                    </span>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+          @if (filteredSheets.length === 0) {
+            <tr>
+              <td colspan="9" class="empty-state">No matching claim care sheets found.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- NEW CARE SHEET MODAL -->
+  @if (showSheetPanel) {
+    <div class="modal-overlay">
+      <div class="modal-backdrop" (click)="showSheetPanel = false"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title">New Care Sheet</h3>
+            <p class="modal-desc">Compiles Feuilles de Soins digital transmission claims.</p>
+          </div>
+          <button (click)="showSheetPanel = false" class="modal-close">
+            <ng-icon name="heroXMark" size="18"></ng-icon>
+          </button>
+        </div>
+        <form (submit)="handleCreateCareSheet('Submitted'); $event.preventDefault();" class="modal-form">
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Select Patient *</label>
+              <div class="input-with-icon">
+                <ng-icon name="heroMagnifyingGlass" class="input-icon" size="16"></ng-icon>
+                <input
+                  type="text"
+                  name="patientSearch"
+                  [(ngModel)]="patientSearch"
+                  (ngModelChange)="showPatientResults = true"
+                  (focus)="showPatientResults = true"
+                  placeholder="Search patient name or ID..."
+                  class="form-input"
+                  required
+                />
+              </div>
+              @if (showPatientResults && filteredPatientsSuggestions.length > 0) {
+                <div class="autocomplete-dropdown">
+                  @for (p of filteredPatientsSuggestions; track p.id) {
+                    <div (click)="handlePatientSelect(p)" class="autocomplete-item">
+                      <span class="autocomplete-name">{{ p.name }}</span>
+                      <span class="autocomplete-id">{{ p.id }}</span>
+                    </div>
+                  }
+                </div>
+              }
+              @if (selectedPatientId) {
+                <p class="form-success">&#10003; Patient Selected: {{ selectedPatientName }}</p>
+              }
+            </div>
+            <div class="form-group">
+              <label class="form-label">Assign Doctor *</label>
+              <select name="selectedDoctor" [(ngModel)]="selectedDoctor" class="form-select">
+                @for (d of doctorOptions; track d) {
+                  <option [value]="d">{{ d }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Consultation Date *</label>
+              <ms-date-picker [(value)]="consultationDate" placeholder="Select date"></ms-date-picker>
+            </div>
+            <div class="acts-section">
+              <div class="acts-header">
+                <span class="form-label">Medical Acts Rendered *</span>
+                <button type="button" (click)="handleAddActLine()" class="acts-add-btn">+ Add Medical Act</button>
+              </div>
+              <div class="acts-list">
+                @for (line of actsList; track line; let idx = $index) {
+                  <div class="acts-row">
+                    <select
+                      name="actName-{{idx}}"
+                      [ngModel]="line.name"
+                      (ngModelChange)="handleActChange(idx, $event)"
+                      class="acts-select"
+                    >
+                      @for (s of actCatalog; track s.name) {
+                        <option [value]="s.name">{{ s.name }}</option>
+                      }
+                    </select>
+                    <span class="acts-code">{{ line.code }}</span>
+                    <span class="acts-fee">{{ line.fee }} MAD</span>
+                    <button
+                      type="button"
+                      [disabled]="actsList.length === 1"
+                      (click)="handleRemoveActLine(idx)"
+                      class="acts-remove"
+                    >&#10005;</button>
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Insurance Provider *</label>
+              <select name="insuranceProvider" [(ngModel)]="insuranceProvider" class="form-select">
+                @for (ins of ['CNOPS', 'CNSS', 'AXA Assurance', 'SAHAM', 'Wafa Assurance']; track ins) {
+                  <option [value]="ins">{{ ins }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Policy Number *</label>
+              <input
+                type="text"
+                name="policyNumber"
+                [(ngModel)]="policyNumber"
+                placeholder="e.g. POL-8492042"
+                class="form-input form-input-mono"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Practitioner Signature Area *</label>
+              <div (click)="toggleSignature()" class="signature-zone">
+                @if (hasSignature) {
+                  <div class="signature-signed">
+                    <ng-icon name="heroPencil" size="16"></ng-icon>
+                    <span>&#10003; Signed digitally: Dr. {{ selectedDoctor.split('. ').pop() }}</span>
+                  </div>
+                } @else {
+                  <div class="signature-empty">
+                    <p>Click here to insert practitioner seal</p>
+                    <p>Approved digitizer validation system</p>
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="total-row">
+              <span>Inter Assurance Total Claim:</span>
+              <span class="total-amount">{{ totalFee }} MAD</span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" (click)="showSheetPanel = false" class="btn-cancel">Cancel</button>
+            <button type="button" (click)="handleCreateCareSheet('Draft')" class="btn-draft">Save as Draft</button>
+            <button type="submit" [disabled]="!hasSignature" class="btn-submit">Generate &amp; Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+</div>
+
+@if (showCareSheetViewer && careSheetViewerData) {
+  <ms-document-viewer
+    [pdfData]="careSheetViewerData"
+    [title]="careSheetViewerTitle"
+    [showDownload]="true"
+    (close)="closeCareSheetViewer()"
+    (download)="downloadViewedCareSheet()"
+  ></ms-document-viewer>
+}

@@ -1,0 +1,121 @@
+<div class="patients-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">Patient Registry</h1>
+      <p class="page-subtitle">Register new patients and manage existing records.</p>
+    </div>
+  </div>
+
+  <!-- Toolbar: Tab Filter + Search -->
+  <div class="toolbar">
+    <div class="filter-tabs">
+      @for (tab of tabs; track tab) {
+        <button
+          class="filter-tab"
+          [class.filter-tab--active]="activeTab() === tab"
+          (click)="setTab(tab)"
+        >
+          {{ tab }}
+        </button>
+      }
+    </div>
+    <div class="search-wrapper">
+      <ng-icon name="heroMagnifyingGlass" class="search-icon" size="18"></ng-icon>
+      <input
+        type="text"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+        placeholder="Search by patient name..."
+        class="search-input"
+      />
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="table-wrapper">
+      <table class="patients-table">
+        <thead>
+          <tr>
+            <th>PATIENT</th>
+            <th>AGE</th>
+            <th>CONTACT DETAIL</th>
+            <th>REGISTERED</th>
+            <th>ASSIGNED DOCTOR</th>
+            <th>STATUS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (_ of [1,2,3,4,5]; track $index) {
+            <tr>
+              <td><div class="skeleton skeleton--avatar-cell"></div></td>
+              <td><div class="skeleton skeleton--short"></div></td>
+              <td><div class="skeleton skeleton--medium"></div></td>
+              <td><div class="skeleton skeleton--short"></div></td>
+              <td><div class="skeleton skeleton--medium"></div></td>
+              <td><div class="skeleton skeleton--pill"></div></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <!-- Patient Table -->
+    <div class="table-wrapper">
+      <table class="patients-table">
+        <thead>
+          <tr>
+            <th>PATIENT</th>
+            <th>AGE</th>
+            <th>CONTACT DETAIL</th>
+            <th>REGISTERED</th>
+            <th>ASSIGNED DOCTOR</th>
+            <th>STATUS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of filteredPatients(); track p.id) {
+            <tr>
+              <td>
+                <div class="cell-patient">
+                  <div class="patient-avatar">{{ getInitials(p.name) }}</div>
+                  <div class="patient-info">
+                    <span class="patient-name">{{ p.name }}</span>
+                    <span class="patient-sub">{{ p.gender || '—' }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="cell-age">{{ p.age }} y/o</td>
+              <td>
+                <div class="cell-contact">
+                  <span class="contact-phone">{{ p.phone || '—' }}</span>
+                  <span class="contact-email">{{ p.email || '—' }}</span>
+                </div>
+              </td>
+              <td class="cell-date">{{ p.registeredDate || '—' }}</td>
+              <td class="cell-doctor">{{ p.assignedDoctor || '—' }}</td>
+              <td>
+                <span
+                  class="status-pill"
+                  [class.status-pill--active]="p.status === 'Active'"
+                  [class.status-pill--inactive]="p.status === 'Inactive'"
+                >{{ p.status }}</span>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-row">
+                <ng-icon name="heroFolderOpen" class="empty-icon"></ng-icon>
+                <div class="empty-title">No patients found</div>
+                <div class="empty-desc">Try adjusting your search or filter criteria.</div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>

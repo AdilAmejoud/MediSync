@@ -1,0 +1,418 @@
+<div class="billing-page">
+
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-xl md:text-2xl font-black tracking-tight text-slate-900">Billing &amp; Invoicing</h1>
+      <p class="text-xs md:text-sm text-secondary font-medium">Generate invoices, track payments and manage care sheets.</p>
+    </div>
+    <button
+      (click)="showInvoicePanel = true"
+      class="btn-gradient"
+    >
+      <span>+ Generate Invoice</span>
+    </button>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-grid">
+    <!-- Today's Revenue -->
+    <div class="stat-card">
+      <div class="stat-card-accent stat-card-accent--emerald"></div>
+      <div class="stat-card-body">
+        <div class="stat-card-content">
+          <span class="stat-card-label">Today's Revenue</span>
+          <p class="stat-card-value stat-card-value--emerald">{{ todayRevenue }} MAD</p>
+          <p class="stat-card-status stat-card-status--emerald">Live Audited Total (24h)</p>
+        </div>
+        <div class="stat-card-icon stat-card-icon--emerald">
+          <ng-icon name="heroBanknotes" size="22"></ng-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Invoices -->
+    <div class="stat-card">
+      <div class="stat-card-accent stat-card-accent--amber"></div>
+      <div class="stat-card-body">
+        <div class="stat-card-content">
+          <span class="stat-card-label">Pending Invoices</span>
+          <p class="stat-card-value stat-card-value--amber">{{ pendingCount }}</p>
+          <p class="stat-card-status stat-card-status--amber">In Process / Reminders Active</p>
+        </div>
+        <div class="stat-card-icon stat-card-icon--amber">
+          <ng-icon name="heroClock" size="22"></ng-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overdue Accounts -->
+    <div class="stat-card">
+      <div class="stat-card-accent stat-card-accent--rose"></div>
+      <div class="stat-card-body">
+        <div class="stat-card-content">
+          <span class="stat-card-label">Overdue Accounts</span>
+          <p class="stat-card-value stat-card-value--rose">{{ overdueCount }}</p>
+          <p class="stat-card-status stat-card-status--rose">Subject to Penalties</p>
+        </div>
+        <div class="stat-card-icon stat-card-icon--rose">
+          <ng-icon name="heroExclamationTriangle" size="22"></ng-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar: Status Tabs + Search + Date -->
+  <div class="toolbar">
+    <div class="filter-tabs">
+      @for (tab of statusTabs; track tab) {
+        <button
+          class="filter-tab"
+          [class.filter-tab--active]="activeStatusTab === tab"
+          (click)="setStatusTab(tab)"
+        >
+          {{ tab === 'All' ? 'All Statuses' : tab }}
+        </button>
+      }
+    </div>
+    <div class="toolbar-right">
+      <div class="search-wrapper">
+        <ng-icon name="heroMagnifyingGlass" class="search-icon" size="18"></ng-icon>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Search by patient, bill #, service..."
+          class="search-input"
+        />
+      </div>
+      <ms-date-picker [(value)]="dateFilter" placeholder="Filter by date"></ms-date-picker>
+      @if (dateFilter) {
+        <button (click)="dateFilter = ''" class="filter-clear-btn">Clear</button>
+      }
+    </div>
+  </div>
+
+  <!-- Invoices Table -->
+  <div class="table-card">
+    <div class="table-scroll">
+      <table class="billing-table">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Invoice #</th>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Service</th>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (inv of filteredInvoices; track inv.id; let idx = $index) {
+            <tr class="table-row">
+              <td class="table-cell-muted">{{ idx + 1 }}</td>
+              <td class="table-cell-id">{{ inv.id }}</td>
+              <td>
+                <div class="patient-cell">
+                  <ms-avatar [name]="inv.patientName" [size]="28" class="avatar-cell"></ms-avatar>
+                  <div>
+                    <p class="patient-name">{{ inv.patientName }}</p>
+                    <p class="patient-code">{{ inv.patientId }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="table-cell-doctor">{{ inv.doctorName }}</td>
+              <td class="table-cell-service">{{ inv.service }}</td>
+              <td class="table-cell-date">{{ inv.date }}</td>
+              <td class="table-cell-amount">{{ inv.amountMAD }} MAD</td>
+              <td>
+                <span
+                  class="status-pill"
+                  [ngClass]="{
+                    'status-pill--paid': inv.status === 'Paid',
+                    'status-pill--pending': inv.status === 'Pending',
+                    'status-pill--overdue': inv.status === 'Overdue'
+                  }"
+                >
+                  {{ inv.status }}
+                </span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button
+                    (click)="handleViewInvoice(inv)"
+                    class="action-btn action-btn--view"
+                    title="View Invoice"
+                  >
+                    <ng-icon name="heroEye" size="16"></ng-icon>
+                  </button>
+                  @if (!inv.reviewedAt) {
+                    <button
+                      (click)="handleMarkReviewed(inv.id)"
+                      class="action-btn action-btn--review"
+                      title="Mark as Reviewed"
+                    >
+                      <ng-icon name="heroCheckBadge" size="16"></ng-icon>
+                    </button>
+                  }
+                  @if (inv.status !== 'Paid') {
+                    <button
+                      (click)="handleMarkAsPaid(inv.id)"
+                      class="action-btn action-btn--paid"
+                      title="Mark as Paid"
+                    >
+                      <ng-icon name="heroCheckCircle" size="16"></ng-icon>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+          @if (filteredInvoices.length === 0) {
+            <tr>
+              <td colspan="9" class="empty-state">No matching clinical billing transactions found.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Invoice View Modal -->
+  @if (showInvoiceModal && selectedInvoiceForView) {
+    <div class="invoice-modal-overlay" (click)="closeInvoiceModal()">
+      <div class="invoice-modal-container" (click)="$event.stopPropagation()">
+        <div class="invoice-modal-header">
+          <div>
+            <h3 class="invoice-modal-title">Invoice #{{ selectedInvoiceForView.id }}</h3>
+            <p class="invoice-modal-subtitle">{{ selectedInvoiceForView.patientName }} · {{ selectedInvoiceForView.date }}</p>
+          </div>
+          <button (click)="closeInvoiceModal()" class="invoice-modal-close">
+            <ng-icon name="heroXMark" size="20"></ng-icon>
+          </button>
+        </div>
+        <div class="invoice-modal-body">
+          @if (invoicePdfData) {
+            <pdf-viewer
+              [src]="invoicePdfData"
+              [zoom]="0.9"
+              [render-text]="true"
+              [show-all]="true"
+              class="invoice-pdf-viewer"
+            ></pdf-viewer>
+          } @else {
+            <div class="invoice-loading">
+              <p>Generating invoice PDF...</p>
+            </div>
+          }
+        </div>
+        <div class="invoice-modal-footer">
+          <button (click)="closeInvoiceModal()" class="btn-outline">Close</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Side Panel -->
+  @if (showInvoicePanel) {
+    <div class="side-panel">
+      <div class="side-panel-backdrop" (click)="showInvoicePanel = false"></div>
+      <div class="side-panel-container">
+        <div class="side-panel-header">
+          <div>
+            <h3 class="side-panel-title">Generate Invoice</h3>
+            <p class="side-panel-subtitle">Create client clinical transaction with line items.</p>
+          </div>
+          <button (click)="showInvoicePanel = false" class="side-panel-close">
+            <ng-icon name="heroXMark" size="16"></ng-icon>
+          </button>
+        </div>
+
+        <form (submit)="handleGenerateInvoice(); $event.preventDefault();" class="side-panel-form">
+
+          <!-- Patient -->
+          <div class="form-group">
+            <label class="form-label">Select Patient *</label>
+            <div class="relative">
+              <ng-icon name="heroMagnifyingGlass" size="16" class="form-input-icon"></ng-icon>
+              <input
+                type="text"
+                name="patientSearch"
+                [(ngModel)]="patientSearch"
+                (ngModelChange)="showPatientResults = true"
+                (focus)="showPatientResults = true"
+                placeholder="Search patient name or ID..."
+                class="form-input form-input--with-icon"
+                required
+              />
+            </div>
+            @if (showPatientResults && filteredPatientsSuggestions.length > 0) {
+              <div class="autocomplete-dropdown">
+                @for (p of filteredPatientsSuggestions; track p.id) {
+                  <div
+                    (click)="handlePatientSelect(p)"
+                    class="autocomplete-item"
+                  >
+                    <span class="font-bold text-slate-900">{{ p.name }}</span>
+                    <span class="autocomplete-item-code">{{ p.id }}</span>
+                  </div>
+                }
+              </div>
+            }
+            @if (selectedPatientId) {
+              <p class="patient-selected-hint">&#10003; Patient Selected: {{ selectedPatientName }}</p>
+            }
+          </div>
+
+          <!-- Doctor -->
+          <div class="form-group">
+            <label class="form-label">Assign Doctor *</label>
+            <select
+              name="selectedDoctor"
+              [(ngModel)]="selectedDoctor"
+              class="form-select"
+            >
+              @for (d of doctorOptions; track d) {
+                <option [value]="d">{{ d }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Date -->
+          <div class="form-group">
+            <label class="form-label">Consultation Date *</label>
+            <ms-date-picker [(value)]="consultationDate" placeholder="Select date"></ms-date-picker>
+          </div>
+
+          <!-- Services -->
+          <div class="services-block">
+            <div class="services-block-header">
+              <span class="form-label">Services Rendered *</span>
+              <button type="button" (click)="handleAddServiceLine()" class="services-add-btn">+ Add Act line</button>
+            </div>
+            <div class="services-list">
+              @for (line of serviceLines; track line; let idx = $index) {
+                <div class="service-line">
+                  <div class="service-line-select">
+                    <select
+                      name="serviceName-{{idx}}"
+                      [ngModel]="line.serviceName"
+                      (ngModelChange)="handleServiceChange(idx, $event)"
+                      class="service-select"
+                    >
+                      @for (s of serviceCatalog; track s.name) {
+                        <option [value]="s.name">{{ s.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="service-line-qty">
+                    <input
+                      type="number"
+                      name="qty-{{idx}}"
+                      [ngModel]="line.qty"
+                      (ngModelChange)="handleQtyChange(idx, $event)"
+                      placeholder="Qty"
+                      class="qty-input"
+                      min="1"
+                    />
+                  </div>
+                  <div class="service-line-price">{{ line.qty * line.unitPrice }} MAD</div>
+                  <div class="service-line-remove">
+                    <button
+                      type="button"
+                      [disabled]="serviceLines.length === 1"
+                      (click)="handleRemoveServiceLine(idx)"
+                      class="remove-btn"
+                    >
+                      <ng-icon name="heroXMark" size="14"></ng-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Subtotal -->
+          <div class="subtotal-row">
+            <span class="subtotal-label">Subtotal Amount:</span>
+            <span class="subtotal-value">{{ subTotal }} MAD</span>
+          </div>
+
+          <!-- Discount -->
+          <div class="discount-row">
+            <span class="discount-label">Discount applied:</span>
+            <div class="discount-input-group">
+              <input
+                type="number"
+                name="discountPercent"
+                [(ngModel)]="discountPercent"
+                class="discount-input"
+                min="0"
+                max="100"
+              />
+              <span class="discount-suffix">%</span>
+            </div>
+          </div>
+
+          <!-- Total -->
+          <div class="total-box">
+            <span class="total-box-label">Total balance:</span>
+            <span class="total-box-value">{{ totalAmount }} MAD</span>
+          </div>
+
+          <!-- Payment Mode -->
+          <div class="form-group">
+            <label class="form-label">Payment Mode</label>
+            <div class="payment-mode-container">
+              @for (mode of paymentMethods; track mode) {
+                <button
+                  type="button"
+                  (click)="setPaymentMethod(mode)"
+                  [ngClass]="{
+                    'payment-mode-btn--active': paymentMethod === mode,
+                    'payment-mode-btn': paymentMethod !== mode
+                  }"
+                  class="payment-mode-btn-base"
+                >
+                  {{ mode }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="form-group">
+            <label class="form-label">Private Office Notes</label>
+            <textarea
+              name="notes"
+              [(ngModel)]="notes"
+              placeholder="Notes relating to payment confirmation codes..."
+              class="form-textarea"
+            ></textarea>
+          </div>
+
+          <!-- Buttons -->
+          <div class="panel-actions">
+            <button
+              type="button"
+              (click)="showInvoicePanel = false"
+              class="btn-outline"
+            >
+              Save Draft
+            </button>
+            <button
+              type="submit"
+              class="btn-gradient"
+            >
+              Generate &amp; Send PDF
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  }
+
+</div>

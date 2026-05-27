@@ -1,0 +1,335 @@
+@use 'variables' as *;
+
+// ═══════════════════════════════════════════════════════════════
+// PAGE LAYOUT
+// ═══════════════════════════════════════════════════════════════
+.patients-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  font-family: $font-sans;
+  color: $text-primary;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.header-left {
+  .page-title {
+    font-family: $font-display;
+    font-size: 20px;
+    font-weight: 800;
+    color: $text-primary;
+    margin: 0 0 2px;
+  }
+
+  .page-subtitle {
+    font-size: 13px;
+    color: $text-secondary;
+    margin: 0;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TOOLBAR
+// ═══════════════════════════════════════════════════════════════
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-tabs {
+  display: flex;
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: $radius-full;
+  padding: 3px;
+  gap: 2px;
+}
+
+.filter-tab {
+  border: none;
+  background: transparent;
+  color: $text-muted;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 16px;
+  border-radius: $radius-full;
+  cursor: pointer;
+  font-family: $font-sans;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+
+  &:hover {
+    color: $text-primary;
+    background: $surface;
+  }
+
+  &--active {
+    background: $primary;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba($primary, 0.25);
+  }
+}
+
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: $text-muted;
+  pointer-events: none;
+  display: flex;
+}
+
+.search-input {
+  width: 280px;
+  padding: 8px 12px 8px 38px;
+  border: 1px solid $border;
+  border-radius: $radius-md;
+  font-size: 13px;
+  font-family: $font-sans;
+  color: $text-primary;
+  background: #fff;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+
+  &::placeholder {
+    color: $text-muted;
+  }
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.08);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABLE
+// ═══════════════════════════════════════════════════════════════
+.table-wrapper {
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+}
+
+.patients-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  thead {
+    th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #6B7280;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: $surface;
+      border-bottom: 1px solid $border;
+      white-space: nowrap;
+    }
+  }
+
+  tbody {
+    tr {
+      cursor: pointer;
+      transition: background 0.12s;
+
+      &:nth-child(even) {
+        background: #F9FAFB;
+      }
+
+      &:hover {
+        background: #EEF2FF;
+      }
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #F3F4F6;
+      vertical-align: middle;
+      color: $text-primary;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  .cell-id {
+    font-weight: 600;
+    color: $primary;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .cell-age {
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .cell-date {
+    white-space: nowrap;
+    font-size: 12px;
+    color: $text-secondary;
+  }
+
+  .cell-doctor {
+    font-weight: 500;
+  }
+}
+
+// ── Patient Avatar + Name ──
+.cell-patient {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.patient-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: $gradient-primary;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: $font-display;
+  flex-shrink: 0;
+}
+
+.patient-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.patient-name {
+  font-weight: 600;
+  color: $text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.patient-sub {
+  font-size: 12px;
+  color: $text-muted;
+}
+
+// ── Contact ──
+.cell-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.contact-phone {
+  font-weight: 500;
+  font-size: 13px;
+  color: $text-primary;
+}
+
+.contact-email {
+  font-size: 12px;
+  color: $text-muted;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STATUS PILL
+// ═══════════════════════════════════════════════════════════════
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+
+  &--active {
+    background: #D1FAE5;
+    color: #059669;
+  }
+
+  &--inactive {
+    background: #FEE2E2;
+    color: #DC2626;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SKELETON LOADING
+// ═══════════════════════════════════════════════════════════════
+.skeleton {
+  background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+  height: 14px;
+
+  &--short { width: 60px; }
+  &--medium { width: 120px; }
+  &--pill { width: 56px; height: 22px; border-radius: 20px; }
+  &--avatar-cell { width: 140px; height: 20px; }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EMPTY STATE
+// ═══════════════════════════════════════════════════════════════
+.empty-row {
+  text-align: center;
+  padding: 48px 20px !important;
+  color: $text-muted;
+}
+
+.empty-icon {
+  display: block;
+  margin: 0 auto 8px;
+  opacity: 0.3;
+  font-size: 32px;
+}
+
+.empty-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: $text-secondary;
+  margin-bottom: 4px;
+}
+
+.empty-desc {
+  font-size: 13px;
+  color: $text-muted;
+}
