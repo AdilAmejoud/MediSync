@@ -1,0 +1,34 @@
+@if (pdfData) {
+  <div class="doc-viewer-overlay">
+    <div class="doc-viewer-backdrop" (click)="close.emit()"></div>
+    <div class="doc-viewer-modal">
+      <div class="doc-viewer-header">
+        <div class="doc-viewer-title-area">
+          <h3 class="doc-viewer-title">{{ title }}</h3>
+          @if (subtitle) {
+            <p class="doc-viewer-subtitle">{{ subtitle }}</p>
+          }
+        </div>
+        <div class="doc-viewer-actions">
+          @if (showDownload) {
+            <button (click)="download.emit()" class="doc-viewer-btn doc-viewer-btn--download" title="Download">
+              <ng-icon name="heroArrowDownTray" size="18"></ng-icon>
+            </button>
+          }
+          <button (click)="close.emit()" class="doc-viewer-btn doc-viewer-btn--close" title="Close">
+            <ng-icon name="heroXMark" size="20"></ng-icon>
+          </button>
+        </div>
+      </div>
+      <div class="doc-viewer-body">
+        <pdf-viewer
+          [src]="pdfData"
+          [zoom]="0.9"
+          [render-text]="true"
+          [show-all]="true"
+          class="doc-pdf-viewer"
+        ></pdf-viewer>
+      </div>
+    </div>
+  </div>
+}

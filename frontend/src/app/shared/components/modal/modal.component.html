@@ -1,0 +1,15 @@
+@if (visible) {
+  <div class="modal-backdrop">
+    <div class="modal-container {{ size }}" (msClickOutside)="close.emit()">
+      <div class="modal-header">
+        <h3 class="modal-title">{{ title }}</h3>
+        <button (click)="close.emit()" class="close-btn" title="Close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="modal-content">
+        <ng-content></ng-content>
+      </div>
+    </div>
+  </div>
+}

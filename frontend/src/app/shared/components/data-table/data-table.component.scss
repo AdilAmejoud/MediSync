@@ -1,0 +1,169 @@
+@use '../../../../styles/variables' as *;
+
+.data-table-wrapper {
+  position: relative;
+  overflow: hidden;
+  background: $white;
+  width: 100%;
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba($white, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 10;
+  font-size: 13px;
+  font-weight: 500;
+  color: $text-secondary;
+
+  .spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgba($primary, 0.1);
+    border-top: 3px solid $primary;
+    border-radius: $radius-full;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+
+  th {
+    background: $surface;
+    color: $text-muted;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 12px 16px;
+    border-bottom: 1px solid $border;
+    user-select: none;
+  }
+
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid $border;
+    color: $text-secondary;
+    vertical-align: middle;
+  }
+
+  .table-row {
+    transition: background 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba($primary, 0.01);
+    }
+    
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+}
+
+.avatar-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .avatar-text {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .cell-primary {
+    font-weight: 600;
+    color: $text-primary;
+    font-size: 13px;
+    line-height: 1.2;
+  }
+
+  .cell-secondary {
+    font-size: 11px;
+    color: $text-muted;
+    font-family: monospace;
+    margin-top: 2px;
+  }
+}
+
+.cell-currency {
+  font-family: monospace;
+  font-weight: 700;
+  color: $text-primary;
+}
+
+.cell-text {
+  color: $text-secondary;
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  .action-btn {
+    border: none;
+    background: transparent;
+    color: $text-muted;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: $radius-sm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: $surface;
+      color: $text-primary;
+    }
+
+    ng-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &.text-primary-color:hover {
+      color: $primary;
+    }
+
+    &.text-danger:hover {
+      color: $danger;
+    }
+  }
+}
+
+.empty-cell {
+  padding: 32px !important;
+  text-align: center;
+  color: $text-muted;
+  font-weight: 500;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.skeleton-cell-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}

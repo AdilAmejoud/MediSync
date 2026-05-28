@@ -1,0 +1,14 @@
+<div 
+  class="avatar-container" 
+  [style.width.px]="size" 
+  [style.height.px]="size" 
+  [style.backgroundColor]="getBgColor()"
+  [style.fontSize.px]="size * 0.4"
+  [title]="name"
+>
+  @if (src) {
+    <img [src]="src" [alt]="name" class="avatar-image" />
+  } @else {
+    <span class="avatar-initials">{{ getInitials() }}</span>
+  }
+</div>

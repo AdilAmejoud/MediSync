@@ -1,0 +1,83 @@
+@use '../../../../styles/variables' as *;
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(#0f172a, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-container {
+  background: $white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-lg;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  width: 100%;
+  animation: scaleIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+
+  &.sm { max-width: 400px; }
+  &.md { max-width: 600px; }
+  &.lg { max-width: 800px; }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid $border;
+
+  .modal-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  .close-btn {
+    border: none;
+    background: transparent;
+    color: $text-muted;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: $radius-sm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background: $surface;
+      color: $text-primary;
+    }
+
+    mat-icon {
+      font-size: 20px;
+      height: 20px;
+      width: 20px;
+    }
+  }
+}
+
+.modal-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

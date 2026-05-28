@@ -1,0 +1,41 @@
+<div class="card stat-card">
+  <div class="stat-top">
+    <div class="stat-value-group">
+      <span class="stat-label">{{ label }}</span>
+      <h3 class="stat-value">{{ value }}</h3>
+    </div>
+    
+    <div class="stat-icon-wrapper" [class]="iconColor">
+      <ng-icon [name]="icon" size="20"></ng-icon>
+    </div>
+  </div>
+
+  <div class="stat-bottom">
+    @if (trend) {
+      <div class="stat-trend" [class.trend-up]="trendUp" [class.trend-down]="!trendUp">
+        <ng-icon 
+          class="trend-icon" 
+          [name]="trendUp ? 'heroArrowTrendingUp' : 'heroArrowTrendingDown'"
+          size="16"
+        ></ng-icon>
+        <span class="trend-text">{{ trend }}</span>
+      </div>
+    }
+
+    <!-- Sparkline visualization -->
+    @if (sparkline && sparkline.length >= 2) {
+      <div class="stat-sparkline">
+        <svg viewBox="0 0 80 24" class="sparkline-svg">
+          <polyline 
+            [attr.points]="getSparklinePointsPolyline()" 
+            fill="none" 
+            [attr.stroke]="getSparklineStrokeColor()" 
+            stroke-width="1.8" 
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
+    }
+  </div>
+</div>

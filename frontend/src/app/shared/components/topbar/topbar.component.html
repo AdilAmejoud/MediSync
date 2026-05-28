@@ -1,0 +1,155 @@
+<header class="topbar-container">
+  <!-- Left Side: Title and Search -->
+  <div class="topbar-left">
+    <div class="search-box" [class.patient-search]="user?.role === 'patient'">
+      <ng-icon name="heroMagnifyingGlass" class="search-icon" size="18"></ng-icon>
+      <input 
+        type="text" 
+        [placeholder]="user?.role === 'patient' ? 'Search exams, doctors or prescriptions...' : 'Search appointments...'" 
+        class="search-input"
+      />
+    </div>
+  </div>
+
+  <!-- Right Side: Utilities & Profile -->
+  <div class="topbar-right">
+    
+    <!-- Help Button (Patients only) -->
+    @if (user?.role === 'patient') {
+      <button class="icon-btn" title="Get Help">
+        <ng-icon name="heroQuestionMarkCircle" size="18"></ng-icon>
+      </button>
+    }
+
+    <!-- Notifications Bell Dropdown -->
+    <div class="dropdown-wrapper" (msClickOutside)="closeNotifications()">
+      <button (click)="toggleNotifications()" class="icon-btn relative-btn" title="Alerts">
+        <ng-icon name="heroBell" size="18"></ng-icon>
+        @if (unreadCount > 0) {
+          <span class="badge-count">{{ unreadCount }}</span>
+        }
+      </button>
+
+      @if (showNotifications()) {
+        <div class="notifications-dropdown card">
+          <div class="dropdown-header">
+            <span class="dropdown-title">Notifications</span>
+            <button (click)="notificationService.markAllAsRead()" class="mark-all-btn">Mark all read</button>
+          </div>
+          <div class="notifications-list">
+            <!-- Show 3 items max -->
+            @for (notif of notificationService.notifications().slice(0, 3); track notif.id) {
+              <div 
+                class="notification-item" 
+                [class.unread]="notif.unread"
+                (click)="notificationService.toggleRead(notif.id)"
+              >
+                <span class="status-indicator" [class]="notif.type || 'info'">●</span>
+                <div class="notif-content">
+                  <p class="notif-title">{{ notif.title }}</p>
+                  <p class="notif-desc">{{ notif.description }}</p>
+                  <span class="notif-time">{{ notif.time }}</span>
+                </div>
+              </div>
+            }
+          </div>
+          <div class="dropdown-footer">
+            <button (click)="navigateAndClose('/' + user?.role + '/notifications')" class="view-all-btn">View all →</button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Divider -->
+    <div class="vertical-divider"></div>
+
+    <!-- User Profile Dropdown Trigger -->
+    <div class="dropdown-wrapper" (msClickOutside)="closeProfileMenu()">
+      <div 
+        (click)="toggleProfileMenu()" 
+        class="profile-avatar-trigger" 
+        [style.background-color]="getAvatarColor(user?.role || '')"
+      >
+        @if (user?.avatar) {
+          <img [src]="user?.avatar" class="avatar-image" />
+        } @else {
+          <span class="avatar-initials">{{ getInitials() }}</span>
+        }
+      </div>
+
+      <!-- Profile Dropdown Component -->
+      @if (showProfileMenu()) {
+        <div class="profile-dropdown card">
+          
+          <!-- User info section - not clickable -->
+          <div class="user-info-section">
+            <div class="info-avatar" [style.background-color]="getAvatarColor(user?.role || '')">
+              @if (user?.avatar) {
+                <img [src]="user?.avatar" class="info-avatar-img" />
+              } @else {
+                <span>{{ getInitials() }}</span>
+              }
+            </div>
+            <div class="info-text">
+              <h4 class="info-name">{{ user?.name || 'Guest User' }}</h4>
+              <p class="info-role">{{ getRoleLabel(user?.role || '') }}</p>
+              <p class="info-id">ID: #MS-{{ user?.id || '0000' }}</p>
+            </div>
+          </div>
+
+          <!-- Menu items -->
+          <div class="menu-items">
+            <button (click)="navigateAndClose('/' + user?.role + '/settings?tab=profile')" class="dropdown-btn">
+              <ng-icon name="heroUser" size="16"></ng-icon>
+              <span>My Profile</span>
+            </button>
+            <button (click)="navigateAndClose('/' + user?.role + '/settings')" class="dropdown-btn">
+              <ng-icon name="heroCog6Tooth" size="16"></ng-icon>
+              <span>Settings</span>
+            </button>
+            <button (click)="navigateAndClose('/' + user?.role + '/notifications')" class="dropdown-btn flex-between">
+              <div class="flex-align">
+                <ng-icon name="heroBell" size="16"></ng-icon>
+                <span>Notifications</span>
+              </div>
+              @if (unreadCount > 0) {
+                <span class="notif-count-badge">{{ unreadCount }}</span>
+              }
+            </button>
+          </div>
+
+          <!-- Divider -->
+          <div class="menu-divider"></div>
+
+          <!-- Dark mode row -->
+          <div class="dark-mode-row">
+            <div class="dark-mode-left">
+              <ng-icon name="heroMoon" size="16"></ng-icon>
+              <span>Dark Mode</span>
+            </div>
+            <label class="switch-toggle">
+              <input type="checkbox" [checked]="isDark()" (change)="toggleDarkMode()" />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <!-- Divider -->
+          <div class="menu-divider"></div>
+
+          <!-- Sign out -->
+          <button (click)="onLogout()" class="dropdown-btn signout-btn">
+            <ng-icon name="heroArrowRightOnRectangle" size="16" color="#DC2626"></ng-icon>
+            <span>Sign Out</span>
+          </button>
+
+          <!-- Bottom info -->
+          <div class="dropdown-footer-info">
+            MediSync v1.0.0
+          </div>
+
+        </div>
+      }
+    </div>
+
+  </div>
+</header>

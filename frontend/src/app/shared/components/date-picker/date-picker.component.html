@@ -1,0 +1,60 @@
+<div class="date-picker-wrapper">
+  <button
+    class="date-picker-trigger"
+    type="button"
+    (click)="toggleDatePicker($event)"
+  >
+    <ng-icon name="heroCalendarDays" class="date-picker-trigger-icon" size="18"></ng-icon>
+    <span class="date-picker-text" [class.date-picker-text--placeholder]="!value">
+      {{ displayText() }}
+    </span>
+    @if (showClear && value) {
+      <button
+        class="date-picker-clear"
+        type="button"
+        (click)="clearDate($event)"
+        tabindex="-1"
+        title="Clear date"
+      >
+        <ng-icon name="heroXMark" size="14"></ng-icon>
+      </button>
+    }
+    <ng-icon
+      name="heroChevronDown"
+      class="date-picker-chevron"
+      [class.date-picker-chevron--open]="datePickerOpen()"
+      size="14"
+    ></ng-icon>
+  </button>
+
+  @if (datePickerOpen()) {
+    <div class="date-picker-popover">
+      <div class="picker-header">
+        <button class="picker-nav" type="button" (click)="prevMonth()">
+          <ng-icon name="heroChevronLeft" size="16"></ng-icon>
+        </button>
+        <span class="picker-month-year">{{ calendarMonthYear() }}</span>
+        <button class="picker-nav" type="button" (click)="nextMonth()">
+          <ng-icon name="heroChevronRight" size="16"></ng-icon>
+        </button>
+      </div>
+      <div class="picker-weekdays">
+        @for (day of weekDays; track day) {
+          <span class="picker-weekday">{{ day }}</span>
+        }
+      </div>
+      <div class="picker-grid">
+        @for (cell of calendarDays(); track cell.dateStr) {
+          <button
+            class="picker-day"
+            type="button"
+            [class.picker-day--selected]="cell.dateStr === value"
+            [class.picker-day--today]="cell.isToday"
+            [class.picker-day--muted]="!cell.isCurrentMonth"
+            (click)="selectDate($event, cell.dateStr)"
+          >{{ cell.day }}</button>
+        }
+      </div>
+    </div>
+  }
+</div>

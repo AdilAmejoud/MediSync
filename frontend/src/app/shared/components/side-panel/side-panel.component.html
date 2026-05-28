@@ -1,0 +1,15 @@
+@if (visible) {
+  <div class="panel-backdrop">
+    <div class="panel-container" (msClickOutside)="close.emit()">
+      <div class="panel-header">
+        <h3 class="panel-title">{{ title }}</h3>
+        <button (click)="close.emit()" class="close-btn" title="Close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="panel-body">
+        <ng-content></ng-content>
+      </div>
+    </div>
+  </div>
+}

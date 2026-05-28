@@ -1,0 +1,123 @@
+@use '../../../../styles/variables' as *;
+
+.stat-card {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 110px;
+  background: $white;
+}
+
+.stat-top {
+  display: flex;
+  justify-content: justify;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.stat-value-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $text-muted;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: $text-primary;
+  margin-top: 6px;
+}
+
+.stat-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  ng-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &.blue {
+    background: rgba(29, 78, 216, 0.1);
+    color: #1D4ED8;
+  }
+
+  &.green {
+    background: rgba(5, 150, 105, 0.1);
+    color: #059669;
+  }
+
+  &.amber {
+    background: rgba(217, 119, 6, 0.1);
+    color: #D97706;
+  }
+
+  &.red {
+    background: rgba(220, 38, 38, 0.1);
+    color: #DC2626;
+  }
+
+  &.purple {
+    background: rgba(79, 70, 229, 0.1);
+    color: #4F46E5;
+  }
+}
+
+.stat-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  width: 100%;
+}
+
+.stat-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+
+  .trend-icon {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+  }
+
+  &.trend-up {
+    color: $success;
+  }
+
+  &.trend-down {
+    color: $danger;
+  }
+}
+
+.stat-sparkline {
+  width: 80px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+
+  .sparkline-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+}

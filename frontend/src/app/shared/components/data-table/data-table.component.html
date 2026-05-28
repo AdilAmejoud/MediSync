@@ -1,0 +1,96 @@
+<div class="data-table-wrapper card">
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          @for (col of columns; track col.key) {
+            <th [style.textAlign]="col.type === 'actions' ? 'center' : 'left'">
+              {{ col.label }}
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading) {
+          @for (placeholder of [1, 2, 3, 4]; track $index) {
+            <tr class="skeleton-row-tr">
+              @for (col of columns; track col.key) {
+                <td [style.textAlign]="col.type === 'actions' ? 'center' : 'left'">
+                  <div class="skeleton-cell-container">
+                    @if (col.type === 'avatar') {
+                      <div class="skeleton-circle"></div>
+                    }
+                    <div class="skeleton-text" [class.medium]="$index % 2 === 0" [class.short]="$index % 2 !== 0"></div>
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        } @else {
+          @for (row of rows; track row.id || row._id || $index) {
+            <tr (click)="rowClick.emit(row)" class="table-row">
+              @for (col of columns; track col.key) {
+                <td [style.textAlign]="col.type === 'actions' ? 'center' : 'left'">
+                  
+                  @switch (col.type) {
+                    @case ('avatar') {
+                      <div class="avatar-cell">
+                        <ms-avatar 
+                          [name]="row[col.key]" 
+                          [src]="col.avatarSrcKey ? row[col.avatarSrcKey] : undefined" 
+                          [size]="34"
+                        ></ms-avatar>
+                        <div class="avatar-text">
+                          <span class="cell-primary">{{ row[col.key] }}</span>
+                          @if (col.subtitleKey && row[col.subtitleKey]) {
+                            <span class="cell-secondary">{{ row[col.subtitleKey] }}</span>
+                          }
+                        </div>
+                      </div>
+                    }
+                    @case ('badge') {
+                      <ms-badge [type]="getBadgeType(row[col.key])" [text]="row[col.key]"></ms-badge>
+                    }
+                    @case ('currency') {
+                      <span class="cell-currency">{{ row[col.key] | currencyMad }}</span>
+                    }
+                    @case ('actions') {
+                      <div class="actions-cell" (click)="$event.stopPropagation()">
+                        <button (click)="actionClick.emit({ action: 'view', row: row })" class="action-btn" title="View details">
+                          <ng-icon name="heroMagnifyingGlass" size="14"></ng-icon>
+                        </button>
+                        <button (click)="actionClick.emit({ action: 'edit', row: row })" class="action-btn text-primary-color" title="Edit">
+                          <ng-icon name="heroCog6Tooth" size="14"></ng-icon>
+                        </button>
+                        <button (click)="actionClick.emit({ action: 'delete', row: row })" class="action-btn text-danger" title="Delete">
+                          <ng-icon name="heroTrash" size="14"></ng-icon>
+                        </button>
+                        <button (click)="actionClick.emit({ action: 'download', row: row })" class="action-btn text-emerald-600" title="Download PDF">
+                          <ng-icon name="heroArrowDownTray" size="14"></ng-icon>
+                        </button>
+                      </div>
+                    }
+                    @default {
+                      <span class="cell-text">{{ row[col.key] }}</span>
+                    }
+                  }
+
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td [attr.colspan]="columns.length" class="empty-cell">
+                <div class="empty-state">
+                  <ng-icon name="heroFolderOpen" class="empty-icon"></ng-icon>
+                  <div class="empty-title">No records found</div>
+                  <div class="empty-desc">There are no items to display in this list.</div>
+                </div>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
