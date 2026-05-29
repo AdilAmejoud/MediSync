@@ -1,0 +1,12 @@
+process.env.JWT_SECRET = 'test-jwt-secret';
+process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/medisync_test';
+process.env.NODE_ENV = 'test';
+process.env.PORT = '0';
+process.env.CLOUDINARY_CLOUD_NAME = 'test';
+process.env.CLOUDINARY_API_KEY = 'test';
+process.env.CLOUDINARY_API_SECRET = 'test';
+process.env.RESEND_API_KEY = 'test-resend-key';
+process.env.RAZORPAY_KEY_ID = 'test';
+process.env.RAZORPAY_KEY_SECRET = 'test';
+process.env.ADMIN_EMAIL = 'admin@medisync.com';
+process.env.ADMIN_PASSWORD = 'admin123';
