@@ -34,4 +34,4 @@ RUN npx prisma generate --schema=./database/schema.prisma
 # Set working directory to the service and start
 WORKDIR /app/backend/src/services/auth-service
 EXPOSE 3001
-CMD ["sh", "-c", "cd /app && npx prisma migrate deploy --schema=./database/schema.prisma && cd backend/src/services/auth-service && npm start"]
+CMD ["npm", "start"]

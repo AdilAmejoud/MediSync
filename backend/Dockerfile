@@ -19,6 +19,7 @@ COPY backend/src/ ./backend/src/
 COPY backend/server.js ./backend/
 COPY backend/socket.js ./backend/
 COPY backend/seed.js ./backend/
+COPY backend/prisma.config.ts ./backend/
 
 # Generate Prisma client
 RUN npx prisma generate --schema=./database/schema.prisma

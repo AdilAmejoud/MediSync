@@ -164,7 +164,7 @@ services:
     restart: unless-stopped
     ports:
       - "3004:3004"
-    command: sh -c "cd /app && npx prisma migrate deploy --schema=./database/schema.prisma && cd /app/backend && node seed.js && node server.js"
+    command: sh -c "cd /app/backend && npx prisma migrate deploy && node seed.js && node server.js"
     env_file:
       - .env
     environment:
@@ -182,9 +182,12 @@ services:
 
   # ── Prisma Studio (Database GUI) ───────────────────────────────────
   prisma-studio:
+    build:
+      context: ./
+      dockerfile: ./backend/Dockerfile
     image: medisync-main-backend:latest
     container_name: medisync-prisma-studio
-    working_dir: /app
+    working_dir: /app/backend
     entrypoint: npx prisma studio --port 5555 --browser none
     environment:
       - DATABASE_URL=postgresql://user:password@postgres:5432/medisync?schema=public
