@@ -1,0 +1,229 @@
+@use 'variables' as *;
+
+.ms-screen-selector {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 9999;
+  font-family: $font-sans;
+  user-select: none;
+}
+
+// ─── Floating open button ──────────────────────────────────────
+.ms-selector-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1E1B4B;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(79,70,229,0.25);
+  transition: all 0.2s;
+
+  &:hover {
+    background: #312E81;
+    transform: scale(1.03);
+  }
+
+  .ms-btn-icon {
+    font-size: 20px;
+    color: #818CF8;
+  }
+
+  .ms-btn-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+}
+
+// ─── Panel ─────────────────────────────────────────────────────
+.ms-selector-panel {
+  width: 280px;
+  max-height: 80vh;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+}
+
+.ms-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding-bottom: 10px;
+  margin-bottom: 8px;
+}
+
+.ms-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .ms-title-icon {
+    font-size: 18px;
+    color: #818CF8;
+  }
+
+  span:last-child {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #CBD5E1;
+  }
+}
+
+.ms-panel-close {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94A3B8;
+  background: rgba(255,255,255,0.04);
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.1);
+  }
+}
+
+.ms-panel-desc {
+  font-size: 10px;
+  color: #64748B;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+// ─── Body / scroll ─────────────────────────────────────────────
+.ms-panel-body {
+  overflow-y: auto;
+  max-height: 55vh;
+  padding-right: 4px;
+
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 99px;
+  }
+}
+
+// ─── Category ──────────────────────────────────────────────────
+.ms-category {
+  margin-bottom: 4px;
+}
+
+.ms-category-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.03);
+  border: none;
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+
+  &:hover {
+    background: rgba(255,255,255,0.07);
+  }
+
+  &.ms-category-active {
+    background: rgba(79,70,229,0.15);
+  }
+
+  .ms-cat-icon {
+    font-size: 16px;
+    color: #818CF8;
+    flex-shrink: 0;
+  }
+
+  .ms-cat-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #E2E8F0;
+    flex: 1;
+  }
+
+  .ms-cat-arrow {
+    font-size: 18px;
+    color: #64748B;
+    transition: transform 0.2s;
+
+    &.ms-cat-arrow-open {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+// ─── Sub-pages ─────────────────────────────────────────────────
+.ms-subpages {
+  padding: 2px 0 2px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ms-subpage-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 8px;
+  cursor: pointer;
+  transition: all 0.12s;
+  text-align: left;
+
+  &:hover {
+    background: rgba(255,255,255,0.05);
+  }
+
+  &.ms-subpage-active {
+    background: #4F46E5;
+    box-shadow: 0 2px 8px rgba(79,70,229,0.25);
+  }
+
+  .ms-subpage-dot {
+    font-size: 8px;
+    color: #64748B;
+    flex-shrink: 0;
+  }
+
+  .ms-subpage-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #CBD5E1;
+    flex: 1;
+  }
+
+  &.ms-subpage-active .ms-subpage-label {
+    color: #fff;
+  }
+
+  .ms-subpage-check {
+    font-size: 14px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+}

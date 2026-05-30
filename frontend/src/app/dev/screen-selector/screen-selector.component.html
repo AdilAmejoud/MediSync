@@ -1,0 +1,62 @@
+<div class="ms-screen-selector">
+  <button
+    *ngIf="!expanded()"
+    class="ms-selector-btn"
+    (click)="togglePanel()"
+    id="dev-selector-open"
+  >
+    <span class="material-icons ms-btn-icon">explore</span>
+    <span class="ms-btn-label">Screen Selector</span>
+  </button>
+
+  <div
+    *ngIf="expanded()"
+    class="ms-selector-panel"
+  >
+    <div class="ms-panel-header">
+      <div class="ms-panel-title">
+        <span class="material-icons ms-title-icon">explore</span>
+        <span>Screen Selector</span>
+      </div>
+      <button class="ms-panel-close" (click)="togglePanel()" id="dev-selector-close">
+        Hide
+      </button>
+    </div>
+
+    <p class="ms-panel-desc">Click to preview each screen:</p>
+
+    <div class="ms-panel-body">
+      <div *ngFor="let category of categories" class="ms-category">
+        <button
+          class="ms-category-btn"
+          [class.ms-category-active]="isCategoryActive(category)"
+          (click)="toggleCategory(category.label)"
+          [id]="categoryId(category)"
+        >
+          <span class="material-icons ms-cat-icon">{{ category.icon }}</span>
+          <span class="ms-cat-label">{{ category.label }}</span>
+          <span class="material-icons ms-cat-arrow" [class.ms-cat-arrow-open]="activeCategory() === category.label">
+            arrow_drop_down
+          </span>
+        </button>
+
+        <div
+          *ngIf="activeCategory() === category.label"
+          class="ms-subpages"
+        >
+          <button
+            *ngFor="let screen of category.screens"
+            class="ms-subpage-btn"
+            [class.ms-subpage-active]="isActive(screen.route)"
+            (click)="navigateTo(screen.route, category.role)"
+            [id]="screenId(screen)"
+          >
+            <span class="material-icons ms-subpage-dot">arrow_forward_ios</span>
+            <span class="ms-subpage-label">{{ screen.label }}</span>
+            <span *ngIf="isActive(screen.route)" class="material-icons ms-subpage-check">check</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

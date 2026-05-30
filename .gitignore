@@ -63,4 +63,4 @@ tests/reports/index.html
 tests/reports/raw.json
 
 # Ignore Replit configuration files
-.replit
+.replitscripts/
