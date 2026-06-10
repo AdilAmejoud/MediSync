@@ -138,6 +138,22 @@
   font-size: 14px;
   font-weight: 600;
   color: $text-primary;
+  padding: 4px 8px;
+  border-radius: $radius-sm;
+  transition: all var(--transition-fast);
+  border: none;
+  background: transparent;
+  cursor: default;
+  font-family: inherit;
+
+  &--clickable {
+    cursor: pointer;
+
+    &:hover {
+      background: $surface;
+      color: $primary;
+    }
+  }
 }
 
 .picker-weekdays {
@@ -192,6 +208,88 @@
     font-weight: 700;
     color: $primary;
     background: rgba($primary, 0.06);
+  }
+
+  &--selected {
+    background: $primary;
+    color: #fff;
+    font-weight: 600;
+
+    &:hover {
+      background: $primary-dark;
+      color: #fff;
+    }
+  }
+}
+
+// Years view grid styling
+.picker-years-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px 6px;
+  margin-top: 12px;
+  animation: pickerFadeIn 0.15s ease;
+}
+
+.picker-year-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  border: none;
+  background: transparent;
+  color: $text-primary;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: $radius-md;
+  transition: all 0.15s;
+  font-family: $font-sans;
+
+  &:hover {
+    background: $primary-light;
+    color: $primary;
+  }
+
+  &--selected {
+    background: $primary;
+    color: #fff;
+    font-weight: 600;
+
+    &:hover {
+      background: $primary-dark;
+      color: #fff;
+    }
+  }
+}
+
+// Months view grid styling
+.picker-months-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 8px;
+  margin-top: 12px;
+  animation: pickerFadeIn 0.15s ease;
+}
+
+.picker-month-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  border: none;
+  background: transparent;
+  color: $text-primary;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: $radius-md;
+  transition: all 0.15s;
+  font-family: $font-sans;
+
+  &:hover {
+    background: $primary-light;
+    color: $primary;
   }
 
   &--selected {

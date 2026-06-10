@@ -56,12 +56,12 @@ export class BillingComponent implements OnInit {
 
   loadInvoices() {
     this.loading = true;
-    const userName = this.auth.currentUser()?.name || '';
+    const userName = (this.auth.currentUser()?.name || '').toLowerCase().trim();
     this.http.get<any>(`${environment.apiUrl}/invoices`).subscribe({
       next: (res) => {
         if (res.success && res.data) {
           this.invoices = res.data
-            .filter((inv: any) => inv.patientName === userName)
+            .filter((inv: any) => !userName || (inv.patientName || '').toLowerCase().trim() === userName)
             .map((inv: any) => ({
               id: inv.invoiceNumber,
               patientName: inv.patientName,

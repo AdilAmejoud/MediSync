@@ -1,12 +1,13 @@
 <div class="date-picker-wrapper">
-  <button
+  <div
     class="date-picker-trigger"
-    type="button"
+    tabindex="0"
     (click)="toggleDatePicker($event)"
+    (keydown)="onKeyDown($event)"
   >
     <ng-icon name="heroCalendarDays" class="date-picker-trigger-icon" size="18"></ng-icon>
     <span class="date-picker-text" [class.date-picker-text--placeholder]="!value">
-      {{ displayText() }}
+      {{ displayText }}
     </span>
     @if (showClear && value) {
       <button
@@ -25,36 +26,83 @@
       [class.date-picker-chevron--open]="datePickerOpen()"
       size="14"
     ></ng-icon>
-  </button>
+  </div>
 
   @if (datePickerOpen()) {
     <div class="date-picker-popover">
       <div class="picker-header">
-        <button class="picker-nav" type="button" (click)="prevMonth()">
+        <button
+          class="picker-nav"
+          type="button"
+          (click)="onHeaderPrev()"
+          [style.visibility]="viewMode() === 'months' ? 'hidden' : 'visible'"
+        >
           <ng-icon name="heroChevronLeft" size="16"></ng-icon>
         </button>
-        <span class="picker-month-year">{{ calendarMonthYear() }}</span>
-        <button class="picker-nav" type="button" (click)="nextMonth()">
+        <button
+          class="picker-month-year"
+          [class.picker-month-year--clickable]="viewMode() === 'days'"
+          type="button"
+          (click)="onHeaderClick()"
+          [disabled]="viewMode() !== 'days'"
+        >
+          {{ headerText() }}
+        </button>
+        <button
+          class="picker-nav"
+          type="button"
+          (click)="onHeaderNext()"
+          [style.visibility]="viewMode() === 'months' ? 'hidden' : 'visible'"
+        >
           <ng-icon name="heroChevronRight" size="16"></ng-icon>
         </button>
       </div>
-      <div class="picker-weekdays">
-        @for (day of weekDays; track day) {
-          <span class="picker-weekday">{{ day }}</span>
-        }
-      </div>
-      <div class="picker-grid">
-        @for (cell of calendarDays(); track cell.dateStr) {
-          <button
-            class="picker-day"
-            type="button"
-            [class.picker-day--selected]="cell.dateStr === value"
-            [class.picker-day--today]="cell.isToday"
-            [class.picker-day--muted]="!cell.isCurrentMonth"
-            (click)="selectDate($event, cell.dateStr)"
-          >{{ cell.day }}</button>
-        }
-      </div>
+
+      @if (viewMode() === 'days') {
+        <div class="picker-weekdays">
+          @for (day of weekDays; track day) {
+            <span class="picker-weekday">{{ day }}</span>
+          }
+        </div>
+        <div class="picker-grid">
+          @for (cell of calendarDays(); track cell.dateStr) {
+            <button
+              class="picker-day"
+              type="button"
+              [class.picker-day--selected]="cell.dateStr === value"
+              [class.picker-day--today]="cell.isToday"
+              [class.picker-day--muted]="!cell.isCurrentMonth"
+              (click)="selectDate($event, cell.dateStr)"
+            >{{ cell.day }}</button>
+          }
+        </div>
+      } @else if (viewMode() === 'years') {
+        <div class="picker-years-grid">
+          @for (year of yearsGrid(); track year) {
+            <button
+              class="picker-year-btn"
+              [class.picker-year-btn--selected]="year === calendarViewDate().getFullYear()"
+              type="button"
+              (click)="selectYear(year)"
+            >
+              {{ year }}
+            </button>
+          }
+        </div>
+      } @else if (viewMode() === 'months') {
+        <div class="picker-months-grid">
+          @for (month of monthsList; track month.value) {
+            <button
+              class="picker-month-btn"
+              [class.picker-month-btn--selected]="month.value === calendarViewDate().getMonth()"
+              type="button"
+              (click)="selectMonth(month.value)"
+            >
+              {{ month.label }}
+            </button>
+          }
+        </div>
+      }
     </div>
   }
 </div>
