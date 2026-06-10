@@ -14,7 +14,22 @@ function parseServices(services) {
 
 router.get('/', authUser, async (req, res) => {
   try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: { patient: true }
+    });
+
+    let whereClause = {};
+    if (user && user.role === 'patient') {
+      if (user.patient) {
+        whereClause = { patientId: user.patient.id };
+      } else {
+        return res.json({ success: true, data: [] });
+      }
+    }
+
     const invoices = await prisma.invoice.findMany({
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
       take: 50,
       include: {
