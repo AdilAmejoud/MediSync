@@ -62,19 +62,86 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      # Build the backend docker image for testing
-      - name: Build a Docker image
-        run: docker build -t medisync-backend -f backend/Dockerfile .
+      # ── Build & Monitor Docker Containers ──
+
+      # 1. Main Backend Container
+      - name: Build Main Backend Docker image
+        run: docker build -t medisync-main-backend -f backend/Dockerfile .
         continue-on-error: true
 
-      # Runs Snyk Container (Container and SCA) analysis and uploads result to Snyk.
-      - name: Snyk Container monitor
-        run: snyk container monitor medisync-backend --file=backend/Dockerfile
+      - name: Snyk Container monitor (Main Backend)
+        run: snyk container monitor medisync-main-backend --file=backend/Dockerfile
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      # Push the Snyk Code results into GitHub Code Scanning tab
+      # 2. Frontend Container
+      - name: Build Frontend Docker image
+        run: docker build -t medisync-frontend -f frontend/Dockerfile frontend
+        continue-on-error: true
+
+      - name: Snyk Container monitor (Frontend)
+        run: snyk container monitor medisync-frontend --file=frontend/Dockerfile
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      # 3. API Gateway Container
+      - name: Build API Gateway Docker image
+        run: docker build -t medisync-gateway -f backend/src/services/gateway/Dockerfile .
+        continue-on-error: true
+
+      - name: Snyk Container monitor (API Gateway)
+        run: snyk container monitor medisync-gateway --file=backend/src/services/gateway/Dockerfile
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      # 4. Auth Service Container
+      - name: Build Auth Service Docker image
+        run: docker build -t medisync-auth-service -f backend/src/services/auth-service/Dockerfile .
+        continue-on-error: true
+
+      - name: Snyk Container monitor (Auth Service)
+        run: snyk container monitor medisync-auth-service --file=backend/src/services/auth-service/Dockerfile
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      # 5. Doctor Service Container
+      - name: Build Doctor Service Docker image
+        run: docker build -t medisync-doctor-service -f backend/src/services/doctor-service/Dockerfile .
+        continue-on-error: true
+
+      - name: Snyk Container monitor (Doctor Service)
+        run: snyk container monitor medisync-doctor-service --file=backend/src/services/doctor-service/Dockerfile
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      # 6. Booking Service Container
+      - name: Build Booking Service Docker image
+        run: docker build -t medisync-booking-service -f backend/src/services/booking-service/Dockerfile .
+        continue-on-error: true
+
+      - name: Snyk Container monitor (Booking Service)
+        run: snyk container monitor medisync-booking-service --file=backend/src/services/booking-service/Dockerfile
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      # 7. Notification Service Container
+      - name: Build Notification Service Docker image
+        run: docker build -t medisync-notification-service -f backend/src/services/notification-service/Dockerfile .
+        continue-on-error: true
+
+      - name: Snyk Container monitor (Notification Service)
+        run: snyk container monitor medisync-notification-service --file=backend/src/services/notification-service/Dockerfile
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      # ── Upload Results ──
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
         with:
