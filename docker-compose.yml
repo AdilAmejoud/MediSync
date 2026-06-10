@@ -1,25 +1,6 @@
-services:
-  # ── PostgreSQL ─────────────────────────────────────────────────────
-  postgres:
-    image: postgres:15
-    container_name: medisync-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: medisync
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    ports:
-      - '5432:5432'
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d medisync"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    volumes:
-      - pg_data:/var/lib/postgresql/data
-    networks:
-      - medisync-net
+version: '3.8'
 
+services:
   # ── Redis (Caching Layer) ──────────────────────────────────────────
   redis:
     image: redis:7
@@ -83,11 +64,9 @@ services:
       - .env
     environment:
       - AUTH_SERVICE_PORT=3001
-      - DATABASE_URL=postgresql://user:password@postgres:5432/medisync?schema=public
+      - DATABASE_URL=${DATABASE_URL}
       - RABBITMQ_URL=amqp://rabbitmq
     depends_on:
-      postgres:
-        condition: service_healthy
       rabbitmq:
         condition: service_started
     networks:
@@ -105,11 +84,9 @@ services:
       - .env
     environment:
       - DOCTOR_SERVICE_PORT=3002
-      - DATABASE_URL=postgresql://user:password@postgres:5432/medisync?schema=public
+      - DATABASE_URL=${DATABASE_URL}
       - REDIS_URL=redis://redis:6379
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_started
     networks:
@@ -127,11 +104,9 @@ services:
       - .env
     environment:
       - BOOKING_SERVICE_PORT=3003
-      - DATABASE_URL=postgresql://user:password@postgres:5432/medisync?schema=public
+      - DATABASE_URL=${DATABASE_URL}
       - REDIS_URL=redis://redis:6379
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_started
     networks:
@@ -169,33 +144,11 @@ services:
       - .env
     environment:
       - PORT=3004
-      - DATABASE_URL=postgresql://user:password@postgres:5432/medisync?schema=public
-      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_key_here}
-      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@medisync.com}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin_password_here}
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - RESEND_API_KEY=${RESEND_API_KEY}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - medisync-net
-
-  # ── Prisma Studio (Database GUI) ───────────────────────────────────
-  prisma-studio:
-    build:
-      context: ./
-      dockerfile: ./backend/Dockerfile
-    image: medisync-main-backend:latest
-    container_name: medisync-prisma-studio
-    working_dir: /app/backend
-    entrypoint: npx prisma studio --port 5555 --browser none
-    environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/medisync?schema=public
-    ports:
-      - '5555:5555'
-    depends_on:
-      postgres:
-        condition: service_healthy
     networks:
       - medisync-net
 
@@ -218,6 +171,3 @@ services:
 networks:
   medisync-net:
     driver: bridge
-
-volumes:
-  pg_data:
